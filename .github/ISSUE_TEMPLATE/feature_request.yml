@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest a widget, board, export or improvement.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the job, not the solution. "I want my screen to show a live sensor value" is more useful than "add a binding API".
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could Epixo help?
+  - type: input
+    id: board
+    attributes:
+      label: Board, if it matters

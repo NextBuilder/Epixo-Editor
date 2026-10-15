@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.wasm binary
+
+apps/editor/epixo-lvgl.wasm linguist-generated
+apps/web/package-lock.json linguist-generated
+apps/editor/packs/** linguist-vendored

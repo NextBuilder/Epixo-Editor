@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "epixo",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "epixo", "database_id": "1938b41d-528f-455c-8935-120f4abcb41e", "migrations_dir": "migrations" }
+  ],
+  "kv_namespaces": [
+    { "binding": "MEDIA_KV", "id": "cf9e2f2f1d324b1c8d3e692eda2b78c1" }
+  ],
+  "vars": {
+    "SITE_URL": "http://localhost:8787",
+    "AI_MODEL": "claude-sonnet-5-5",
+    "FREE_AI_CREDITS": "30"
+  }
+}

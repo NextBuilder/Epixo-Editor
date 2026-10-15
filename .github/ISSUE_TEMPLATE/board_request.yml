@@ -1,0 +1,22 @@
+name: Add a board
+description: Ask for a display board that Epixo does not list yet.
+labels: ["board"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Board name and maker
+      placeholder: e.g. Waveshare ESP32-S3-Touch-LCD-2.8
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Product or wiki page
+    validations:
+      required: true
+  - type: textarea
+    id: specs
+    attributes:
+      label: Anything you know about it
+      description: Resolution, display driver, touch chip, pins, a working example sketch.

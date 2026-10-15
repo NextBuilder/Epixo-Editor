@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in the editor or on the website does not work as expected.
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make Epixo better. Please check that nobody has reported this already.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did it happen?
+      options:
+        - Editor (canvas, widgets, screens)
+        - Export or generated code
+        - Live Mirror or flashing a board
+        - Website or community
+        - Sign-in or account
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to see it
+      placeholder: |
+        1. Open the editor with the 4.3" Waveshare board
+        2. Add a slider
+        3. Export C for LVGL 9
+    validations:
+      required: true
+  - type: input
+    id: board
+    attributes:
+      label: Board and LVGL version
+      placeholder: e.g. Waveshare ESP32-S3-Touch-LCD-4.3, LVGL 9.2
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and system
+      placeholder: e.g. Chrome 141 on Windows 11
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots, project file or logs
+      description: Drag files here. Remove anything private first.

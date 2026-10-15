@@ -1,0 +1,21 @@
+Epixo Runtime Licence
+
+Copyright (c) 2026 Kishan Pratap Singh (Next Builder). All rights reserved.
+
+The files in this folder (epixo_rt.c and epixo_rt.h) are bundled into
+projects exported from Epixo and into Epixo Live Mirror firmware.
+
+You may use, copy, modify and compile these files, and distribute them in
+source or compiled form, only as part of firmware or software that displays
+user interfaces designed with Epixo. This includes personal and commercial
+products.
+
+You may not use them to build a product that competes with Epixo, such as
+another UI editor, design tool or runtime, and you may not distribute them on
+their own.
+
+Keep this notice with any copy of the source files.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.

@@ -1,0 +1,21 @@
+{
+  "name": "epixo",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Epixo: design LVGL screens for ESP32 displays in the browser.",
+  "homepage": "https://github.com/NextBuilder/Epixo-Editor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NextBuilder/Epixo-Editor.git"
+  },
+  "author": "Kishan Pratap Singh (Next Builder)",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/unit/*.test.mjs",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "check": "npm run test && npm run typecheck"
+  }
+}

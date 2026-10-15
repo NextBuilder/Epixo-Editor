@@ -1,0 +1,33 @@
+Epixo
+Copyright (c) 2026 Kishan Pratap Singh (Next Builder). All rights reserved.
+
+This repository is public so people can read the code, report problems and
+suggest changes. Reading it does not grant a licence to use it.
+
+Unless a folder carries its own licence file, you may not copy, modify,
+publish, distribute, sublicense or sell this software, in whole or in part,
+or run it as a hosted service, without written permission from the copyright
+holder.
+
+Exceptions
+
+1. Your designs and exported code. Projects you create with Epixo and the code
+   Epixo generates from them belong to you. You may use them in personal and
+   commercial products without restriction.
+
+2. The Epixo runtime in runtime/ may ship inside firmware that shows screens
+   designed with Epixo. See runtime/LICENSE for the exact terms.
+
+3. Third-party components keep their own licences. See THIRD_PARTY_NOTICES.md.
+
+Contributions
+
+By sending a pull request you agree that your contribution may be used,
+changed and distributed by the copyright holder under these terms or any
+future licence of the project.
+
+For permission requests, open an issue on the GitHub repository.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.

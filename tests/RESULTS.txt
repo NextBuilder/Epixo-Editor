@@ -1,0 +1,9 @@
+Last full run: 15 October 2026
+
+v9.2.2: 57 passed, 0 failed
+v9.4.0: 57 passed, 0 failed
+v9.6.0: 57 passed, 0 failed
+v8.4.0: 57 passed, 0 failed
+xml v9.4: 57 passed, 0 failed
+esphome: 57 passed, 0 failed
+micropython: 56 passed, 1 failed (kitchen_sink: spinner drawn as an arc)

@@ -1,0 +1,14 @@
+# Engineering rules
+
+Guidance for anyone changing this codebase.
+
+- Run `npm run check` before every commit. Run `tests/verify.sh` when `apps/editor/core.js`, `runtime/` or `tests/` change.
+- `apps/editor/` has no build step and no framework. Keep it that way. Logic belongs in `core.js` with a test in `tests/unit/`.
+- Never edit a migration that has shipped. Add a new numbered file in `apps/web/migrations/`.
+- Never commit secrets or local settings files.
+- Keep the security model intact: same-origin checks on every change, rate limits, Zod validation of every input, the Content Security Policy, hashed session tokens, and no test sign-in on HTTPS.
+- All animation goes through `apps/web/src/app/motion.css` and must respect reduced motion.
+- Interface text is plain, friendly English in sentence case, written for beginners.
+- Code is simple and direct, with comments only where the code cannot speak for itself.
+- Next.js stays on 16.3 until OpenNext supports 16.4; CI smoke-tests every page.
+- Images live in R2 when the `MEDIA` binding exists, otherwise in KV (`MEDIA_KV`). Always go through `src/lib/media.ts`.
