@@ -12,3 +12,4 @@ Guidance for anyone changing this codebase.
 - Code is simple and direct, with comments only where the code cannot speak for itself.
 - Next.js stays on 16.3 until OpenNext supports 16.4; CI smoke-tests every page.
 - Images live in R2 when the `MEDIA` binding exists, otherwise in KV (`MEDIA_KV`). Always go through `src/lib/media.ts`.
+- Every commit is authored and committed as `Kishan Pratap Singh <158418132+NextBuilder@users.noreply.github.com>`, with no co-author or session lines, pushed straight to `main`. Set this with `git config user.name` and `git config user.email` before the first commit.
