@@ -11,6 +11,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        versions: [">=16.4.0"]
     groups:
       next-react-cloudflare:
         patterns: ["next", "react", "react-dom", "@types/react", "@types/react-dom", "wrangler", "@opennextjs/cloudflare", "@cloudflare/*"]
