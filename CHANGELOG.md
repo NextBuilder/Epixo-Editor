@@ -4,6 +4,8 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-16
+
 ### Added
 - Repository layout: `apps/web`, `apps/editor`, `runtime`, `engine`, `tests`.
 - Unit tests that export every template on all 113 boards and check Design Doctor.
@@ -50,7 +52,8 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 - Design Doctor, Live Mirror and AI design.
 - Verification suite comparing every export pixel by pixel.
 
-[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.5.0
 [0.4.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.4.0
 [0.3.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.3.0
