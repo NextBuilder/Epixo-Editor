@@ -12,11 +12,9 @@ const PICKS = ["waveshare-esp32-s3-touch-lcd-4-3", "waveshare-esp32-s3-touch-amo
 export default function TemplatesPage() {
   const boards = PICKS.map(id => BOARDS.find(b => b.id === id)!).filter(Boolean);
   return (
-    <div className="mx-auto max-w-[1200px] px-4 pt-14 sm:px-6">
-      <h1 className="text-4xl font-semibold sm:text-5xl">Templates</h1>
-      <p className="mt-4 max-w-2xl text-lg text-graphite">
-        Start from a finished screen. Every template rebuilds itself for the board you pick, so a dial stays round on a watch and a dashboard spreads out on a 7-inch panel.
-      </p>
+    <div className="wrap pt-12 sm:pt-16">
+      <h1 className="t-display">Templates</h1>
+      <p className="t-lead mt-3 max-w-xl">Finished screens that rebuild themselves for any board.</p>
       <TemplateGallery templates={TEMPLATES} boards={boards} all={BOARDS} />
     </div>
   );

@@ -4,9 +4,9 @@ export const metadata: Metadata = { title: "Privacy" };
 
 export default function Privacy() {
   return (
-    <div className="mx-auto max-w-[760px] px-4 pt-14 sm:px-6">
-      <h1 className="text-4xl font-semibold">Privacy</h1>
-      <p className="mt-3 text-graphite">Plain-language summary of what Epixo stores and why.</p>
+    <div className="wrap-narrow pt-12 sm:pt-16">
+      <h1 className="t-display">Privacy</h1>
+      <p className="t-lead mt-3">Plain-language summary of what Epixo stores and why.</p>
       <div className="prose-epx mt-10">
         <h2>What we store</h2>
         <ul>
@@ -25,7 +25,9 @@ export default function Privacy() {
         <h2>Cookies</h2>
         <p>One cookie keeps you signed in, and a short-lived one protects the sign-in step. Nothing else.</p>
         <h2>Deleting your data</h2>
-        <p>You can delete projects and unpublish posts from your dashboard at any time. To delete your account, write to the contact on the Next Builder GitHub page and we will remove everything within 30 days.</p>
+        <p>Delete projects and unpublish posts from your dashboard at any time. In Settings you can download everything we keep about you as one file, sign out of every device, and delete your account. Deleting your account removes your profile, projects, posts, images, comments and connections straight away.</p>
+        <h2>AI connections</h2>
+        <p>When you connect Claude, ChatGPT or another AI app, that app can read and change your Epixo projects through a private link. It cannot see your sign-in or other account details. We store only a fingerprint of the link, so not even we can read it back. Remove a connection at any time and its link stops working at once.</p>
       </div>
     </div>
   );

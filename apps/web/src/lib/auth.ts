@@ -10,8 +10,9 @@ function b64url(bytes: Uint8Array) {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+// Only paths on this site. Rejects "//host" and "/\\host", which browsers treat as another site, and control characters.
 export function safeNext(n: string | null) {
-  return n && n.startsWith("/") && !n.startsWith("//") ? n : "/dashboard";
+  return n && n.length < 500 && /^\/(?![/\\])/.test(n) && !/[\\\u0000-\u001f]/.test(n) ? n : "/dashboard";
 }
 
 export async function beginOAuth(provider: Provider, next: string) {

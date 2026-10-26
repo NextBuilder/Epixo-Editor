@@ -11,8 +11,8 @@ const FILTERS = [
   ["all", "All"],
   ["round", "Round"],
   ["touch", "Touch"],
-  ["pack", "Ready-to-build pack"],
-  ["checked", "Driver-verified"],
+  ["pack", "Ready to build"],
+  ["checked", "Verified"],
 ] as const;
 
 export function BoardDirectory({ boards, brands }: { boards: Board[]; brands: Brand[] }) {
@@ -37,7 +37,7 @@ export function BoardDirectory({ boards, brands }: { boards: Board[]; brands: Br
           {brands.map(b => {
             const n = shown.filter(x => x.brand === b.name).length;
             return (
-              <a key={b.slug} href={`#${b.slug}`} className={`flex justify-between rounded-lg px-3 py-1.5 text-[15px] hover:bg-card ${n ? "text-graphite hover:text-ink" : "pointer-events-none text-mist/60"}`}>
+              <a key={b.slug} href={`#${b.slug}`} className={`flex justify-between rounded-lg px-3 py-1.5 text-[14px] hover:bg-fill ${n ? "text-graphite hover:text-ink" : "pointer-events-none text-mist/50"}`}>
                 <span>{b.name}</span>
                 <span className="tabular-nums text-mist">{n}</span>
               </a>
@@ -46,42 +46,38 @@ export function BoardDirectory({ boards, brands }: { boards: Board[]; brands: Br
         </nav>
       </aside>
       <div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label className="relative block flex-1">
-            <Search size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-mist" />
-            <input className="field pl-10" placeholder="Search by name, chip or resolution, like 800x480 or ST7701" value={q} onChange={e => setQ(e.target.value)} aria-label="Search boards" />
-          </label>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Filter boards">
+        <label className="search">
+          <Search size={16} />
+          <input placeholder="Name, chip or size like 800x480" value={q} onChange={e => setQ(e.target.value)} aria-label="Search boards" />
+        </label>
+        <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Filter boards">
           {FILTERS.map(([k, label]) => (
-            <button key={k} onClick={() => setF(k)} aria-pressed={f === k} className={`pill rounded-full px-3.5 py-1.5 text-sm ${f === k ? "bg-ink text-white" : "bg-card text-graphite shadow-[inset_0_0_0_1px_var(--color-line-strong)] hover:text-ink"}`}>
-              {label}
-            </button>
+            <button key={k} onClick={() => setF(k)} aria-pressed={f === k} data-on={f === k} className="chip">{label}</button>
           ))}
-          <span className="ml-auto self-center text-sm text-mist">{shown.length} boards</span>
+          <span className="ml-auto text-[13px] tabular-nums text-mist">{shown.length} boards</span>
         </div>
 
         {brands.map(br => {
           const list = shown.filter(b => b.brand === br.name);
           if (!list.length) return null;
           return (
-            <section key={br.slug} id={br.slug} data-reveal className="scroll-mt-24 pt-12">
-              <h2 className="text-2xl font-semibold">{br.name}</h2>
-              <ul className="mt-4 divide-y divide-line border-y border-line">
+            <section key={br.slug} id={br.slug} className="scroll-mt-20 pt-10">
+              <h2 className="group-title font-sans text-[15px] font-semibold tracking-normal text-ink">{br.name}</h2>
+              <ul className="inset-group">
                 {list.map(b => (
                   <li key={b.id}>
-                    <Link href={`/boards/${b.id}`} className="group grid grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 py-3.5 transition-colors duration-300 hover:bg-card active:bg-line sm:grid-cols-[28px_minmax(0,1.6fr)_110px_minmax(0,1fr)_auto] sm:px-2">
+                    <Link href={`/boards/${b.id}`} className="grid grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-4 py-3 transition-colors duration-200 hover:bg-fill sm:grid-cols-[28px_minmax(0,1.6fr)_100px_minmax(0,1fr)_auto]">
                       <Shape w={b.w} h={b.h} round={b.round} />
                       <span className="min-w-0">
-                        <span className="block truncate font-medium">{b.name}</span>
-                        <span className="block truncate text-sm text-mist sm:hidden">
+                        <span className="block truncate text-[15px] font-medium">{b.name}</span>
+                        <span className="block truncate text-[13px] text-mist sm:hidden">
                           {b.w} × {b.h}, {b.size} {b.panel}
                         </span>
                       </span>
-                      <span className="hidden text-sm tabular-nums text-graphite sm:block">
+                      <span className="hidden text-[14px] tabular-nums text-graphite sm:block">
                         {b.w} × {b.h}
                       </span>
-                      <span className="hidden truncate text-sm text-graphite sm:block">
+                      <span className="hidden truncate text-[14px] text-mist sm:block">
                         {b.size} {b.panel}, {b.chip}
                       </span>
                       <VerifyBadge v={b.v} />
@@ -93,9 +89,9 @@ export function BoardDirectory({ boards, brands }: { boards: Board[]; brands: Br
           );
         })}
         {!shown.length && (
-          <div className="mt-12 rounded-2xl border border-dashed border-line-strong px-6 py-14 text-center">
-            <h2 className="text-xl font-semibold">No board matches that search</h2>
-            <p className="mt-2 text-graphite">Try a resolution like 480x480, or pick Custom size in the editor to design for any screen.</p>
+          <div className="stage mt-10 px-6 py-16 text-center">
+            <h2 className="text-[22px]">No matches</h2>
+            <p className="mt-2 text-[15px] text-graphite">Try a size like 480x480, or use Custom size in the editor.</p>
           </div>
         )}
       </div>

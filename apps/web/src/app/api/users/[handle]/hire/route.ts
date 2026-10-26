@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fail, first, guard, json, newId, now, run } from "@/lib/server";
 import { HIRE_TYPES } from "@/lib/profile";
+import { notify } from "@/lib/notify";
 
 const Body = z.object({
   name: z.string().trim().min(2).max(80),
@@ -33,5 +34,6 @@ export async function POST(req: Request, ctx: { params: Promise<{ handle: string
     "INSERT INTO hire_requests (id, to_user, from_user, name, email, company, kind, budget, timeline, message, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     newId(14), target.id, g.user!.id, d.name, d.email, d.company, kind, d.budget, d.timeline, d.message, now(),
   );
+  await notify(target.id, g.user!.id, "hire", null, d.kind || "New project");
   return json({ ok: true });
 }

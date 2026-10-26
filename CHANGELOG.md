@@ -4,6 +4,30 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-26
+
+### Added
+- Notifications for likes, comments, new followers, hire requests and remixes, with a bell in the header. Repeat likes and follows from the same person do not pile up.
+- A Following feed in the community, showing new work from makers you follow.
+- Save any project and find it again under Saved.
+- Your projects as a grid of real LVGL thumbnails, with duplicate and delete.
+- An account menu with quick links to projects, requests, saved, profile, AI connections and settings.
+- Light, dark and automatic appearance across the whole site, shared with the editor.
+- In Settings: download all your data, sign out of every device, and delete your account.
+
+### Changed
+- The whole website is redesigned: Apple system type, a calm grey palette with one blue, pill buttons, a glass navigation bar, grouped lists, segmented controls and much less text on every page.
+- Profiles are centred like a contact card, with a soft colour wash in place of the dark banner.
+- Comments read like a chat, with a composer that sends on Enter.
+- Avatars without a photo get a gradient that stays the same for each maker everywhere.
+
+### Security
+- Sign-in links can no longer redirect to another site through paths like `/\example.com`.
+- Requests with an `Origin: null` header are refused cleanly instead of failing.
+- Reports must point at a real project and count once per person.
+- Uploaded images are served with a sandboxing Content Security Policy.
+- The site sends `object-src 'none'` and `X-Frame-Options: DENY`, and expired sessions are cleared at sign-in.
+
 ## [0.6.0] - 2026-10-26
 
 ### Added
@@ -68,7 +92,8 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 - Design Doctor, Live Mirror and AI design.
 - Verification suite comparing every export pixel by pixel.
 
-[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.5.0

@@ -1,6 +1,7 @@
 import { fail, first, guard, json, newId, now, run } from "@/lib/server";
 import { cleanTags, readProject } from "@/lib/project";
 import { deleteMedia, putMedia } from "@/lib/media";
+import { notify } from "@/lib/notify";
 
 const PNG = [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -43,10 +44,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     await run("UPDATE posts SET title = ?, description = ?, tags = ?, board_id = ?, board_label = ?, brand = ?, w = ?, h = ?, round = ?, images = ?, json = ?, updated_at = ? WHERE id = ?",
       title, description, tags, meta.boardId, meta.boardLabel, meta.brand, meta.w, meta.h, meta.round ? 1 : 0, JSON.stringify(keys), project.json, t, postId);
   } else {
-    const origin = meta.remixOf ? await first<{ id: string }>("SELECT id FROM posts WHERE id = ? AND hidden = 0", meta.remixOf) : null;
+    const origin = meta.remixOf ? await first<{ id: string; owner_id: string }>("SELECT id, owner_id FROM posts WHERE id = ? AND hidden = 0", meta.remixOf) : null;
     await run("INSERT INTO posts (id, project_id, owner_id, title, description, tags, board_id, board_label, brand, w, h, round, images, json, remix_of, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       postId, id, user.id, title, description, tags, meta.boardId, meta.boardLabel, meta.brand, meta.w, meta.h, meta.round ? 1 : 0, JSON.stringify(keys), project.json, origin?.id ?? null, t, t);
-    if (origin) await run("UPDATE posts SET remixes = remixes + 1 WHERE id = ?", origin.id);
+    if (origin) {
+      await run("UPDATE posts SET remixes = remixes + 1 WHERE id = ?", origin.id);
+      await notify(origin.owner_id, user.id, "remix", postId, title);
+    }
   }
   return json({ ok: true, id: postId, url: `/community/${postId}` });
 }

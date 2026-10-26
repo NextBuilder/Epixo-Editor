@@ -33,11 +33,13 @@ const COLS = "p.id, p.project_id, p.title, p.description, p.tags, p.board_id, p.
 
 export type Sort = "trending" | "new" | "top";
 
-export async function listPosts(o: { q?: string; brand?: string; board?: string; tag?: string; owner?: string; sort?: Sort; limit?: number; offset?: number; includeHidden?: boolean }) {
+export async function listPosts(o: { q?: string; brand?: string; board?: string; tag?: string; owner?: string; following?: string; saved?: string; sort?: Sort; limit?: number; offset?: number; includeHidden?: boolean }) {
   const where: string[] = [];
   const args: unknown[] = [];
   if (!o.includeHidden) where.push("p.hidden = 0");
   if (o.owner) where.push("p.owner_id = ?"), args.push(o.owner);
+  if (o.following) where.push("p.owner_id IN (SELECT followee_id FROM follows WHERE follower_id = ?)"), args.push(o.following);
+  if (o.saved) where.push("p.id IN (SELECT post_id FROM saves WHERE user_id = ?)"), args.push(o.saved);
   if (o.brand) where.push("p.brand = ?"), args.push(o.brand);
   if (o.board) where.push("p.board_id = ?"), args.push(o.board);
   if (o.tag) where.push("(',' || p.tags || ',') LIKE ?"), args.push(`%,${o.tag},%`);

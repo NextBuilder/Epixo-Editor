@@ -62,7 +62,7 @@ Start from eight finished templates, from a smart home panel to a door keypad. E
 
 <img src=".github/assets/community.png" alt="The Epixo community showing published screens for different boards" width="100%">
 
-Publish your screens with a single click. Anyone can open your project in the editor, remix it and publish their own version, and the original maker is always credited. Maker profiles show your work, your links and whether you are open to hire.
+Publish your screens with a single click. Anyone can open your project in the editor, remix it and publish their own version, and the original maker is always credited. Follow makers, save projects, get notified about likes, comments and hire requests, and hire makers straight from their profiles.
 
 ### And more
 
@@ -70,7 +70,7 @@ Publish your screens with a single click. Anyone can open your project in the ed
 |---|---|
 | **Live Mirror** | See your design on a real board over USB while you edit. |
 | **AI design** | Describe a screen or upload a sketch and get an editable layout. |
-| **Feels native** | Floating glass panels, spring motion, light and dark mode, focus mode, pinch and pan, and a layout for phones. |
+| **Feels native** | Floating glass panels, spring motion, light and dark mode across the editor and site, focus mode, pinch and pan, and a layout for phones. |
 | **13 widgets, 42 icons** | Labels, buttons, switches, sliders, arcs, bars, charts, dropdowns, LEDs and more. |
 | **Themes** | Restyle a whole project in one tap, from Daylight to Midnight. |
 | **Keyboard first** | Command menu, Ask AI with `/`, nudging, duplicating and full undo history. |
@@ -130,7 +130,7 @@ A project is a small JSON file describing the board, the screens and the widgets
 
 ## Privacy and security
 
-Sign-in uses GitHub or Google, so Epixo never stores a password. Projects stay private until you publish them. Every request is validated and rate limited, uploads are inspected, and a strict Content Security Policy keeps third-party scripts out. The code is scanned with CodeQL on every change.
+Sign-in uses GitHub or Google, so Epixo never stores a password. Projects stay private until you publish them. You can download everything Epixo keeps about you, sign out of every device, or delete your account from Settings. Every request is validated and rate limited, uploads are inspected, and a strict Content Security Policy keeps third-party scripts out. The code is scanned with CodeQL on every change.
 
 Found a problem? Please report it privately, as described in the [security policy](SECURITY.md).
 

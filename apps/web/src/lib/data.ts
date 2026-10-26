@@ -23,11 +23,12 @@ export function packName(b: Board) {
 
 export function timeAgo(t: number) {
   const s = Math.max(1, Math.floor(Date.now() / 1000) - t);
-  if (s < 60) return "just now";
-  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
-  if (s < 86400 * 30) return `${Math.floor(s / 86400)} d ago`;
-  return new Date(t * 1000).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  if (s < 60) return "Just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 86400 * 2) return "Yesterday";
+  if (s < 86400 * 7) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(t * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: s > 86400 * 300 ? "numeric" : undefined });
 }
 
 export const SOCIAL = [

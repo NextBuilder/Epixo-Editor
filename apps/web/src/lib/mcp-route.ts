@@ -1,13 +1,10 @@
 import { connectionFor, handleRpc } from "./mcp";
-import { env, fail, limit, now, run } from "./server";
+import { fail, limit, now, run, sameOrigin } from "./server";
 
 // Shared by /api/mcp (token in an Authorization header) and /api/mcp/<token> (token in the link, for apps that only take a URL).
 export async function serveMcp(req: Request, token: string) {
   const origin = req.headers.get("origin");
-  if (origin) {
-    const e = await env();
-    if (new URL(origin).host !== new URL(req.url).host && origin !== e.SITE_URL) return fail("Cross-site request blocked", 403);
-  }
+  if (origin && !(await sameOrigin(req))) return fail("Cross-site request blocked", 403);
   const c = await connectionFor(token);
   if (!c) return fail("This link is not valid any more. Make a new one at /connect.", 401);
   if (!(await limit(`mcp:${c.id}`, 240, 60))) return fail("Too many requests. Try again in a minute.", 429);

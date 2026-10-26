@@ -1,4 +1,5 @@
 import { fail, first, guard, json, now, run } from "@/lib/server";
+import { notify } from "@/lib/notify";
 
 export async function POST(req: Request, ctx: { params: Promise<{ handle: string }> }) {
   const { handle } = await ctx.params;
@@ -9,7 +10,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ handle: string
   if (target.id === g.user!.id) return fail("You cannot follow yourself.");
   const had = await first("SELECT 1 FROM follows WHERE follower_id = ? AND followee_id = ?", g.user!.id, target.id);
   if (had) await run("DELETE FROM follows WHERE follower_id = ? AND followee_id = ?", g.user!.id, target.id);
-  else await run("INSERT INTO follows (follower_id, followee_id, created_at) VALUES (?, ?, ?)", g.user!.id, target.id, now());
+  else {
+    await run("INSERT INTO follows (follower_id, followee_id, created_at) VALUES (?, ?, ?)", g.user!.id, target.id, now());
+    await notify(target.id, g.user!.id, "follow");
+  }
   const c = await first<{ n: number }>("SELECT COUNT(*) AS n FROM follows WHERE followee_id = ?", target.id);
   return json({ following: !had, followers: c?.n ?? 0 });
 }

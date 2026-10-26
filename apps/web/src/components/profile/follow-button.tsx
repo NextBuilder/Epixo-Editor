@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserCheck, UserPlus } from "lucide-react";
 
-export function FollowButton({ handle, following, followers, signedIn }: { handle: string; following: boolean; followers: number; signedIn: boolean }) {
+export function FollowButton({ handle, following, followers = 0, signedIn, small = false }: { handle: string; following: boolean; followers?: number; signedIn: boolean; small?: boolean }) {
   const [s, setS] = useState({ following, followers });
   const [busy, setBusy] = useState(false);
   const router = useRouter();
   return (
     <button
-      className={`btn ${s.following ? "btn-quiet" : "bg-ink text-white hover:bg-ink/90"}`}
+      className={`btn ${small ? "btn-sm" : ""} ${s.following ? "btn-quiet" : "btn-ink"} min-w-[92px]`}
       aria-pressed={s.following}
       disabled={busy}
       onClick={async () => {
@@ -25,8 +24,7 @@ export function FollowButton({ handle, following, followers, signedIn }: { handl
         router.refresh();
       }}
     >
-      <span key={String(s.following)} className="scale-in inline-flex">{s.following ? <UserCheck size={17} /> : <UserPlus size={17} />}</span>
-      {s.following ? "Following" : "Follow"}
+      <span key={String(s.following)} className="scale-in inline-flex">{s.following ? "Following" : "Follow"}</span>
     </button>
   );
 }

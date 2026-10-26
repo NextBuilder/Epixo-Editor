@@ -5,16 +5,15 @@ import { parseSocials, splitList } from "@/lib/profile";
 import { all, currentUser } from "@/lib/server";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Edit profile", robots: { index: false } };
+export const metadata: Metadata = { title: "Settings", robots: { index: false } };
 
 export default async function Settings() {
   const u = await currentUser();
   if (!u) redirect("/login?next=/settings");
   const posts = await all<{ id: string; title: string }>("SELECT id, title FROM posts WHERE owner_id = ? AND hidden = 0 ORDER BY created_at DESC LIMIT 100", u.id).catch(() => []);
   return (
-    <div className="mx-auto max-w-[680px] px-4 pt-12 sm:px-6">
-      <h1 className="text-4xl font-semibold">Edit profile</h1>
-      <p className="mt-2 text-graphite">Your profile is your portfolio. Projects you publish appear on it automatically.</p>
+    <div className="wrap-narrow pt-12 sm:pt-16">
+      <h1 className="t-display">Settings</h1>
       <SettingsForm
         posts={posts}
         user={{

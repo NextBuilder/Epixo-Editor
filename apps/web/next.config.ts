@@ -9,6 +9,7 @@ const csp = [
   "img-src 'self' data: blob: https://avatars.githubusercontent.com https://lh3.googleusercontent.com",
   "connect-src 'self'",
   "frame-ancestors 'none'",
+  "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self' https://github.com https://accounts.google.com",
 ].join("; ");
@@ -30,6 +31,7 @@ const config: NextConfig = {
           { key: "Permissions-Policy", value: "serial=(self), camera=(), microphone=(), geolocation=()" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "X-Frame-Options", value: "DENY" },
         ],
       },
       {

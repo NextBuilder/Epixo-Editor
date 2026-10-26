@@ -4,23 +4,24 @@ import { useState } from "react";
 
 export function Waitlist() {
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<{ ok?: boolean; msg?: string }>({});
-  if (state.ok) return <p className="mt-6 rounded-xl bg-white/10 px-4 py-3 text-[15px]">You are on the list. We will email you when Pro opens.</p>;
+  const [state, setState] = useState<{ ok?: boolean; msg?: string; busy?: boolean }>({});
+  if (state.ok) return <p className="scale-in mt-8 rounded-2xl bg-white/10 px-4 py-3.5 text-[15px]">You are on the list.</p>;
   return (
     <form
-      className="mt-6"
+      className="mt-8"
       onSubmit={async e => {
         e.preventDefault();
+        setState({ busy: true });
         const r = await fetch("/api/waitlist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email }) });
         const j = (await r.json().catch(() => ({}))) as { error?: string };
         setState(r.ok ? { ok: true } : { msg: j.error ?? "Could not add you. Try again." });
       }}
     >
       <div className="flex gap-2">
-        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" className="h-11 min-w-0 flex-1 rounded-xl bg-white/10 px-3.5 text-white outline-none ring-1 ring-white/20 placeholder:text-white/40 focus:ring-2 focus:ring-[#7FB2FF]" aria-label="Email address" />
-        <button className="btn bg-white text-ink hover:bg-white/90">Join the list</button>
+        <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="h-[52px] min-w-0 flex-1 rounded-full bg-white/10 px-5 text-[16px] text-white outline-none placeholder:text-white/40 focus:bg-white/15 focus:ring-2 focus:ring-[#2997FF]" aria-label="Email address" />
+        <button className="btn btn-lg bg-white text-[#1D1D1F] hover:bg-white/90" disabled={state.busy}>Notify me</button>
       </div>
-      {state.msg && <p className="mt-2 text-sm text-[#FFB4B4]">{state.msg}</p>}
+      {state.msg && <p className="mt-2 text-[14px] text-[#FF6961]">{state.msg}</p>}
     </form>
   );
 }

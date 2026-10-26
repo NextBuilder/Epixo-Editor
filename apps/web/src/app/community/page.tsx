@@ -1,36 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { Empty } from "@/components/empty";
 import { PostGrid } from "@/components/post-card";
-import { communityStats, listPosts, postBrands, type Sort } from "@/lib/posts";
+import { currentUser } from "@/lib/server";
+import { listPosts, postBrands, type Sort } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Community projects",
+  title: "Community",
   description: "LVGL screens made by makers in Epixo. Open any project in the editor, remix it for your board and publish your own version.",
 };
 
-const SORTS: [Sort, string][] = [
-  ["trending", "Trending"],
-  ["new", "Newest"],
-  ["top", "Most liked"],
-];
+const SORTS = [["trending", "Trending"], ["new", "New"], ["top", "Top"], ["following", "Following"]] as const;
 const PER = 24;
 
 type SP = Promise<{ q?: string; brand?: string; sort?: string; tag?: string; page?: string }>;
 
 export default async function Community({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const sort = (SORTS.find(s => s[0] === sp.sort)?.[0] ?? "trending") as Sort;
+  const user = await currentUser().catch(() => null);
+  const view = SORTS.find(s => s[0] === sp.sort)?.[0] ?? "trending";
+  const following = view === "following";
+  const sort: Sort = following || view === "new" ? "new" : view === "top" ? "top" : "trending";
   const page = Math.max(1, Math.min(50, Number(sp.page) || 1));
   const q = (sp.q ?? "").slice(0, 80);
   const brand = sp.brand?.slice(0, 40);
   const tag = sp.tag?.toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 20);
-  const [posts, brands, stats] = await Promise.all([listPosts({ q, brand, tag, sort, limit: PER * page + 1 }), postBrands(), communityStats()]);
+  const [posts, brands] = await Promise.all([
+    following && !user ? Promise.resolve([]) : listPosts({ q, brand, tag, sort, following: following ? user!.id : undefined, limit: PER * page + 1 }),
+    postBrands(),
+  ]);
   const more = posts.length > PER * page;
   const href = (o: Record<string, string | undefined>) => {
     const u = new URLSearchParams();
-    const m = { q: q || undefined, brand, sort: sort === "trending" ? undefined : sort, tag, ...o };
+    const m = { q: q || undefined, brand, sort: view === "trending" ? undefined : view, tag, ...o };
     for (const [k, v] of Object.entries(m)) if (v) u.set(k, v);
     const s = u.toString();
     return s ? `/community?${s}` : "/community";
@@ -38,49 +42,37 @@ export default async function Community({ searchParams }: { searchParams: SP }) 
   const filtered = !!(q || brand || tag);
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 pt-14 sm:px-6">
-      <div className="stagger flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-semibold sm:text-5xl">Community</h1>
-          <p className="mt-4 max-w-xl text-lg text-graphite">
-            Screens made in Epixo by makers everywhere. Open one in the editor, make it yours and publish your version.
-            {stats && stats.posts > 0 ? ` ${stats.posts} ${stats.posts === 1 ? "project" : "projects"} from ${stats.makers} ${stats.makers === 1 ? "maker" : "makers"} so far.` : ""}
-          </p>
-        </div>
-        <a href="/editor" className="btn btn-primary">Share a project</a>
+    <div className="wrap pt-12 sm:pt-16">
+      <div className="flex flex-wrap items-end justify-between gap-5">
+        <h1 className="t-display">Community</h1>
+        <a href="/editor" className="btn btn-primary btn-sm">Share yours</a>
       </div>
 
-      <div className="mt-10 flex flex-col gap-4 border-b border-line pb-5 lg:flex-row lg:items-center">
-        <form action="/community" className="relative flex-1 lg:max-w-md" role="search">
-          <Search size={17} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-mist" />
-          <input name="q" defaultValue={q} className="field pl-10" placeholder="Search projects, boards or makers" aria-label="Search projects" />
-          {brand && <input type="hidden" name="brand" value={brand} />}
-          {sort !== "trending" && <input type="hidden" name="sort" value={sort} />}
-        </form>
-        <nav className="flex gap-1 lg:ml-auto" aria-label="Sort">
+      <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
+        <nav className="seg self-start" aria-label="Sort">
           {SORTS.map(([k, label]) => (
-            <Link key={k} href={href({ sort: k === "trending" ? undefined : k, page: undefined })} className={`pill rounded-lg px-3 py-2 text-[15px] ${sort === k ? "bg-card font-medium text-ink shadow-[inset_0_0_0_1px_var(--color-line-strong)]" : "text-graphite hover:text-ink"}`} aria-current={sort === k ? "page" : undefined}>
-              {label}
-            </Link>
+            <Link key={k} href={href({ sort: k === "trending" ? undefined : k, page: undefined })} data-on={view === k} aria-current={view === k ? "page" : undefined}>{label}</Link>
           ))}
         </nav>
+        <form action="/community" className="search md:ml-auto md:w-80" role="search">
+          <Search size={16} />
+          <input name="q" defaultValue={q} placeholder="Search" aria-label="Search projects" />
+          {brand && <input type="hidden" name="brand" value={brand} />}
+          {view !== "trending" && <input type="hidden" name="sort" value={view} />}
+        </form>
       </div>
 
       {brands.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2" aria-label="Filter by maker">
-          <Link href={href({ brand: undefined, page: undefined })} className={`pill rounded-full px-3.5 py-1.5 text-sm ${!brand ? "bg-ink text-white" : "bg-card text-graphite shadow-[inset_0_0_0_1px_var(--color-line-strong)] hover:text-ink"}`}>
-            All boards
-          </Link>
+        <div className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Filter by maker">
+          <Link href={href({ brand: undefined, page: undefined })} className="chip" data-on={!brand}>All</Link>
           {brands.map(b => (
-            <Link key={b.brand} href={href({ brand: b.brand, page: undefined })} className={`pill rounded-full px-3.5 py-1.5 text-sm ${brand === b.brand ? "bg-ink text-white" : "bg-card text-graphite shadow-[inset_0_0_0_1px_var(--color-line-strong)] hover:text-ink"}`}>
-              {b.brand} <span className="opacity-60">{b.n}</span>
-            </Link>
+            <Link key={b.brand} href={href({ brand: b.brand, page: undefined })} className="chip" data-on={brand === b.brand}>{b.brand} <small>{b.n}</small></Link>
           ))}
         </div>
       )}
       {tag && (
-        <p className="mt-4 text-sm text-graphite">
-          Tagged <span className="font-medium text-ink">#{tag}</span>.{" "}
+        <p className="mt-4 flex items-center gap-2 text-[15px] text-graphite">
+          <span className="tag tag-signal">#{tag}</span>
           <Link href={href({ tag: undefined })} className="text-signal hover:underline">Clear</Link>
         </p>
       )}
@@ -91,24 +83,19 @@ export default async function Community({ searchParams }: { searchParams: SP }) 
             <PostGrid posts={posts.slice(0, PER * page)} />
             {more && (
               <div className="mt-14 text-center">
-                <Link href={href({ page: String(page + 1) })} scroll={false} className="btn btn-quiet">Show more projects</Link>
+                <Link href={href({ page: String(page + 1) })} scroll={false} className="btn btn-quiet">Show more</Link>
               </div>
             )}
           </>
-        ) : filtered ? (
-          <div className="rounded-2xl border border-dashed border-line-strong px-6 py-16 text-center">
-            <h2 className="text-xl font-semibold">Nothing matches yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-graphite">Try a shorter search or another board. Or be the first: design it and publish.</p>
-            <Link href="/community" className="btn btn-quiet mt-6">Show all projects</Link>
-          </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-line-strong px-6 py-16 text-center">
-            <h2 className="text-xl font-semibold">The first project here could be yours</h2>
-            <p className="mx-auto mt-2 max-w-md text-graphite">Design a screen, press Publish in the editor, and it shows up here for everyone to open and remix.</p>
-            <a href="/editor" className="btn btn-primary mt-6">Start a project</a>
-          </div>
+          <Empty
+            title={following ? (user ? "Nothing from people you follow yet" : "See work from makers you follow") : filtered ? "No matches" : "Be the first to share"}
+            body={following ? (user ? "Follow makers from their profiles and their new work shows up here." : "Sign in, follow makers you like, and their work collects here.") : filtered ? "Try another search or board." : "Publish from the editor and your screen appears here."}
+            action={following && !user ? ["/login?next=/community?sort=following", "Sign in"] : following ? ["/makers", "Find makers"] : filtered ? ["/community", "Show everything"] : ["/editor", "Open the editor"]}
+          />
         )}
       </div>
     </div>
   );
 }
+

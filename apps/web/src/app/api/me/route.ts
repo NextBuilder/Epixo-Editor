@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { currentUser, env, fail, first, guard, json, run } from "@/lib/server";
+import { all, currentUser, env, fail, first, guard, json, run } from "@/lib/server";
+import { unseen } from "@/lib/notify";
+import { deleteMedia } from "@/lib/media";
 import { HIRE_TYPES, PLATFORMS, cleanSkills, normalizeSocial, parseSocials, splitList, type SocialKey } from "@/lib/profile";
 
 export async function GET() {
@@ -14,6 +16,7 @@ export async function GET() {
       hire_open: !!user.hire_open, hire_types: splitList(user.hire_types), hire_rate: user.hire_rate, hire_note: user.hire_note, pinned_post: user.pinned_post,
     },
     inbox: inbox?.n ?? 0,
+    unread: await unseen(user.id),
     ai: { enabled: !!e.ANTHROPIC_API_KEY, credits: user.ai_credits },
   });
 }
@@ -72,4 +75,21 @@ export async function PATCH(req: Request) {
     d.hire_rate ?? u.hire_rate, d.hire_note ?? u.hire_note, pinned, u.id,
   );
   return json({ ok: true, handle: d.handle ?? u.handle });
+}
+
+const Remove = z.object({ confirm: z.string().max(40) });
+
+// Deletes the account and everything in it: projects, posts and their images, comments, likes, follows and connections.
+export async function DELETE(req: Request) {
+  const g = await guard(req, { auth: true, rate: ["delete-account", 3, 3600] });
+  if (g.error) return g.error;
+  const u = g.user!;
+  const b = Remove.safeParse(await req.json().catch(() => null));
+  if (!b.success || b.data.confirm.trim().toLowerCase() !== u.handle) return fail("Type your handle to confirm.");
+  const posts = await all<{ images: string }>("SELECT images FROM posts WHERE owner_id = ?", u.id);
+  for (const p of posts) for (const k of JSON.parse(p.images) as string[]) await deleteMedia(k).catch(() => {});
+  if (u.avatar?.startsWith("/api/media/avatars/")) await deleteMedia(u.avatar.slice("/api/media/".length)).catch(() => {});
+  await run("DELETE FROM ai_usage WHERE user_id = ?", u.id).catch(() => {});
+  await run("DELETE FROM users WHERE id = ?", u.id);
+  return json({ ok: true });
 }

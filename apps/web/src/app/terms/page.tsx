@@ -4,9 +4,9 @@ export const metadata: Metadata = { title: "Terms" };
 
 export default function Terms() {
   return (
-    <div className="mx-auto max-w-[760px] px-4 pt-14 sm:px-6">
-      <h1 className="text-4xl font-semibold">Terms</h1>
-      <p className="mt-3 text-graphite">The short version of the rules for using Epixo.</p>
+    <div className="wrap-narrow pt-12 sm:pt-16">
+      <h1 className="t-display">Terms</h1>
+      <p className="t-lead mt-3">The short version of the rules for using Epixo.</p>
       <div className="prose-epx mt-10">
         <h2>Your work</h2>
         <p>You own the designs you make and the code you export. Use them in personal or commercial products.</p>

@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ImagePlus, X } from "lucide-react";
-import { Avatar } from "./site-header";
+import { Avatar } from "./avatar";
+import { AccountZone } from "./account-zone";
 import { Group, Row } from "./profile/hire-sheet";
 import { PlatformTile } from "./profile/social-links";
 import { HIRE_TYPES, PLATFORMS, type SocialKey } from "@/lib/profile";
@@ -62,7 +63,7 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
 
   return (
     <div className="mt-10 space-y-9 pb-32">
-      <section className="flex items-center gap-5 rounded-[20px] bg-card p-5 shadow-[inset_0_0_0_1px_var(--color-line)]">
+      <section className="card flex items-center gap-5 p-5">
         <Avatar src={f.avatar} name={f.name || "?"} size={76} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-semibold">{f.name || "Your name"}</p>
@@ -71,7 +72,7 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
             <input ref={file} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={e => photo(e.target.files?.[0])} />
             <button className="btn btn-quiet btn-sm" onClick={() => file.current?.click()} disabled={photoBusy}><ImagePlus size={15} />{photoBusy ? "Uploading…" : "Change photo"}</button>
             {f.avatar?.startsWith("/api/media/") && (
-              <button className="btn btn-sm text-graphite" onClick={async () => { await fetch("/api/me/avatar", { method: "DELETE" }); setF(x => ({ ...x, avatar: null })); user.avatar = null; router.refresh(); }}>Remove</button>
+              <button className="btn btn-quiet btn-sm" onClick={async () => { await fetch("/api/me/avatar", { method: "DELETE" }); setF(x => ({ ...x, avatar: null })); user.avatar = null; router.refresh(); }}>Remove</button>
             )}
           </div>
         </div>
@@ -89,20 +90,20 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
       </Group>
 
       <section>
-        <h3 className="mb-2 px-4 font-sans text-[13px] font-medium tracking-normal text-mist">Skills</h3>
-        <div className="rounded-[18px] bg-card p-4 shadow-[inset_0_0_0_1px_var(--color-line)]">
+        <h3 className="group-title font-sans tracking-normal">Skills</h3>
+        <div className="card rounded-[14px] p-4">
           <div className="flex flex-wrap gap-2">
             {f.skills.map(s => (
-              <span key={s} className="scale-in flex items-center gap-1 rounded-full bg-signal-soft py-1.5 pl-3 pr-1.5 text-[13px] font-medium text-signal-deep">
+              <span key={s} className="scale-in flex items-center gap-1 rounded-full bg-signal-soft py-1.5 pl-3 pr-1.5 text-[13px] font-medium text-signal">
                 {s}
-                <button className="grid size-5 place-items-center rounded-full hover:bg-white/70" onClick={() => set("skills", f.skills.filter(x => x !== s))} aria-label={`Remove ${s}`}><X size={12} /></button>
+                <button className="grid size-5 place-items-center rounded-full hover:bg-fill-strong" onClick={() => set("skills", f.skills.filter(x => x !== s))} aria-label={`Remove ${s}`}><X size={12} /></button>
               </span>
             ))}
             <input className="min-w-[160px] flex-1 bg-transparent py-1.5 text-[15px] outline-none placeholder:text-mist" value={skill} placeholder={f.skills.length ? "Add another" : "Type a skill and press Enter"} onChange={e => (e.target.value.endsWith(",") ? addSkill(e.target.value) : setSkill(e.target.value))} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSkill(skill); } if (e.key === "Backspace" && !skill && f.skills.length) set("skills", f.skills.slice(0, -1)); }} />
           </div>
-          <div className="mt-3 flex flex-wrap gap-1.5 border-t border-line pt-3">
+          <div className="mt-3 flex flex-wrap gap-1.5 pt-3 shadow-[inset_0_0.5px_0_var(--color-line-strong)]">
             {SUGGEST.filter(s => !f.skills.includes(s)).slice(0, 10).map(s => (
-              <button key={s} className="rounded-full px-2.5 py-1 text-[13px] text-graphite shadow-[inset_0_0_0_1px_var(--color-line)] hover:text-ink" onClick={() => addSkill(s)}>+ {s}</button>
+              <button key={s} className="chip h-7 px-2.5 text-[13px] text-graphite" onClick={() => addSkill(s)}>+ {s}</button>
             ))}
           </div>
         </div>
@@ -119,8 +120,8 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
       </Group>
 
       <section id="hire" className="scroll-mt-24">
-        <h3 className="mb-2 px-4 font-sans text-[13px] font-medium tracking-normal text-mist">Hiring</h3>
-        <div className="divide-y divide-line overflow-hidden rounded-[18px] bg-card shadow-[inset_0_0_0_1px_var(--color-line)] [&>*]:ml-4 [&>*]:pr-4">
+        <h3 className="group-title font-sans tracking-normal">Hiring</h3>
+        <div className="inset-group [&>*]:px-4">
           <div className="flex min-h-[60px] items-center gap-4">
             <span className="flex-1">
               <span className="block text-[15px] font-medium">Available for work</span>
@@ -136,7 +137,7 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
                   {HIRE_TYPES.map(t => {
                     const on = f.hire_types.includes(t);
                     return (
-                      <button key={t} aria-pressed={on} onClick={() => set("hire_types", on ? f.hire_types.filter(x => x !== t) : [...f.hire_types, t])} className={`pill flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[14px] ${on ? "bg-ink text-white" : "text-graphite shadow-[inset_0_0_0_1px_var(--color-line-strong)] hover:text-ink"}`}>
+                      <button key={t} aria-pressed={on} onClick={() => set("hire_types", on ? f.hire_types.filter(x => x !== t) : [...f.hire_types, t])} className="chip" data-on={on}>
                         {on && <Check size={14} />}{t}
                       </button>
                     );
@@ -151,28 +152,24 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
       </section>
 
       {posts.length > 0 && (
-        <Group title="Pinned project" note="Shown large at the top of your profile. Leave on automatic to feature your most liked project.">
+        <Group title="Pinned project" note="Shown large at the top of your profile.">
           <Row label="Feature">
             <select className="row-input" value={f.pinned_post ?? ""} onChange={e => set("pinned_post", e.target.value || null)}>
-              <option value="">Automatic</option>
+              <option value="">None</option>
               {posts.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
             </select>
           </Row>
         </Group>
       )}
 
-      <section className="rounded-[18px] bg-card p-5 shadow-[inset_0_0_0_1px_var(--color-line)]">
-        <p className="text-[15px] font-medium">Sign out</p>
-        <p className="mt-1 text-sm text-graphite">Signs you out on this browser.</p>
-        <button className="btn btn-quiet btn-sm mt-3" onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); location.href = "/"; }}>Sign out</button>
-      </section>
+      <AccountZone handle={user.handle} />
 
-      <div className={`fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/85 shadow-[0_-10px_30px_-20px_rgb(12_18_34/0.3)] backdrop-blur-xl transition-transform duration-500 [transition-timing-function:var(--ease-ios)] ${dirty || msg ? "translate-y-0" : "translate-y-full"}`}>
+      <div className={`glass fixed inset-x-0 bottom-0 z-30 shadow-[inset_0_0.5px_0_var(--color-line-strong)] transition-transform duration-500 [transition-timing-function:var(--ease-ios)] ${dirty || msg ? "translate-y-0" : "translate-y-full"}`}>
         <div className="mx-auto flex max-w-[680px] items-center gap-4 px-4 py-3.5 sm:px-6">
-          <span key={msg?.text ?? "dirty"} className={`scale-in flex-1 text-sm ${msg ? (msg.ok ? "text-[#137A41]" : "text-danger") : "text-graphite"}`}>{msg ? msg.text : "You have unsaved changes"}</span>
+          <span key={msg?.text ?? "dirty"} className={`scale-in flex-1 text-sm ${msg ? (msg.ok ? "text-live" : "text-danger") : "text-graphite"}`}>{msg ? msg.text : "You have unsaved changes"}</span>
           {dirty && <button className="btn btn-quiet btn-sm" onClick={() => { setF(user); setMsg(null); }}>Discard</button>}
           <button className="btn btn-primary btn-sm" disabled={busy || !dirty} onClick={save}>{busy ? "Saving…" : "Save changes"}</button>
-          <a href={`/u/${f.handle}`} className="btn btn-sm text-signal">View profile</a>
+          <a href={`/u/${f.handle}`} className="btn btn-link btn-sm">View profile</a>
         </div>
       </div>
     </div>

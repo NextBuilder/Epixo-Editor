@@ -12,7 +12,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ key: string[] }
   if (hit) return hit;
   const obj = await getMedia(k);
   if (!obj) return new Response("Not found", { status: 404 });
-  const res = new Response(obj.body, { headers: { "content-type": obj.type, "cache-control": MEDIA_CACHE, "x-content-type-options": "nosniff" } });
+  const res = new Response(obj.body, { headers: { "content-type": obj.type, "cache-control": MEDIA_CACHE, "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; sandbox", "cross-origin-resource-policy": "same-origin" } });
   if (cache) await cache.put(id, res.clone()).catch(() => {});
   return res;
 }

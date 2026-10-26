@@ -36,14 +36,14 @@ function Steps({ app, link }: { app: App; link: string }) {
     return (
       <div className="space-y-2 text-[15px] text-graphite">
         <p>Run this once in your terminal:</p>
-        <pre className="overflow-x-auto rounded-xl bg-ink p-4 font-mono text-[13px] text-white">claude mcp add --transport http epixo {shown}</pre>
+        <pre className="overflow-x-auto rounded-2xl bg-[#1D1D1F] p-4 font-mono text-[13px] text-[#F5F5F7]">claude mcp add --transport http epixo {shown}</pre>
         <p>Then ask Claude Code to design a screen, or to fit your Epixo UI into your firmware project.</p>
       </div>
     );
   return (
     <div className="space-y-2 text-[15px] text-graphite">
       <p>Prefer to keep everything on your own computer? The Epixo source includes a local server that works offline, saves projects as files and draws real LVGL previews your AI can look at.</p>
-      <pre className="overflow-x-auto rounded-xl bg-ink p-4 font-mono text-[13px] text-white">{`{
+      <pre className="overflow-x-auto rounded-2xl bg-[#1D1D1F] p-4 font-mono text-[13px] text-[#F5F5F7]">{`{
   "mcpServers": {
     "epixo": { "command": "node", "args": ["/path/to/Epixo-Editor/apps/mcp/server.mjs"] }
   }
@@ -82,10 +82,10 @@ export function AiConnections({ signedIn, site, initial }: { signedIn: boolean; 
 
   return (
     <div className="mt-12 space-y-8">
-      <section className="rounded-[24px] bg-card p-6 shadow-[inset_0_0_0_1px_var(--color-line)] sm:p-8">
-        <div className="flex flex-wrap gap-1 rounded-xl bg-paper p-1" role="tablist">
+      <section className="card p-6 sm:p-8">
+        <div className="seg flex w-full" role="tablist">
           {APPS.map(a => (
-            <button key={a.key} role="tab" aria-selected={app === a.key} onClick={() => setApp(a.key)} className={`press flex-1 rounded-lg px-3 py-2 text-[14px] font-medium transition-colors ${app === a.key ? "bg-card text-ink shadow-[0_1px_3px_rgb(12_18_34/0.12)]" : "text-graphite hover:text-ink"}`}>
+            <button key={a.key} role="tab" aria-selected={app === a.key} data-on={app === a.key} onClick={() => setApp(a.key)} className="flex-1 justify-center">
               {a.name}
             </button>
           ))}
@@ -94,42 +94,42 @@ export function AiConnections({ signedIn, site, initial }: { signedIn: boolean; 
         {app !== "local" && (
           <div className="mt-6">
             {!signedIn ? (
-              <a href="/login?next=/connect" className="btn btn-primary">Sign in to make a link</a>
+              <a href="/login?next=/connect" className="btn btn-primary btn-lg w-full">Sign in to make a link</a>
             ) : link ? (
               <div className="scale-in">
-                <p className="text-[13px] font-medium text-mist">Your private link for {APPS.find(a => a.key === app)!.name}. Copy it now: it is only shown once.</p>
-                <div className="mt-2 flex items-center gap-2 rounded-xl bg-paper p-2 pl-4">
+                <p className="text-[13px] font-medium text-mist">Copy it now. It is only shown once.</p>
+                <div className="mt-2 flex items-center gap-2 rounded-2xl bg-fill p-1.5 pl-4">
                   <code className="min-w-0 flex-1 truncate font-mono text-[13px]">{link}</code>
                   <button className="btn btn-primary btn-sm" onClick={copy}>{copied ? <Check size={16} /> : <Copy size={16} />}{copied ? "Copied" : "Copy"}</button>
                 </div>
               </div>
             ) : (
-              <button className="btn btn-primary" disabled={busy} onClick={make}><Link2 size={17} />{busy ? "Making your link…" : `Make a link for ${APPS.find(a => a.key === app)!.name}`}</button>
+              <button className="btn btn-primary btn-lg w-full" disabled={busy} onClick={make}><Link2 size={17} />{busy ? "Making your link…" : `Make a link for ${APPS.find(a => a.key === app)!.name}`}</button>
             )}
             {err && <p className="mt-3 text-[14px] text-danger">{err}</p>}
           </div>
         )}
 
-        <div className="mt-6 border-t border-line pt-6">
+        <div className="mt-6 pt-6 shadow-[inset_0_0.5px_0_var(--color-line-strong)]">
           <Steps app={app} link={link} />
         </div>
       </section>
 
       {signedIn && list.length > 0 && (
         <section>
-          <h3 className="mb-2 px-4 font-sans text-[13px] font-medium tracking-normal text-mist">Your connections</h3>
-          <div className="divide-y divide-line overflow-hidden rounded-[18px] bg-card shadow-[inset_0_0_0_1px_var(--color-line)]">
+          <h3 className="group-title font-sans tracking-normal">Your connections</h3>
+          <div className="inset-group">
             {list.map(c => (
               <div key={c.id} className="flex min-h-[60px] items-center gap-4 px-4">
                 <span className="min-w-0 flex-1">
                   <span className="block text-[15px] font-medium">{c.label}{c.client ? <span className="font-normal text-mist"> · {c.client}</span> : null}</span>
                   <span className="block text-[13px] text-mist">{c.last_used_at ? `Last used ${timeAgo(c.last_used_at)}` : "Not used yet"}</span>
                 </span>
-                <button className="btn btn-sm text-graphite hover:text-danger" onClick={() => remove(c.id)} aria-label={`Remove ${c.label}`}><Trash2 size={16} />Remove</button>
+                <button className="btn btn-sm text-danger hover:bg-danger-soft" onClick={() => remove(c.id)} aria-label={`Remove ${c.label}`}><Trash2 size={16} />Remove</button>
               </div>
             ))}
           </div>
-          <p className="mt-2 px-4 text-[13px] text-mist">Removing a connection stops that link working straight away. AI apps never see your sign-in or other account details.</p>
+          <p className="group-note">Removing a connection stops its link at once. AI apps never see your sign-in.</p>
         </section>
       )}
     </div>

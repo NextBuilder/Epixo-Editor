@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export type Me = { user: { id: string; handle: string; name: string; avatar: string | null; plan: string } | null; inbox?: number; ai: { enabled: boolean; credits?: number } };
+export type Me = { user: { id: string; handle: string; name: string; avatar: string | null; plan: string } | null; inbox?: number; unread?: number; ai: { enabled: boolean; credits?: number } };
 
 let cache: Promise<Me> | null = null;
 

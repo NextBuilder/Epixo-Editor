@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Roll } from "./motion/motion";
 import { useRouter } from "next/navigation";
-import { Heart, Link2, Flag, Trash2, EyeOff, Eye, Check } from "lucide-react";
+import { Heart, Link2, Flag, Trash2, EyeOff, Eye, Check, Bookmark } from "lucide-react";
 
 async function call(url: string, init?: RequestInit) {
   const r = await fetch(url, { ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });
@@ -19,7 +19,7 @@ export function LikeButton({ id, likes, liked, signedIn }: { id: string; likes: 
   const router = useRouter();
   return (
     <button
-      className={`btn ${s.liked ? "bg-[#FFE8EC] text-[#D61F45] shadow-[inset_0_0_0_1px_#FFC9D3]" : "btn-quiet"}`}
+      className={`btn btn-quiet flex-1 ${s.liked ? "text-heart" : ""}`}
       aria-pressed={s.liked}
       disabled={busy}
       onClick={async () => {
@@ -40,16 +40,35 @@ export function LikeButton({ id, likes, liked, signedIn }: { id: string; likes: 
         <Heart key={pop} size={17} fill={s.liked ? "currentColor" : "none"} className={pop ? "heart-pop" : ""} />
         {pop > 0 && <span key={"b" + pop} className="burst" aria-hidden />}
       </span>
-      {s.liked ? "Liked" : "Like"} <span className="overflow-hidden opacity-70"><Roll value={s.likes} /></span>
+      <span className="overflow-hidden"><Roll value={s.likes} /></span>
     </button>
   );
 }
 
-export function ShareButton({ title }: { title: string }) {
+export function SaveButton({ id, saved, signedIn }: { id: string; saved: boolean; signedIn: boolean }) {
+  const [on, setOn] = useState(saved);
+  const router = useRouter();
+  return (
+    <button
+      className={`btn btn-quiet flex-1 ${on ? "text-signal" : ""}`}
+      aria-pressed={on}
+      onClick={async () => {
+        if (!signedIn) return router.push(`/login?next=/community/${id}`);
+        setOn(x => !x);
+        try { const j = await call(`/api/posts/${id}/save`, { method: "POST" }); setOn(!!j.saved); } catch { setOn(saved); }
+      }}
+    >
+      <Bookmark key={String(on)} size={17} fill={on ? "currentColor" : "none"} className={on ? "scale-in" : ""} />
+      {on ? "Saved" : "Save"}
+    </button>
+  );
+}
+
+export function ShareButton({ title, className = "" }: { title: string; className?: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
-      className="btn btn-quiet"
+      className={`btn btn-quiet ${className}`}
       onClick={async () => {
         const url = location.href;
         if (navigator.share && matchMedia("(pointer: coarse)").matches) {
@@ -62,7 +81,7 @@ export function ShareButton({ title }: { title: string }) {
       }}
     >
       <span key={String(done)} className="scale-in inline-flex">{done ? <Check size={17} className="text-live" /> : <Link2 size={17} />}</span>
-      {done ? "Link copied" : "Copy link"}
+      {done ? "Copied" : "Share"}
     </button>
   );
 }
@@ -73,8 +92,8 @@ export function OwnerTools({ id, isOwner, isAdmin, hidden }: { id: string; isOwn
   const [confirm, setConfirm] = useState(false);
   if (!isOwner && !isAdmin) return null;
   return (
-    <div className="mt-6 rounded-xl bg-card p-4 shadow-[inset_0_0_0_1px_var(--color-line)]">
-      <p className="text-sm font-medium">{isOwner ? "Your project" : "Moderation"}</p>
+    <div className="card mt-6 p-4">
+      <p className="t-label">{isOwner ? "Your project" : "Moderation"}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {isAdmin && (
           <button
@@ -95,7 +114,7 @@ export function OwnerTools({ id, isOwner, isAdmin, hidden }: { id: string; isOwn
         {confirm ? (
           <>
             <button
-              className="btn btn-sm bg-danger text-white"
+              className="btn btn-sm bg-danger text-white hover:opacity-90"
               onClick={async () => {
                 try {
                   await call(`/api/posts/${id}`, { method: "DELETE" });

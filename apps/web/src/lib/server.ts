@@ -70,6 +70,7 @@ export async function currentUser(): Promise<User | null> {
 }
 
 export async function startSession(userId: string) {
+  await run("DELETE FROM sessions WHERE user_id = ? AND expires_at < ?", userId, now()).catch(() => {});
   const token = newId(40);
   await run("INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)", await sha256(token), userId, now() + 60 * 60 * 24 * 30);
   const e = await env();
@@ -97,8 +98,11 @@ export async function sameOrigin(req: Request) {
   const origin = req.headers.get("origin");
   if (!origin) return req.method === "GET";
   const e = await env();
-  const host = new URL(req.url).host;
-  return new URL(origin).host === host || origin === e.SITE_URL;
+  try {
+    return new URL(origin).host === new URL(req.url).host || origin === e.SITE_URL;
+  } catch {
+    return false;
+  }
 }
 
 export async function limit(key: string, max: number, windowSec: number) {
