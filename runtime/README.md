@@ -26,4 +26,18 @@ One command per line, with fields separated by tabs.
 | `L <screen> [animation]` | Load a screen |
 | `K <screen>` | Delete a screen |
 
+Widget types are `label`, `button`, `panel`, `icon`, `image`, `switch`, `slider`, `checkbox`, `dropdown`, `roller`, `textarea`, `keyboard`, `arc`, `bar`, `chart`, `spinner` and `led`. Properties a widget does not use are ignored.
+
+| Property | Value |
+|---|---|
+| `text`, `options`, `data`, `icon` | Text, with `\n` for a new line |
+| `fg`, `bg`, `accent`, `borderColor` | Colour as `RRGGBB` |
+| `font`, `align`, `pad`, `radius`, `thick`, `border`, `value`, `min`, `max`, `opacity` | Whole numbers |
+| `checked`, `showValue`, `shadow`, `hidden`, `oneLine`, `password` | `0` or `1` |
+| `tapTo`, `tapAnim` | Screen to open when tapped, and the animation |
+| `img` | Picture size and format: `<width>,<height>,<1 if it has an alpha plane>` |
+| `imgd` | The next piece of the picture in base64: LVGL's RGB565 plane, then the alpha plane. Repeat until it is all sent. |
+
+A keyboard types into the first text field on its screen, and into any other text field that gets focus.
+
 Licence: [LICENSE](LICENSE). You may ship these files inside firmware that shows screens designed with Epixo.

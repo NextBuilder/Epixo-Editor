@@ -358,6 +358,12 @@ textarea.fld{height:auto;min-height:64px;padding:8px 10px;resize:vertical;line-h
 .vchip.web{background:var(--accent-soft);color:var(--accent)}
 .vchip.spec{background:var(--warn-soft);color:var(--warn)}
 .note{color:var(--ink3);font-size:12px;margin:8px 0 0;line-height:1.5}
+.picf{display:flex;gap:12px;align-items:center}
+.picf img,.picf .ph{width:64px;height:64px;border-radius:12px;object-fit:contain;flex:none;display:grid;place-items:center;color:var(--ink3);background:var(--fill) repeating-conic-gradient(rgb(0 0 0 / .05) 0 25%,transparent 0 50%) 0 0/12px 12px}
+.picf .ph svg{width:24px;height:24px}
+.picf .col{display:flex;flex-direction:column;gap:6px;min-width:0}
+.picf small{color:var(--ink3);font-size:12px;line-height:1.4}
+.btn2.pick{margin:0;cursor:pointer;width:auto}
 .note code,.fld.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12px}
 .note code{background:var(--fill);padding:1px 5px;border-radius:5px;color:var(--ink2);overflow-wrap:anywhere}
 .note a{color:var(--accent)}

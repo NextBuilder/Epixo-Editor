@@ -28,6 +28,7 @@ display:
     auto_clear_enabled: false
     update_interval: never
 YAML
+  [ -d $d/epixo_images ] && cp -r $d/epixo_images esphome/
   sed 's/^lvgl:$/lvgl:\n  displays: lcd/' $d/epixo.yaml >> $f
   if ${ESPHOME:-esphome} config $f > esphome/$n.log 2>&1; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL $n"; fi
 done

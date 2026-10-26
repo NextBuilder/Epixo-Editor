@@ -193,6 +193,10 @@ function wEl(w) {
   else if (t == 'chart') { st.background = w.bg; st.borderRadius = w.radius + 'px'; const v = E.nums(w.data), n = Math.max(v.length, 2), mn = Math.min(...v, 0), mx = Math.max(...v, 1), pd = 8; const pts = v.map((y, i) => (pd + i * (w.w - 2 * pd) / (n - 1)).toFixed(1) + ',' + (w.h - pd - (y - mn) / ((mx - mn) || 1) * (w.h - 2 * pd)).toFixed(1)).join(' '); el.innerHTML = `<svg viewBox="0 0 ${w.w} ${w.h}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${w.accent}" stroke-width="2"/></svg>`; }
   else if (t == 'spinner') { const s = Math.min(w.w, w.h), th = w.thick, r = s / 2 - th / 2, c = s / 2; el.innerHTML = `<svg viewBox="0 0 ${s} ${s}"><circle cx="${c}" cy="${c}" r="${r}" stroke="${w.bg}" stroke-width="${th}" fill="none"/><path d="${arcD(c, c, r, -90, 10)}" stroke="${w.accent}" stroke-width="${th}" fill="none" stroke-linecap="round"/></svg>`; }
   else if (t == 'led') { st.borderRadius = '50%'; st.background = w.checked ? w.accent : w.accent + '55'; }
+  else if (t == 'image') { const pic = E.pictureOf(w); if (pic && !pic.error) el.innerHTML = `<img src="${esc(w.image.src)}" alt="" style="width:100%;height:100%;display:block">`; else { st.background = '#E4E6EB'; st.borderRadius = '12px'; el.innerHTML = `<span style="margin:auto;color:#8D93A1">${ico(I.img)}</span>`; st.display = 'flex'; } }
+  else if (t == 'roller') { const o = String(w.options).split('\n'), sel = Math.max(0, Math.min(o.length - 1, R(w.value || 0))); st.background = w.bg; st.borderRadius = w.radius + 'px'; st.overflow = 'hidden'; st.display = 'flex'; st.flexDirection = 'column'; st.justifyContent = 'center'; st.fontSize = w.font + 'px'; st.color = w.fg; el.innerHTML = o.map((x, i) => Math.abs(i - sel) > 1 ? '' : `<div style="text-align:center;padding:4px 0;${i == sel ? 'background:' + w.accent + ';color:#fff' : 'opacity:.6'}">${esc(x)}</div>`).join(''); }
+  else if (t == 'textarea') { st.background = w.bg; st.borderRadius = w.radius + 'px'; st.boxShadow = 'inset 0 0 0 2px #E4E6EB'; st.fontSize = w.font + 'px'; st.color = '#A0A6B1'; st.padding = '0 12px'; st.display = 'flex'; st.alignItems = w.oneLine ? 'center' : 'flex-start'; el.textContent = w.text; }
+  else if (t == 'keyboard') { st.background = w.bg; st.display = 'grid'; st.gridTemplateColumns = 'repeat(10,1fr)'; st.gap = '4px'; st.padding = '6px'; el.innerHTML = 'qwertyuiopasdfghjkl zxcvbnm'.split('').map(k => `<span style="background:${w.accent};color:${w.fg};border-radius:${w.radius}px;display:grid;place-items:center;font-size:${w.font}px">${k == ' ' ? '' : k}</span>`).join(''); }
   return el;
 }
 
@@ -333,9 +337,42 @@ function previewPointer(e, down) {
   }
   if (pdown) ENG.pointer(x, y, true);
 }
-vp.addEventListener('dragover', e => { if ([...e.dataTransfer.types].includes('text/epixo')) { e.preventDefault(); $('#frame').classList.add('drop-hint'); } });
+vp.addEventListener('dragover', e => { if ([...e.dataTransfer.types].some(t => t == 'text/epixo' || t == 'Files')) { e.preventDefault(); $('#frame').classList.add('drop-hint'); } });
 vp.addEventListener('dragleave', e => { if (e.target == vp) $('#frame').classList.remove('drop-hint'); });
-vp.addEventListener('drop', e => { const t = e.dataTransfer.getData('text/epixo'); $('#frame').classList.remove('drop-hint'); if (!t) return; e.preventDefault(); addWidget(t, pt(e)); });
+vp.addEventListener('drop', e => {
+  const t = e.dataTransfer.getData('text/epixo'), f = [...(e.dataTransfer.files || [])].find(x => /^image\//.test(x.type));
+  $('#frame').classList.remove('drop-hint');
+  if (f && S.mode == 'design') { e.preventDefault(); addPicture(f, pt(e)); return; }
+  if (!t) return; e.preventDefault(); addWidget(t, pt(e));
+});
+document.addEventListener('paste', e => {
+  if (S.mode != 'design' || /^(INPUT|TEXTAREA)$/.test((document.activeElement || {}).tagName || '')) return;
+  const f = [...((e.clipboardData && e.clipboardData.files) || [])].find(x => /^image\//.test(x.type));
+  if (f) { e.preventDefault(); addPicture(f); }
+});
+// Pictures are stored as PNG at up to 320 px, then scaled to the widget's exact size when drawn and exported.
+async function loadPicture(file) {
+  if (!/^image\//.test(file.type)) throw new Error('Choose a picture file.');
+  let src;
+  try { src = await createImageBitmap(file); } catch (e) { const img = new Image(); img.src = URL.createObjectURL(file); await img.decode(); src = img; }
+  const nw = src.width || 256, nh = src.height || 256, k = Math.min(1, 320 / Math.max(nw, nh)), w = Math.max(1, Math.round(nw * k)), h = Math.max(1, Math.round(nh * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(src, 0, 0, w, h);
+  return {src: c.toDataURL('image/png'), w, h};
+}
+function fitPicture(pw, ph, bw, bh) { const k = Math.min(1, bw / pw, bh / ph); return [Math.max(4, Math.round(pw * k)), Math.max(4, Math.round(ph * k))]; }
+async function setPicture(w, file) {
+  try {
+    const p = await loadPicture(file), cx = w.x + w.w / 2, cy = w.y + w.h / 2, [nw, nh] = fitPicture(p.w, p.h, Math.max(w.w, 48), Math.max(w.h, 48));
+    mutate(() => { w.image = {src: p.src}; w.w = nw; w.h = nh; w.x = R(cx - nw / 2); w.y = R(cy - nh / 2); });
+  } catch (e) { toast(e.message || 'That picture could not be opened.'); }
+}
+async function addPicture(file, at) {
+  try {
+    const p = await loadPicture(file), b = S.p.board, [nw, nh] = fitPicture(p.w, p.h, b.w * .5, b.h * .5), c = at || {x: b.w / 2, y: b.h / 2};
+    mutate(() => { const w = E.mkW(S.p, 'image', {w: nw, h: nh, x: R(clamp(c.x - nw / 2, 0, b.w - nw)), y: R(clamp(c.y - nh / 2, 0, b.h - nh)), image: {src: p.src}}); w.name = E.uniqueWidgetName(cur(), (file.name || 'Picture').replace(/\.[a-z0-9]+$/i, '').replace(/[^A-Za-z0-9]/g, '') || 'Picture', w); cur().widgets.push(w); S.sel = w.id; });
+    toast('Picture added');
+  } catch (e) { toast(e.message || 'That picture could not be opened.'); }
+}
 function addWidget(type, at) {
   const b = S.p.board, k = clamp(Math.min(b.w, b.h) / 480, .5, 1.6);
   mutate(() => {
@@ -346,6 +383,7 @@ function addWidget(type, at) {
     pr.w = Math.min(pr.w, b.w - 8); pr.h = Math.min(pr.h, b.h - 8);
     const c = at || {x: b.w / 2, y: b.h / 2}; pr.x = R(clamp(c.x - pr.w / 2, 0, b.w - pr.w)); pr.y = R(clamp(c.y - pr.h / 2, 0, b.h - pr.h));
     if (type == 'label' || type == 'checkbox') { const tmp = Object.assign({type}, d, pr); E.fitWidget(tmp); pr.font = tmp.font; }
+    if (type == 'keyboard') { pr.w = b.w; pr.h = R(clamp(b.h * .42, Math.min(b.h, 120), b.h)); pr.x = 0; pr.y = b.h - pr.h; pr.font = E.F(clamp(pr.h / 11, 12, 24)); }
     const w = E.mkW(S.p, type, pr); w.name = E.uniqueWidgetName(cur(), w.name, w); cur().widgets.push(w); S.sel = w.id;
   });
   closeMob();
@@ -461,13 +499,22 @@ function renderLeft() {
 /* ---------------- right panel ---------------- */
 const FLD = {text:['Text','text'],options:['Options','area'],data:['Values','text'],fg:['Text colour','color'],bg:['Fill','color'],accent:['Accent','color'],borderColor:['Border colour','color'],
   font:['Font size','font'],align:['Align','align'],valign:['Vertical','valign'],radius:['Corner radius','range',0,240],thick:['Thickness','range',1,80],border:['Border','range',0,12],
-  value:['Value','num'],min:['Min','num'],max:['Max','num'],checked:['On','toggle'],showValue:['Show value','toggle'],shadow:['Shadow','toggle'],icon:['Symbol','icon']};
+  value:['Value','num'],min:['Min','num'],max:['Max','num'],checked:['On','toggle'],showValue:['Show value','toggle'],shadow:['Shadow','toggle'],icon:['Symbol','icon'],
+  oneLine:['One line','toggle'],password:['Password','toggle'],picture:['Picture','picture']};
+// Field names that read better for a particular widget.
+const LBL = {textarea: {text: 'Hint'}, roller: {value: 'Selected', accent: 'Highlight'}, keyboard: {bg: 'Background', accent: 'Keys', fg: 'Key labels'}};
 const TF = {label:['text','fg','font','align','valign','bg','radius'],button:['text','bg','fg','font','radius'],switch:['checked','accent','bg'],slider:['value','min','max','accent','bg'],
   arc:['value','min','max','thick','showValue','accent','bg','fg','font'],bar:['value','min','max','accent','bg','radius'],checkbox:['text','checked','accent','fg','font'],
-  panel:['bg','radius','shadow','border','borderColor'],icon:['icon','fg'],dropdown:['options','bg','fg','font','radius'],chart:['data','accent','bg','radius'],spinner:['accent','bg','thick'],led:['checked','accent']};
+  panel:['bg','radius','shadow','border','borderColor'],icon:['icon','fg'],dropdown:['options','bg','fg','font','radius'],chart:['data','accent','bg','radius'],spinner:['accent','bg','thick'],led:['checked','accent'],
+  image:['picture'],roller:['options','value','font','fg','bg','accent','radius'],textarea:['text','oneLine','password','font','fg','bg','accent','radius'],keyboard:['font','fg','accent','bg','radius']};
 function colorF(k, v, allowNone) { const none = !v || v == 'transparent'; return `<div class="color"><label class="swatch${none ? ' none' : ''}" style="${none ? '' : 'background:' + v}"><input type="color" data-k="${k}" value="${none ? '#ffffff' : v}" aria-label="Pick colour"></label><input class="fld" data-k="${k}" data-hex value="${none ? 'none' : esc(v).toUpperCase()}" spellcheck="false">${allowNone && !none ? `<button class="rb lit" data-clear="${k}" title="No fill">${ico(I.close)}</button>` : ''}</div>`; }
 function fieldHTML(w, k) {
-  const [lab, kind, a, b] = FLD[k], v = w[k]; let ctl = '';
+  const [lab0, kind, a, b] = FLD[k], lab = (LBL[w.type] && LBL[w.type][k]) || lab0, v = w[k]; let ctl = '';
+  if (kind == 'picture') {
+    const pic = E.pictureOf(w), ok = pic && !pic.error;
+    return `<div class="picf">${ok ? `<img src="${esc(w.image.src)}" alt="">` : `<span class="ph">${ico(I.img)}</span>`}<div class="col"><label class="btn2 pick">${ico(I.img)}${w.image ? 'Replace picture' : 'Choose a picture'}<input type="file" accept="image/*" data-pic hidden></label>
+      <small>${ok ? pic.w + ' × ' + pic.h + (pic.alpha ? ' · see-through' : '') + ' · ' + Math.ceil(E.picBytes(pic).length / 1024) + ' KB of flash' : pic && pic.error ? esc(pic.error) : 'PNG, JPEG, WebP or SVG. You can also drop or paste one onto the screen.'}</small></div></div>`;
+  }
   if (kind == 'text') ctl = `<input class="fld" data-k="${k}" value="${esc(v)}">`;
   else if (kind == 'area') return `<div class="f col" style="margin-top:8px"><span class="lbl">${lab}</span><textarea class="fld" data-k="${k}" rows="3">${esc(v)}</textarea></div>`;
   else if (kind == 'color') ctl = colorF(k, v, w.type == 'label' && k == 'bg');
@@ -528,6 +575,7 @@ function renderInspector() {
   rb.querySelectorAll('[data-ic]').forEach(b => b.onclick = () => mutate(() => { w.icon = b.dataset.ic; }));
   rb.querySelectorAll('[data-align]').forEach(b => b.onclick = () => mutate(() => { const B = S.p.board, a = b.dataset.align; if (a == 'l') w.x = 0; if (a == 'c') w.x = R((B.w - w.w) / 2); if (a == 'r') w.x = B.w - w.w; if (a == 't') w.y = 0; if (a == 'm') w.y = R((B.h - w.h) / 2); if (a == 'b') w.y = B.h - w.h; }));
   const wn = $('#wName'); wn.addEventListener('change', () => { if (wn.value.replace(/[^A-Za-z0-9_]/g, '')) w.name = E.uniqueWidgetName(cur(), wn.value, w); save(); renderAll(); });
+  const pk = rb.querySelector('[data-pic]'); if (pk) pk.onchange = () => { const f = pk.files[0]; if (f) setPicture(w, f); };
   const wa = $('#wAct'); if (wa) { wa.oninput = () => { $('#actNote').innerHTML = actNote(wa.value); }; wa.onchange = () => mutate(() => { const a = E.actionName(wa.value); if (a) w.action = a; else delete w.action; }); }
   const tt = $('#tapTo'); if (tt) { tt.onchange = () => mutate(() => { w.onTap = tt.value ? {to: tt.value, anim: (w.onTap && w.onTap.anim) || 'move_left'} : null; }); $('#tapAnim').onchange = e => mutate(() => { if (w.onTap) w.onTap.anim = e.target.value; }); }
   $('#dupW').onclick = dup; $('#delW').onclick = del;
@@ -566,7 +614,7 @@ function renderDoctor() {
     ${fixable.length ? `<div style="margin:0 12px 10px"><button class="btn2" id="fixAll" style="margin:0">${ico(I.wand)}Fix ${fixable.length} automatically</button></div>` : ''}
     <div class="issues">${sorted.map((i, n) => { const s = S.p.screens.find(x => x.id == i.screen); return `<div class="issue ${i.sev}" data-n="${n}" role="button" tabindex="0"><span class="sv"></span><p>${esc(i.msg)}</p><small>${s ? esc(s.name) : 'Project'}${i.fix ? `<button class="fix" data-fix="${n}">Fix</button>` : ''}</small></div>`; }).join('') || '<p class="hint" style="margin:4px 4px 0">No problems found. Every widget is on screen, readable and big enough to tap.</p>'}</div>
     <div class="sec"><h4>Device budget</h4><div class="mem">
-      <span>Fonts in flash (${mem.fonts.length} sizes)</span><b>${mem.flashFontsKB} KB</b>
+      <span>Fonts in flash (${mem.fonts.length} sizes)</span><b>${mem.flashFontsKB} KB</b>${mem.flashImagesKB ? `<span>Pictures in flash</span><b>${mem.flashImagesKB} KB</b>` : ''}
       <span>UI objects in RAM</span><b>≈ ${mem.uiRamKB} KB</b>
       <span>Suggested LV_MEM_SIZE</span><b>${mem.lvMemKB} KB</b>
       <span>Partial draw buffer (1/10)</span><b>${mem.partialBufKB} KB</b>
@@ -631,10 +679,10 @@ function codeTabs() {
 }
 async function codeFor(k) {
   const P = S.p, lv = S.lv, pk = E.packOf(P.board);
-  if (k == 'c') return {src: E.genC(P, {lvgl: lv}), lang: 'c'};
+  if (k == 'c') return {src: E.genC(P, {lvgl: lv, brief: true}), lang: 'c'};
   if (k == 'h') return {src: E.genH(P), lang: 'c'};
   if (k == 'conf') { const t = await asset(confTemplatePath(lv)); return {src: E.genLvConf(t, P, {memKB: Math.max(64, E.memoryReport(P).lvMemKB)}), lang: 'c', note: 'Only the Montserrat sizes this project uses are switched on, which keeps firmware smaller.'}; }
-  if (k == 'py') return {src: E.genPy(P), lang: 'py', note: 'For the LVGL MicroPython binding (lv_micropython, LVGL 9.x).'};
+  if (k == 'py') return {src: E.genPy(P, {brief: true}), lang: 'py', note: 'For the LVGL MicroPython binding (lv_micropython, LVGL 9.x).'};
   if (k == 'xml') { const xs = E.genXML(P); return {src: xs.map(x => '<!-- ' + x.name + '.xml -->\n' + x.xml).join('\n'), lang: 'xml', note: xs.skipped.length ? 'LVGL XML has no spinner or LED tag yet, so these are left out: ' + xs.skipped.join(', ') + '.' : 'Loads with the LVGL XML module (LVGL 9.4, LV_USE_XML). Fonts are registered by epixo_xml_init.c in the export.'}; }
   if (k == 'yaml') { const y = E.genYAML(P); return {src: y.yaml, lang: 'yaml', note: y.skipped.length ? 'ESPHome has no chart widget, so these are left out: ' + y.skipped.join(', ') + '.' : 'Merge into your device YAML and set lvgl: displays to your display id.'}; }
   if (k == 'pio') return {src: E.boardPlatformio(P, pk), lang: 'ini', note: pk.kind == 'espanel' ? 'ESP32_Display_Panel ships its LVGL port for LVGL 8, so this project uses the LVGL 8.4 build of your UI.' : null};
@@ -1004,7 +1052,7 @@ async function buildZip(sel, st) {
   }
   if (sel.py) { z.file('micropython/ui.py', E.genPy(P)); parts.push('`micropython/ui.py` for lv_micropython'); }
   if (sel.xml) { const xs = E.genXML(P); xs.forEach(x => z.file('xml/' + x.name + '.xml', x.xml)); z.file('xml/epixo_xml_init.c', E.genXMLLoader(P)); parts.push('`xml/` LVGL XML screens' + (xs.skipped.length ? ' (without ' + xs.skipped.join(', ') + ')' : '')); }
-  if (sel.yaml) { const y = E.genYAML(P); z.file('esphome/epixo_ui.yaml', y.yaml); parts.push('`esphome/epixo_ui.yaml`' + (y.skipped.length ? ' (charts left out)' : '')); }
+  if (sel.yaml) { const y = E.genYAML(P); z.file('esphome/epixo_ui.yaml', y.yaml); y.files.forEach(f => z.file('esphome/' + f.name, f.bytes)); parts.push('`esphome/epixo_ui.yaml`' + (y.skipped.length ? ' (charts left out)' : '')); }
   if (sel.png) { for (let i = 0; i < P.screens.length; i++) { if (st) st.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>Rendering ' + P.screens[i].name; const b = await renderPNG(P.screens[i]); if (b) z.file('screens/' + (i + 1) + '-' + E.ident(P.screens[i].name).toLowerCase() + '.png', b); } parts.push('`screens/` PNG renders straight from LVGL'); }
   if (sel.json) { z.file('project.epixo.json', JSON.stringify(P, null, 2)); parts.push('`project.epixo.json` to reopen in Epixo'); }
   z.file('README.md', README(P, parts));

@@ -74,13 +74,18 @@ const TYPES = {
   bar:{n:'Progress',g:'data',lv:'lv_bar',i:'<path d="M224,96H184V56a8,8,0,0,0-8-8H56V40a8,8,0,0,0-16,0V216a8,8,0,0,0,16,0v-8h88a8,8,0,0,0,8-8V160h72a8,8,0,0,0,8-8V104A8,8,0,0,0,224,96ZM168,64V96H56V64ZM136,192H56V160h80Zm80-48H56V112H216Z"/>',d:{w:220,h:12,accent:C.green,bg:C.track,value:45,min:0,max:100,radius:6}},
   chart:{n:'Chart',g:'data',lv:'lv_chart',i:'<path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0v94.37L90.73,98a8,8,0,0,1,10.07-.38l58.81,44.11L218.73,90a8,8,0,1,1,10.54,12l-64,56a8,8,0,0,1-10.07.38L96.39,114.29,40,163.63V200H224A8,8,0,0,1,232,208Z"/>',d:{w:300,h:150,accent:C.acc,bg:C.card,data:'12,18,15,26,22,30,27,35',radius:16}},
   spinner:{n:'Spinner',g:'data',lv:'lv_spinner',i:'<path d="M232,128a104,104,0,0,1-208,0c0-41,23.81-78.36,60.66-95.27a8,8,0,0,1,6.68,14.54C60.15,61.59,40,93.27,40,128a88,88,0,0,0,176,0c0-34.73-20.15-66.41-51.34-80.73a8,8,0,0,1,6.68-14.54C208.19,49.64,232,87,232,128Z"/>',d:{w:56,h:56,accent:C.acc,bg:C.track,thick:6}},
-  led:{n:'LED',g:'data',lv:'lv_led',i:'<path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z"/>',d:{w:26,h:26,accent:C.green,checked:true}}
+  led:{n:'LED',g:'data',lv:'lv_led',i:'<path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z"/>',d:{w:26,h:26,accent:C.green,checked:true}},
+  image:{n:'Image',g:'basic',lv:'lv_image',i:'<path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"/>',d:{w:120,h:120}},
+  roller:{n:'Roller',g:'ctl',lv:'lv_roller',i:'<path d="M208,136H48a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136Zm0,56H48V152H208v40Zm0-144H48A16,16,0,0,0,32,64v40a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V64A16,16,0,0,0,208,48Zm0,56H48V64H208v40Z"/>',d:{w:180,h:132,options:'Morning\nAfternoon\nEvening\nNight',value:1,bg:C.card,fg:C.ink,accent:C.acc,font:20,radius:16}},
+  textarea:{n:'Text field',cn:'TextField',g:'ctl',lv:'lv_textarea',i:'<path d="M112,40a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80v96a16,16,0,0,0,16,16h80v16a8,8,0,0,0,16,0V48A8,8,0,0,0,112,40ZM24,176V80h80v96ZM248,80v96a16,16,0,0,1-16,16H144a8,8,0,0,1,0-16h88V80H144a8,8,0,0,1,0-16h88A16,16,0,0,1,248,80ZM88,112a8,8,0,0,1-8,8H72v24a8,8,0,0,1-16,0V120H48a8,8,0,0,1,0-16H80A8,8,0,0,1,88,112Z"/>',d:{w:260,h:48,text:'Type here',bg:C.card,fg:C.ink,accent:C.acc,font:18,radius:12,oneLine:true,password:false}},
+  keyboard:{n:'Keyboard',g:'ctl',lv:'lv_keyboard',i:'<path d="M224,48H32A16,16,0,0,0,16,64V192a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48Zm0,144H32V64H224V192Zm-16-64a8,8,0,0,1-8,8H56a8,8,0,0,1,0-16H200A8,8,0,0,1,208,128Zm0-32a8,8,0,0,1-8,8H56a8,8,0,0,1,0-16H200A8,8,0,0,1,208,96ZM72,160a8,8,0,0,1-8,8H56a8,8,0,0,1,0-16h8A8,8,0,0,1,72,160Zm96,0a8,8,0,0,1-8,8H96a8,8,0,0,1,0-16h64A8,8,0,0,1,168,160Zm40,0a8,8,0,0,1-8,8h-8a8,8,0,0,1,0-16h8A8,8,0,0,1,208,160Z"/>',d:{w:480,h:200,bg:'#D1D5DB',accent:'#FFFFFF',fg:C.ink,font:18,radius:8}}
 };
 const SQUARE = {arc:1, spinner:1, led:1, icon:1};
-const TAPPABLE = {button:1, panel:1, icon:1, label:1};
-const INTERACTIVE = {button:1, switch:1, slider:1, checkbox:1, dropdown:1, arc:0};
+const TAPPABLE = {button:1, panel:1, icon:1, label:1, image:1};
+const INTERACTIVE = {button:1, switch:1, slider:1, checkbox:1, dropdown:1, arc:0, roller:1, textarea:1};
 // Widgets that can run your firmware code, and the LVGL event that runs it.
-const ACTION_EVENT = {button:'CLICKED', panel:'CLICKED', icon:'CLICKED', label:'CLICKED', switch:'VALUE_CHANGED', checkbox:'VALUE_CHANGED', slider:'VALUE_CHANGED', dropdown:'VALUE_CHANGED'};
+const ACTION_EVENT = {button:'CLICKED', panel:'CLICKED', icon:'CLICKED', label:'CLICKED', image:'CLICKED', switch:'VALUE_CHANGED', checkbox:'VALUE_CHANGED', slider:'VALUE_CHANGED', dropdown:'VALUE_CHANGED', roller:'VALUE_CHANGED', textarea:'READY'};
+const CLICKS = {label:1, icon:1, image:1};
 const actionName = s => String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 32).replace(/_+$/, '').replace(/^(\d)/, '_$1');
 const actionOf = w => (ACTION_EVENT[w.type] && actionName(w.action)) || null;
 function actionsOf(P) { const s = new Set(); P.screens.forEach(sc => sc.widgets.forEach(w => { const a = actionOf(w); if (a) s.add(a); })); return [...s]; }
@@ -394,7 +399,7 @@ function mkW(p, type, props) {
   const t = TYPES[type];
   if (!t) return null;
   p.counts[type] = (p.counts[type] || 0) + 1;
-  const w = Object.assign({id: 'w' + (++p.seq), type, name: t.n.replace(/\W/g, '') + p.counts[type], x: 0, y: 0, opacity: 100, hidden: false, locked: false}, JSON.parse(JSON.stringify(t.d)), props || {});
+  const w = Object.assign({id: 'w' + (++p.seq), type, name: (t.cn || t.n.replace(/\W/g, '')) + p.counts[type], x: 0, y: 0, opacity: 100, hidden: false, locked: false}, JSON.parse(JSON.stringify(t.d)), props || {});
   for (const k of ['x', 'y', 'w', 'h']) w[k] = R(w[k]);
   if (w.font) w.font = F(w.font);
   if (props && props.name) w.name = String(props.name).replace(/[^A-Za-z0-9_]/g, '') || w.name;
@@ -456,6 +461,173 @@ const nums = s => String(s || '').split(/[,\s]+/).filter(x => x !== '').map(Numb
 const sid = s => parseInt(String(s).slice(1), 10) || 0;
 const ident = s => String(s).replace(/[^A-Za-z0-9_]/g, '_').replace(/^(\d)/, '_$1');
 const hexv = c => (c && c[0] == '#' ? c.slice(1, 7) : '000000').toUpperCase();
+
+/* ---------------- pictures ----------------
+   Image widgets keep their picture as a PNG data URL. A small inflate and PNG decoder turn it into pixels the
+   same way in the browser and in Node, so the canvas, the runtime and every export get identical bytes. */
+const LBASE = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258], LEXT = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+const DBASE = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577], DEXT = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+const CLORD = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+function huffman(lens, n) {
+  const count = new Uint16Array(16), symbol = new Uint16Array(n), offs = new Uint16Array(16);
+  for (let i = 0; i < n; i++) count[lens[i]]++;
+  count[0] = 0;
+  for (let i = 1; i < 16; i++) offs[i] = offs[i - 1] + count[i - 1];
+  for (let i = 0; i < n; i++) if (lens[i]) symbol[offs[lens[i]]++] = i;
+  return {count, symbol};
+}
+let FIXED = null;
+function inflate(src) {
+  let pos = 0, bb = 0, bc = 0, op = 0, out = new Uint8Array(Math.max(1024, src.length * 4));
+  const grow = n => { if (op + n > out.length) { const o = new Uint8Array(Math.max(out.length * 2, op + n)); o.set(out); out = o; } };
+  const bit = () => { if (!bc) { if (pos >= src.length) throw new Error('The picture data ends early.'); bb = src[pos++]; bc = 8; } const b = bb & 1; bb >>= 1; bc--; return b; };
+  const bits = n => { let v = 0; for (let i = 0; i < n; i++) v |= bit() << i; return v; };
+  const decode = h => { let code = 0, first = 0, index = 0; for (let len = 1; len < 16; len++) { code |= bit(); const c = h.count[len]; if (code - c < first) return h.symbol[index + code - first]; index += c; first = (first + c) << 1; code <<= 1; } throw new Error('The picture data is damaged.'); };
+  if (!FIXED) { const l = new Uint8Array(288); l.fill(8, 0, 144); l.fill(9, 144, 256); l.fill(7, 256, 280); l.fill(8, 280); FIXED = [huffman(l, 288), huffman(new Uint8Array(30).fill(5), 30)]; }
+  let last;
+  do {
+    last = bit();
+    const type = bits(2);
+    if (type == 0) {
+      bc = 0;
+      const len = src[pos] | src[pos + 1] << 8; pos += 4;
+      if (pos + len > src.length) throw new Error('The picture data ends early.');
+      grow(len); out.set(src.subarray(pos, pos + len), op); op += len; pos += len;
+    } else if (type == 1 || type == 2) {
+      let lh = FIXED[0], dh = FIXED[1];
+      if (type == 2) {
+        const nl = bits(5) + 257, nd = bits(5) + 1, nc = bits(4) + 4, cl = new Uint8Array(19), lens = new Uint8Array(nl + nd);
+        for (let i = 0; i < nc; i++) cl[CLORD[i]] = bits(3);
+        const ch = huffman(cl, 19);
+        for (let i = 0; i < nl + nd;) {
+          const sym = decode(ch);
+          if (sym < 16) { lens[i++] = sym; continue; }
+          let rep, val = 0;
+          if (sym == 16) { if (!i) throw new Error('The picture data is damaged.'); val = lens[i - 1]; rep = 3 + bits(2); } else rep = sym == 17 ? 3 + bits(3) : 11 + bits(7);
+          if (i + rep > nl + nd) throw new Error('The picture data is damaged.');
+          while (rep--) lens[i++] = val;
+        }
+        lh = huffman(lens.subarray(0, nl), nl); dh = huffman(lens.subarray(nl), nd);
+      }
+      for (;;) {
+        const sym = decode(lh);
+        if (sym < 256) { grow(1); out[op++] = sym; } else if (sym == 256) break;
+        else {
+          const k = sym - 257, len = LBASE[k] + bits(LEXT[k]), d = decode(dh), dist = DBASE[d] + bits(DEXT[d]);
+          if (dist > op) throw new Error('The picture data is damaged.');
+          grow(len); for (let i = 0; i < len; i++, op++) out[op] = out[op - dist];
+        }
+      }
+    } else throw new Error('The picture data is damaged.');
+  } while (!last);
+  return out.subarray(0, op);
+}
+function b64bytes(b64) {
+  if (typeof Buffer != 'undefined') return new Uint8Array(Buffer.from(b64, 'base64'));
+  const s = atob(b64), u = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+  return u;
+}
+function bytesb64(u) {
+  if (typeof Buffer != 'undefined') return Buffer.from(u.buffer, u.byteOffset, u.length).toString('base64');
+  let s = '';
+  for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768));
+  return btoa(s);
+}
+const PNG_URL = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/;
+// Reads an 8-bit PNG (grey, RGB, palette, with or without alpha) into RGBA.
+function decodePNG(bytes) {
+  const u32 = (d, o) => (d[o] << 24 | d[o + 1] << 16 | d[o + 2] << 8 | d[o + 3]) >>> 0;
+  if (bytes.length < 33 || u32(bytes, 0) != 0x89504E47) throw new Error('That is not a PNG picture.');
+  let p = 8, w = 0, h = 0, depth = 0, ct = 0, lace = 0, plte = null, trns = null, size = 0;
+  const parts = [];
+  while (p + 8 <= bytes.length) {
+    const len = u32(bytes, p), type = String.fromCharCode(bytes[p + 4], bytes[p + 5], bytes[p + 6], bytes[p + 7]), d = bytes.subarray(p + 8, p + 8 + len);
+    if (type == 'IHDR') { w = u32(d, 0); h = u32(d, 4); depth = d[8]; ct = d[9]; lace = d[12]; }
+    else if (type == 'PLTE') plte = d; else if (type == 'tRNS') trns = d; else if (type == 'IDAT') { parts.push(d); size += d.length; } else if (type == 'IEND') break;
+    p += 12 + len;
+  }
+  const ch = {0: 1, 2: 3, 3: 1, 4: 2, 6: 4}[ct];
+  if (!w || !h || w * h > 1 << 22 || depth != 8 || lace || !ch || (ct == 3 && !plte)) throw new Error('Use an 8-bit PNG that is not interlaced.');
+  const z = new Uint8Array(size);
+  let o = 0; for (const d of parts) { z.set(d, o); o += d.length; }
+  const raw = inflate(z.subarray(2)), stride = w * ch, px = new Uint8Array(w * h * ch);
+  if (raw.length < (stride + 1) * h) throw new Error('The picture data ends early.');
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)], s = y * (stride + 1) + 1, r = y * stride;
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? px[r + x - ch] : 0, b = y ? px[r - stride + x] : 0, c = x >= ch && y ? px[r - stride + x - ch] : 0;
+      let v = raw[s + x];
+      if (f == 1) v += a; else if (f == 2) v += b; else if (f == 3) v += (a + b) >> 1;
+      else if (f == 4) { const q = a + b - c, pa = Math.abs(q - a), pb = Math.abs(q - b), pc = Math.abs(q - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      px[r + x] = v;
+    }
+  }
+  const rgba = new Uint8Array(w * h * 4);
+  for (let i = 0; i < w * h; i++) {
+    const j = i * ch, k = i * 4;
+    if (ct == 6) { rgba[k] = px[j]; rgba[k + 1] = px[j + 1]; rgba[k + 2] = px[j + 2]; rgba[k + 3] = px[j + 3]; }
+    else if (ct == 2) { rgba[k] = px[j]; rgba[k + 1] = px[j + 1]; rgba[k + 2] = px[j + 2]; rgba[k + 3] = 255; }
+    else if (ct == 0 || ct == 4) { rgba[k] = rgba[k + 1] = rgba[k + 2] = px[j]; rgba[k + 3] = ct == 4 ? px[j + 1] : 255; }
+    else { const c = px[j]; rgba[k] = plte[c * 3]; rgba[k + 1] = plte[c * 3 + 1]; rgba[k + 2] = plte[c * 3 + 2]; rgba[k + 3] = trns && c < trns.length ? trns[c] : 255; }
+  }
+  return {w, h, rgba};
+}
+// Scales RGBA to the widget size: averaging when shrinking, bilinear when growing, with alpha weighted so edges stay clean.
+function resize(src, sw, sh, dw, dh) {
+  const out = new Uint8Array(dw * dh * 4), fx = sw / dw, fy = sh / dh;
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    let r = 0, g = 0, b = 0, a = 0, n = 0;
+    const add = (i, wt) => { const al = src[i + 3] * wt; r += src[i] * al; g += src[i + 1] * al; b += src[i + 2] * al; a += al; n += wt; };
+    if (fx >= 1 && fy >= 1) {
+      const x0 = Math.floor(x * fx), x1 = Math.max(x0 + 1, Math.floor((x + 1) * fx)), y0 = Math.floor(y * fy), y1 = Math.max(y0 + 1, Math.floor((y + 1) * fy));
+      for (let yy = y0; yy < y1; yy++) for (let xx = x0; xx < x1; xx++) add((yy * sw + xx) * 4, 1);
+    } else {
+      const sx = Math.max(0, Math.min(sw - 1, (x + .5) * fx - .5)), sy = Math.max(0, Math.min(sh - 1, (y + .5) * fy - .5)), ix = Math.floor(sx), iy = Math.floor(sy), tx = sx - ix, ty = sy - iy;
+      const jx = Math.min(sw - 1, ix + 1), jy = Math.min(sh - 1, iy + 1);
+      add((iy * sw + ix) * 4, (1 - tx) * (1 - ty)); add((iy * sw + jx) * 4, tx * (1 - ty)); add((jy * sw + ix) * 4, (1 - tx) * ty); add((jy * sw + jx) * 4, tx * ty);
+    }
+    const k = (y * dw + x) * 4;
+    if (a > 0) { out[k] = Math.round(r / a); out[k + 1] = Math.round(g / a); out[k + 2] = Math.round(b / a); }
+    out[k + 3] = Math.round(a / n);
+  }
+  return out;
+}
+const PICS = new Map(), SRCS = new Map();
+function pictureSource(src) {
+  if (SRCS.has(src)) return SRCS.get(src);
+  let v;
+  try { const m = PNG_URL.exec(src || ''); if (!m) throw new Error('Choose a PNG, JPEG or WebP picture.'); v = decodePNG(b64bytes(m[1])); } catch (e) { v = {error: e.message}; }
+  if (SRCS.size > 24) SRCS.delete(SRCS.keys().next().value);
+  SRCS.set(src, v);
+  return v;
+}
+// An image widget's pixels in LVGL's RGB565 format (little endian) with an optional 8-bit alpha plane, at the widget's size.
+// LVGL 9's RGB565A8 layout: the RGB565 plane, then the alpha plane when the picture has see-through pixels.
+function picBytes(pic) { if (!pic.alpha) return pic.rgb; const u = new Uint8Array(pic.rgb.length + pic.alpha.length); u.set(pic.rgb); u.set(pic.alpha, pic.rgb.length); return u; }
+function pictureOf(w) {
+  const src = w.image && w.image.src;
+  if (!src) return null;
+  const key = w.w + 'x' + w.h + ':' + src.length + ':' + src.slice(-48);
+  if (PICS.has(key)) return PICS.get(key);
+  const s = pictureSource(src);
+  let v;
+  if (s.error) v = {error: s.error};
+  else {
+    const px = resize(s.rgba, s.w, s.h, w.w, w.h), n = w.w * w.h, rgb = new Uint8Array(n * 2);
+    let alpha = null;
+    for (let i = 0; i < n; i++) if (px[i * 4 + 3] < 255) { alpha = new Uint8Array(n); break; }
+    for (let i = 0; i < n; i++) {
+      const c = ((px[i * 4] * 31 + 127) / 255 << 11) | ((px[i * 4 + 1] * 63 + 127) / 255 << 5) | ((px[i * 4 + 2] * 31 + 127) / 255);
+      rgb[i * 2] = c & 255; rgb[i * 2 + 1] = c >> 8;
+      if (alpha) alpha[i] = px[i * 4 + 3];
+    }
+    v = {w: w.w, h: w.h, rgb, alpha};
+  }
+  if (PICS.size > 48) PICS.delete(PICS.keys().next().value);
+  PICS.set(key, v);
+  return v;
+}
 const hx = c => '0x' + hexv(c);
 const cstr = s => JSON.stringify(String(s == null ? '' : s));
 function iconFont(w) { const m = Math.min(w.w, w.h); let f = 12; for (const s of FONTS) if (LH[s] <= m) f = s; return f; }
@@ -468,6 +640,11 @@ function padOf(w) {
 const opaOf = w => Math.floor((255 * w.opacity + 50) / 100);
 const hasBg = w => w.bg && w.bg !== 'transparent';
 const alignIdx = a => a === 'center' ? 1 : a === 'right' ? 2 : 0;
+const optionList = w => String(w.options || '').split('\n');
+const rollerSel = w => clamp(R(+w.value || 0), 0, optionList(w).length - 1);
+// Keyboards type into the first text field on their screen, and into any other field that gets focus.
+function keyboardPairs(s) { const kbs = s.widgets.filter(w => w.type == 'keyboard'), tas = s.widgets.filter(w => w.type == 'textarea'); return kbs.length && tas.length ? {kbs, tas} : null; }
+const picName = (s, w) => 'ui_img_' + ident(s.name) + '_' + ident(w.name);
 function tapOf(P, w) { const t = w.onTap && w.onTap.to && P.screens.find(x => x.id == w.onTap.to); return t && TAPPABLE[w.type] ? t : null; }
 
 function esc(s) { return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/\t/g, '\\t').replace(/\n/g, '\\n').replace(/\r/g, ''); }
@@ -475,8 +652,10 @@ function scriptWidget(P, w) {
   const L = [['W', w.type, sid(w.id), w.x, w.y, w.w, w.h].join('\t')];
   const p = (k, v) => L.push('P\t' + k + '\t' + v);
   const t = w.type;
-  if ('text' in w && (t == 'label' || t == 'button' || t == 'checkbox')) p('text', esc(w.text));
-  if (t == 'dropdown') p('options', esc(w.options));
+  if ('text' in w && (t == 'label' || t == 'button' || t == 'checkbox' || t == 'textarea')) p('text', esc(w.text));
+  if (t == 'dropdown' || t == 'roller') p('options', esc(w.options));
+  if (t == 'textarea') { if (w.oneLine) p('oneLine', 1); if (w.password) p('password', 1); }
+  if (t == 'image') { const pic = pictureOf(w); if (pic && !pic.error) { p('img', pic.w + ',' + pic.h + ',' + (pic.alpha ? 1 : 0)); const b = bytesb64(picBytes(pic)); for (let i = 0; i < b.length; i += 1536) p('imgd', b.slice(i, i + 1536)); } }
   if (t == 'chart') p('data', nums(w.data).join(','));
   if (t == 'icon') { p('icon', w.icon); p('font', iconFont(w)); }
   else if (w.font) p('font', w.font);
@@ -487,7 +666,7 @@ function scriptWidget(P, w) {
   if (w.borderColor) p('borderColor', hexv(w.borderColor));
   if (t == 'label') p('align', alignIdx(w.align));
   const pad = padOf(w); if (pad) p('pad', pad);
-  for (const k of ['radius', 'thick', 'border', 'value', 'min', 'max']) if (w[k] != null) p(k, R(+w[k]));
+  for (const k of ['radius', 'thick', 'border', 'value', 'min', 'max']) if (w[k] != null) p(k, k == 'value' && t == 'roller' ? rollerSel(w) : R(+w[k]));
   for (const k of ['checked', 'showValue', 'shadow']) if (w[k] != null) p(k, w[k] ? 1 : 0);
   p('opacity', R(w.opacity == null ? 100 : w.opacity));
   if (w.hidden) p('hidden', 1);
@@ -507,11 +686,31 @@ function toScript(P, opts) {
   return L.join('\n') + '\n';
 }
 
+// C arrays for every picture. LVGL 9 takes RGB565A8 as is; LVGL 8 needs the colour depth and byte order of lv_conf.h.
+function genImages(P, lv, brief) {
+  const out = [], hexes = u => { const L = []; for (let i = 0; i < u.length; i += 24) { if (brief && L.length == 2) { L.push('    /* ' + (u.length - i).toLocaleString('en') + ' more bytes, written out in full when you export */'); break; } L.push('    ' + Array.from(u.subarray(i, i + 24), b => '0x' + (b < 16 ? '0' : '') + b.toString(16)).join(',') + ','); } return L; };
+  P.screens.forEach(s => s.widgets.forEach(w => {
+    if (w.type != 'image') return;
+    const pic = pictureOf(w);
+    if (!pic || pic.error) return;
+    const n = picName(s, w), px = pic.w * pic.h;
+    if (lv != 8) {
+      out.push('static const uint8_t ' + n + '_map[] = {', ...hexes(picBytes(pic)), '};', 'const lv_image_dsc_t ' + n + ' = {', '    .header.magic = LV_IMAGE_HEADER_MAGIC,', '    .header.cf = ' + (pic.alpha ? 'LV_COLOR_FORMAT_RGB565A8' : 'LV_COLOR_FORMAT_RGB565') + ',', '    .header.w = ' + pic.w + ',', '    .header.h = ' + pic.h + ',', '    .header.stride = ' + pic.w * 2 + ',', '    .data_size = sizeof(' + n + '_map),', '    .data = ' + n + '_map,', '};', '');
+      return;
+    }
+    const lay = mode => { const per = mode == 32 ? 4 : pic.alpha ? 3 : 2, u = new Uint8Array(px * per); for (let i = 0; i < px; i++) { const lo = pic.rgb[i * 2], hi = pic.rgb[i * 2 + 1], a = pic.alpha ? pic.alpha[i] : 255, o = i * per;
+      if (mode == 32) { const c = lo | hi << 8, r = c >> 11, g = c >> 5 & 63, b = c & 31; u[o] = b << 3 | b >> 2; u[o + 1] = g << 2 | g >> 4; u[o + 2] = r << 3 | r >> 2; u[o + 3] = a; }
+      else { u[o] = mode == 16 ? lo : hi; u[o + 1] = mode == 16 ? hi : lo; if (pic.alpha) u[o + 2] = a; } } return u; };
+    out.push('#if LV_COLOR_DEPTH == 16 && LV_COLOR_16_SWAP == 0', 'static const uint8_t ' + n + '_map[] = {', ...hexes(lay(16)), '};', '#elif LV_COLOR_DEPTH == 16', 'static const uint8_t ' + n + '_map[] = {', ...hexes(lay(161)), '};', '#elif LV_COLOR_DEPTH == 32', 'static const uint8_t ' + n + '_map[] = {', ...hexes(lay(32)), '};', '#else', '#error "Epixo pictures need LV_COLOR_DEPTH 16 or 32"', '#endif',
+      'const lv_img_dsc_t ' + n + ' = {', '    .header.cf = ' + (pic.alpha ? 'LV_IMG_CF_TRUE_COLOR_ALPHA' : 'LV_IMG_CF_TRUE_COLOR') + ',', '    .header.always_zero = 0,', '    .header.reserved = 0,', '    .header.w = ' + pic.w + ',', '    .header.h = ' + pic.h + ',', '    .data_size = sizeof(' + n + '_map),', '    .data = ' + n + '_map,', '};', '');
+  }));
+  return out;
+}
 function vname(s, w) { return 'ui_' + ident(s.name) + '_' + ident(w.name); }
 function genC(P, opt) {
   opt = opt || {};
   const lv = opt.lvgl || P.lvgl || 9, v8 = lv === 8;
-  const API = v8 ? {btn:'lv_btn_create',rmflag:'lv_obj_clear_flag',load:'lv_scr_load',loadAnim:'lv_scr_load_anim',ofsY:'lv_obj_set_style_shadow_ofs_y'} : {btn:'lv_button_create',rmflag:'lv_obj_remove_flag',load:'lv_screen_load',loadAnim:'lv_screen_load_anim',ofsY:'lv_obj_set_style_shadow_offset_y'};
+  const API = v8 ? {btn:'lv_btn_create',rmflag:'lv_obj_clear_flag',load:'lv_scr_load',loadAnim:'lv_scr_load_anim',ofsY:'lv_obj_set_style_shadow_ofs_y',img:'lv_img_create',imgSrc:'lv_img_set_src'} : {btn:'lv_button_create',rmflag:'lv_obj_remove_flag',load:'lv_screen_load',loadAnim:'lv_screen_load_anim',ofsY:'lv_obj_set_style_shadow_offset_y',img:'lv_image_create',imgSrc:'lv_image_set_src'};
   const out = [], decl = [], evs = [];
   const anyArcLabel = P.screens.some(s => s.widgets.some(w => w.type == 'arc' && w.showValue));
   P.screens.forEach(s => { decl.push('lv_obj_t * ui_' + ident(s.name) + ';'); s.widgets.forEach(w => decl.push('lv_obj_t * ' + vname(s, w) + ';')); });
@@ -577,6 +776,23 @@ function genC(P, opt) {
         case 'led':
           A(v + ' = lv_led_create(' + sv + ');'); A('lv_led_set_color(' + v + ', lv_color_hex(' + hx(w.accent) + '));'); A(w.checked ? 'lv_led_on(' + v + ');' : 'lv_led_off(' + v + ');');
           break;
+        case 'roller':
+          A(v + ' = lv_roller_create(' + sv + ');'); A('lv_roller_set_options(' + v + ', ' + cstr(w.options) + ', LV_ROLLER_MODE_NORMAL);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), 0);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', 0);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', 0);'); A('lv_obj_set_style_border_width(' + v + ', 0, 0);');
+          A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_PART_SELECTED);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(0xFFFFFF), LV_PART_SELECTED);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', LV_PART_SELECTED);'); A('lv_roller_set_selected(' + v + ', ' + rollerSel(w) + ', LV_ANIM_OFF);');
+          break;
+        case 'textarea':
+          A(v + ' = lv_textarea_create(' + sv + ');'); A('lv_textarea_set_placeholder_text(' + v + ', ' + cstr(w.text) + ');'); if (w.oneLine) A('lv_textarea_set_one_line(' + v + ', true);'); if (w.password) A('lv_textarea_set_password_mode(' + v + ', true);');
+          A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), 0);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', 0);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', 0);'); A('lv_obj_set_style_border_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_STATE_FOCUSED);');
+          break;
+        case 'keyboard':
+          A(v + ' = lv_keyboard_create(' + sv + ');'); A('lv_obj_set_align(' + v + ', LV_ALIGN_TOP_LEFT);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_PART_ITEMS);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), LV_PART_ITEMS);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', LV_PART_ITEMS);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', LV_PART_ITEMS);');
+          break;
+        case 'image': {
+          const pic = pictureOf(w);
+          if (pic && !pic.error) { A(v + ' = ' + API.img + '(' + sv + ');'); A(API.imgSrc + '(' + v + ', &' + picName(s, w) + ');'); }
+          else { A(v + ' = lv_obj_create(' + sv + ');'); A(API.rmflag + '(' + v + ', LV_OBJ_FLAG_SCROLLABLE);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(0xE4E6EB), 0);'); A('lv_obj_set_style_border_width(' + v + ', 0, 0);'); A('lv_obj_set_style_radius(' + v + ', 12, 0);'); A('lv_obj_set_style_shadow_width(' + v + ', 0, 0);'); A('lv_obj_t * ' + v + '_icon = lv_label_create(' + v + ');'); A('lv_label_set_text(' + v + '_icon, LV_SYMBOL_IMAGE);'); A('lv_obj_set_style_text_color(' + v + '_icon, lv_color_hex(0x8D93A1), 0);'); A('lv_obj_set_style_text_font(' + v + '_icon, &lv_font_montserrat_14, 0);'); A('lv_obj_center(' + v + '_icon);'); }
+          break;
+        }
       }
       A('lv_obj_set_pos(' + v + ', ' + w.x + ', ' + w.y + ');'); A('lv_obj_set_size(' + v + ', ' + w.w + ', ' + w.h + ');');
       if ((w.opacity == null ? 100 : w.opacity) < 100) A('lv_obj_set_style_opa(' + v + ', ' + opaOf(w) + ', 0);');
@@ -585,26 +801,34 @@ function genC(P, opt) {
       if (tg) {
         const fn = 'ui_event_' + ident(s.name) + '_' + ident(w.name);
         evs.push('static void ' + fn + '(lv_event_t * e)', '{', '    LV_UNUSED(e);', '    ' + API.loadAnim + '(ui_' + ident(tg.name) + ', LV_SCR_LOAD_ANIM_' + ANIMS[animIndex(w.onTap.anim)][2] + ', 300, 0, false);', '}', '');
-        if (w.type == 'label' || w.type == 'icon') A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
+        if (CLICKS[w.type]) A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
         A('lv_obj_add_event_cb(' + v + ', ' + fn + ', LV_EVENT_CLICKED, NULL);');
       }
       const act = actionOf(w);
       if (act) {
-        if (!tg && (w.type == 'label' || w.type == 'icon')) A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
+        if (!tg && CLICKS[w.type]) A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
         A('lv_obj_add_event_cb(' + v + ', ui_action_' + act + ', LV_EVENT_' + ACTION_EVENT[w.type] + ', NULL);');
       }
     });
+    const kp = keyboardPairs(s);
+    if (kp) { L.push(''); kp.kbs.forEach(k => { L.push('    lv_keyboard_set_textarea(' + vname(s, k) + ', ' + vname(s, kp.tas[0]) + ');'); kp.tas.forEach(t => L.push('    lv_obj_add_event_cb(' + vname(s, t) + ', ui_textarea_focus_cb, LV_EVENT_FOCUSED, ' + vname(s, k) + ');')); }); }
     L.push('}', '');
     return L.join('\n');
   });
+  if (P.screens.some(keyboardPairs)) evs.unshift('static void ui_textarea_focus_cb(lv_event_t * e)', '{', '    lv_keyboard_set_textarea((lv_obj_t *)lv_event_get_user_data(e), (lv_obj_t *)lv_event_get_target(e));', '}', '');
   const acts = actionsOf(P), weak = acts.length ? ['#if defined(__GNUC__) || defined(__clang__)', '#define UI_WEAK __attribute__((weak))', '#else', '#define UI_WEAK', '#endif', '',
     '/* Empty actions so the project builds. Write your own in another file and it replaces these. */', ...acts.flatMap(a => ['UI_WEAK void ui_action_' + a + '(lv_event_t * e)', '{', '    LV_UNUSED(e);', '}', ''])] : [];
-  out.push('#include "ui.h"', '', ...decl, '', ...weak, ...evs, ...fns);
+  out.push('#include "ui.h"', '', ...decl, '', ...genImages(P, lv, opt.brief), ...weak, ...evs, ...fns);
   out.push('lv_obj_t * ui_get_screen(uint32_t index)', '{', '    switch(index) {', ...P.screens.map((s, i) => '        case ' + i + ': return ui_' + ident(s.name) + ';'), '        default: return NULL;', '    }', '}', '');
   out.push('void ui_init(void)', '{', ...P.screens.map(s => '    ui_' + ident(s.name) + '_create();'), '    ' + API.load + '(ui_' + ident(P.screens[0].name) + ');', '}', '');
   let code = out.join('\n');
   if (lv == 96) code = code.replace(/lv_obj_remove_flag\(([^,]+), LV_OBJ_FLAG_SCROLLABLE\)/g, 'lv_obj_set_scrollable($1, false)').replace(/lv_obj_add_flag\(([^,]+), LV_OBJ_FLAG_HIDDEN\)/g, 'lv_obj_set_hidden($1, true)').replace(/lv_obj_add_flag\(([^,]+), LV_OBJ_FLAG_CLICKABLE\)/g, 'lv_obj_set_clickable($1, true)').replace(/lv_chart_set_range\(/g, 'lv_chart_set_axis_range(');
   return code;
+}
+function imageDecls(P) {
+  const L = [];
+  P.screens.forEach(s => s.widgets.forEach(w => { const pic = w.type == 'image' && pictureOf(w); if (pic && !pic.error) L.push('UI_IMAGE_DECLARE(' + picName(s, w) + ');'); }));
+  return L.length ? ['/* Pictures, ready to pass to lv_image_set_src (lv_img_set_src on LVGL 8). */', '#if LVGL_VERSION_MAJOR >= 9', '#define UI_IMAGE_DECLARE(n) extern const lv_image_dsc_t n', '#else', '#define UI_IMAGE_DECLARE(n) extern const lv_img_dsc_t n', '#endif', ...L, ''] : [];
 }
 function actionDecls(P) {
   const acts = actionsOf(P);
@@ -634,12 +858,14 @@ function genH(P) {
   return ['#ifndef EPIXO_UI_H', '#define EPIXO_UI_H', '', '#if defined __has_include', '#if __has_include("lvgl.h")', '#include "lvgl.h"', '#elif __has_include("lvgl/lvgl.h")', '#include "lvgl/lvgl.h"', '#else', '#include "lvgl.h"', '#endif', '#else', '#include "lvgl.h"', '#endif', '', '#ifdef __cplusplus', 'extern "C" {', '#endif', '',
     '#define UI_SCREEN_COUNT ' + P.screens.length, '',
     ...P.screens.flatMap(s => ['extern lv_obj_t * ui_' + ident(s.name) + ';', ...s.widgets.map(w => 'extern lv_obj_t * ' + vname(s, w) + ';')]), '',
-    'void ui_init(void);', 'lv_obj_t * ui_get_screen(uint32_t index);', '', ...actionDecls(P), '#ifdef __cplusplus', '}', '#endif', '', '#endif', ''].join('\n');
+    'void ui_init(void);', 'lv_obj_t * ui_get_screen(uint32_t index);', '', ...imageDecls(P), ...actionDecls(P), '#ifdef __cplusplus', '}', '#endif', '', '#endif', ''].join('\n');
 }
 
-function genPy(P) {
+function genPy(P, opt) {
+  opt = opt || {};
   const L = ['import lvgl as lv', ''], c = x => 'lv.color_hex(' + hx(x) + ')', f = n => 'lv.font_montserrat_' + n;
   const anyArc = P.screens.some(s => s.widgets.some(w => w.type == 'arc' && w.showValue));
+  if (P.screens.some(s => s.widgets.some(w => w.type == 'image' && pictureOf(w) && !pictureOf(w).error))) L.splice(1, 0, 'import binascii');
   if (actionsOf(P).length) L.push('# Actions. In your own code, set ui.actions["name"] = a function that takes the LVGL event.', 'actions = {}', '', 'def run_action(name):', '    def cb(e):', '        f = actions.get(name)', '        if f:', '            f(e)', '    return cb', '');
   if (anyArc) L.push('def arc_value_cb(arc, label):', '    def cb(e):', '        label.set_text(str(arc.get_value()))', '    return cb', '');
   const sn = s => 'scr_' + ident(s.name).toLowerCase();
@@ -663,16 +889,27 @@ function genPy(P) {
         case 'chart': { const vs = nums(w.data), lo = Math.min(0, ...vs), hi = Math.max(1, ...vs); A(v + ' = lv.chart(' + sv + ')'); A(v + '.set_type(lv.chart.TYPE.LINE)'); A(v + '.set_point_count(' + vs.length + ')'); A(v + '.set_axis_range(lv.chart.AXIS.PRIMARY_Y, ' + lo + ', ' + hi + ')'); A(v + '.set_div_line_count(3, 0)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_width(0, 0)'); A(v + '_series = ' + v + '.add_series(' + c(w.accent) + ', lv.chart.AXIS.PRIMARY_Y)'); A('for value in [' + vs.join(', ') + ']:'); A('    ' + v + '.set_next_value(' + v + '_series, value)'); break; }
         case 'spinner': A('# lv.spinner is not exposed by the MicroPython binding, so this is a matching arc'); A(v + ' = lv.arc(' + sv + ')'); A(v + '.set_bg_angles(0, 360)'); A(v + '.set_angles(270, 10)'); A(v + '.remove_style(None, lv.PART.KNOB)'); A(v + '.remove_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.set_style_arc_width(' + w.thick + ', lv.PART.MAIN)'); A(v + '.set_style_arc_width(' + w.thick + ', lv.PART.INDICATOR)'); A(v + '.set_style_arc_color(' + c(w.bg) + ', lv.PART.MAIN)'); A(v + '.set_style_arc_color(' + c(w.accent) + ', lv.PART.INDICATOR)'); break;
         case 'led': A(v + ' = lv.led(' + sv + ')'); A(v + '.set_color(' + c(w.accent) + ')'); A(w.checked ? v + '.on()' : v + '.off()'); break;
+        case 'roller': A(v + ' = lv.roller(' + sv + ')'); A(v + '.set_options(' + cstr(w.options) + ', lv.roller.MODE.NORMAL)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_text_color(' + c(w.fg) + ', 0)'); A(v + '.set_style_text_font(' + f(w.font) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_width(0, 0)'); A(v + '.set_style_bg_color(' + c(w.accent) + ', lv.PART.SELECTED)'); A(v + '.set_style_text_color(lv.color_hex(0xFFFFFF), lv.PART.SELECTED)'); A(v + '.set_style_text_font(' + f(w.font) + ', lv.PART.SELECTED)'); A(v + '.set_selected(' + rollerSel(w) + ', False)'); break;
+        case 'textarea': A(v + ' = lv.textarea(' + sv + ')'); A(v + '.set_placeholder_text(' + cstr(w.text) + ')'); if (w.oneLine) A(v + '.set_one_line(True)'); if (w.password) A(v + '.set_password_mode(True)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_text_color(' + c(w.fg) + ', 0)'); A(v + '.set_style_text_font(' + f(w.font) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_color(' + c(w.accent) + ', lv.STATE.FOCUSED)'); break;
+        case 'keyboard': A(v + ' = lv.keyboard(' + sv + ')'); A(v + '.set_align(lv.ALIGN.TOP_LEFT)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_bg_color(' + c(w.accent) + ', lv.PART.ITEMS)'); A(v + '.set_style_text_color(' + c(w.fg) + ', lv.PART.ITEMS)'); A(v + '.set_style_text_font(' + f(w.font) + ', lv.PART.ITEMS)'); A(v + '.set_style_radius(' + w.radius + ', lv.PART.ITEMS)'); break;
+        case 'image': {
+          const pic = pictureOf(w);
+          if (pic && !pic.error) { const n = v + '_picture'; A(n + ' = lv.image_dsc_t({\'header\': {\'magic\': lv.IMAGE_HEADER_MAGIC, \'cf\': lv.COLOR_FORMAT.' + (pic.alpha ? 'RGB565A8' : 'RGB565') + ', \'w\': ' + pic.w + ', \'h\': ' + pic.h + ', \'stride\': ' + pic.w * 2 + '}, \'data_size\': ' + picBytes(pic).length + ', \'data\': binascii.a2b_base64(' + JSON.stringify(opt.brief ? bytesb64(picBytes(pic)).slice(0, 48) + '...' : bytesb64(picBytes(pic))) + ')})'); A(v + ' = lv.image(' + sv + ')'); A(v + '.set_src(' + n + ')'); }
+          else { A(v + ' = lv.obj(' + sv + ')'); A(v + '.remove_flag(lv.obj.FLAG.SCROLLABLE)'); A(v + '.set_style_bg_color(lv.color_hex(0xE4E6EB), 0)'); A(v + '.set_style_border_width(0, 0)'); A(v + '.set_style_radius(12, 0)'); A(v + '.set_style_shadow_width(0, 0)'); A(v + '_icon = lv.label(' + v + ')'); A(v + '_icon.set_text(lv.SYMBOL.IMAGE)'); A(v + '_icon.set_style_text_color(lv.color_hex(0x8D93A1), 0)'); A(v + '_icon.set_style_text_font(lv.font_montserrat_14, 0)'); A(v + '_icon.center()'); }
+          break;
+        }
       }
       A(v + '.set_pos(' + w.x + ', ' + w.y + ')'); A(v + '.set_size(' + w.w + ', ' + w.h + ')');
       if ((w.opacity == null ? 100 : w.opacity) < 100) A(v + '.set_style_opa(' + opaOf(w) + ', 0)');
       if (w.hidden) A(v + '.add_flag(lv.obj.FLAG.HIDDEN)');
       const tg = tapOf(P, w);
-      if (tg) { if (w.type == 'label' || w.type == 'icon') A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(lambda e: lv.screen_load_anim(' + sn(tg) + ', lv.SCR_LOAD_ANIM.' + ANIMS[animIndex(w.onTap.anim)][2] + ', 300, 0, False), lv.EVENT.CLICKED, None)'); }
+      if (tg) { if (CLICKS[w.type]) A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(lambda e: lv.screen_load_anim(' + sn(tg) + ', lv.SCR_LOAD_ANIM.' + ANIMS[animIndex(w.onTap.anim)][2] + ', 300, 0, False), lv.EVENT.CLICKED, None)'); }
       const act = actionOf(w);
-      if (act) { if (!tg && (w.type == 'label' || w.type == 'icon')) A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(run_action("' + act + '"), lv.EVENT.' + ACTION_EVENT[w.type] + ', None)'); }
+      if (act) { if (!tg && CLICKS[w.type]) A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(run_action("' + act + '"), lv.EVENT.' + ACTION_EVENT[w.type] + ', None)'); }
       A('');
     });
+    const kp = keyboardPairs(s), py = w => (ident(s.name) + '_' + ident(w.name)).toLowerCase();
+    if (kp) kp.kbs.forEach(k => { L.push(py(k) + '.set_textarea(' + py(kp.tas[0]) + ')'); kp.tas.forEach(t => L.push(py(t) + '.add_event_cb(lambda e, k=' + py(k) + ': k.set_textarea(e.get_target_obj()), lv.EVENT.FOCUSED, None)')); L.push(''); });
   });
   L.push('lv.screen_load(' + sn(P.screens[0]) + ')', '');
   return L.join('\n');
@@ -686,10 +923,10 @@ function genXML(P) {
   const files = P.screens.map(s => {
     const L = ['<screen>', '\t<view scrollable="false" style_bg_color="' + col(s.bg) + '" style_bg_opa="255">'];
     s.widgets.forEach(w => {
-      if (w.type == 'spinner' || w.type == 'led') { skipped.push(s.name + '/' + w.name); return; }
+      if (w.type == 'spinner' || w.type == 'led' || w.type == 'image') { skipped.push(s.name + '/' + w.name); return; }
       const pos = 'name="' + ident(w.name).toLowerCase() + '" x="' + w.x + '" y="' + w.y + '" width="' + w.w + '" height="' + w.h + '"';
       const tg = tapOf(P, w), act = actionOf(w);
-      const extra = (w.hidden ? ' hidden="true"' : '') + ((w.opacity == null ? 100 : w.opacity) < 100 ? ' style_opa="' + opaOf(w) + '"' : '') + ((tg || act) && (w.type == 'label' || w.type == 'icon') ? ' clickable="true"' : '');
+      const extra = (w.hidden ? ' hidden="true"' : '') + ((w.opacity == null ? 100 : w.opacity) < 100 ? ' style_opa="' + opaOf(w) + '"' : '') + ((tg || act) && CLICKS[w.type] ? ' clickable="true"' : '');
       const pad = padOf(w) ? ' style_pad_top="' + padOf(w) + '"' : '';
       const kids = [];
       if (tg) kids.push('\t\t\t<screen_load_event trigger="clicked" screen="' + ident(tg.name).toLowerCase() + '" anim_type="' + ANIMS[animIndex(w.onTap.anim)][2].toLowerCase() + '" duration="300"/>');
@@ -706,6 +943,9 @@ function genXML(P) {
         case 'checkbox': open = '<lv_checkbox ' + pos + ' text="' + xa(w.text) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_bg_color:indicator:checked="' + col(w.accent) + '" style_border_color:indicator:checked="' + col(w.accent) + '"' + (w.checked ? ' checked="true"' : '') + extra; break;
         case 'icon': open = '<lv_label ' + pos + ' text="&#x' + SYMBOL_HEX[(ICONS[w.icon] || ICONS.home)[1]] + ';" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(iconFont(w)) + '" style_text_align="center"' + pad + extra; break;
         case 'dropdown': open = '<lv_dropdown ' + pos + ' options="' + xa(w.options) + '" style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '"' + extra; break;
+        case 'roller': open = '<lv_roller ' + pos + ' options="' + xa(w.options) + '" selected="' + rollerSel(w) + '" style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '" style_border_width="0" style_bg_color:selected="' + col(w.accent) + '" style_text_color:selected="0xFFFFFF" style_text_font:selected="' + fnt(w.font) + '"' + extra; break;
+        case 'textarea': open = '<lv_textarea ' + pos + ' placeholder_text="' + xa(w.text) + '"' + (w.oneLine ? ' one_line="true"' : '') + (w.password ? ' password_mode="true"' : '') + ' style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '" style_border_color:focused="' + col(w.accent) + '"' + extra; break;
+        case 'keyboard': open = '<lv_keyboard ' + pos + ' align="top_left" style_bg_color="' + col(w.bg) + '" style_bg_color:items="' + col(w.accent) + '" style_text_color:items="' + col(w.fg) + '" style_text_font:items="' + fnt(w.font) + '" style_radius:items="' + w.radius + '"' + extra; break;
         case 'chart': { const vs = nums(w.data); open = '<lv_chart ' + pos + ' type="line" point_count="' + vs.length + '" hor_div_line_count="3" ver_div_line_count="0" style_bg_color="' + col(w.bg) + '" style_radius="' + w.radius + '" style_border_width="0"' + extra; kids.unshift('\t\t\t<lv_chart-axis axis="primary_y" min_value="' + Math.min(0, ...vs) + '" max_value="' + Math.max(1, ...vs) + '"/>', '\t\t\t<lv_chart-series color="0x' + hexv(w.accent) + '" axis="primary_y" values="' + vs.join(' ') + '"/>'); break; }
       }
       const tag = open.slice(1, open.indexOf(' '));
@@ -730,12 +970,12 @@ function genXMLLoader(P) {
 function genYAML(P) {
   const L = ['lvgl:', '  pages:'], q = s => JSON.stringify(String(s == null ? '' : s));
   const pid = s => ident(s.name).toLowerCase();
-  const skipped = [];
+  const skipped = [], files = [], pics = [];
   P.screens.forEach(s => {
     L.push('    - id: ' + pid(s), '      bg_color: ' + hx(s.bg), '      bg_opa: COVER', '      widgets:');
     s.widgets.forEach(w => {
       if (w.type == 'chart') { skipped.push(w.name); return; }
-      const T = {panel: 'obj', icon: 'label'}[w.type] || w.type, I = '            ', A = x => L.push(I + x);
+      const blank = w.type == 'image' && !(pictureOf(w) && !pictureOf(w).error), T = blank ? 'obj' : {panel: 'obj', icon: 'label'}[w.type] || w.type, I = '            ', A = x => L.push(I + x);
       L.push('        - ' + T + ':');
       A('id: ' + pid(s) + '_' + ident(w.name).toLowerCase()); A('x: ' + w.x); A('y: ' + w.y); A('width: ' + w.w); A('height: ' + w.h);
       switch (w.type) {
@@ -752,20 +992,25 @@ function genYAML(P) {
         case 'dropdown': A('options:'); String(w.options).split('\n').forEach(o => A('  - ' + q(o))); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); break;
         case 'spinner': A('spin_time: 1000ms'); A('arc_length: 100deg'); A('arc_width: ' + w.thick); A('arc_color: ' + hx(w.bg)); A('indicator:'); A('  arc_width: ' + w.thick); A('  arc_color: ' + hx(w.accent)); break;
         case 'led': A('color: ' + hx(w.accent)); A('brightness: ' + (w.checked ? '100%' : '0%')); break;
+        case 'roller': A('options:'); optionList(w).forEach(o => A('  - ' + q(o))); A('selected_index: ' + rollerSel(w)); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); A('border_width: 0'); A('selected:'); A('  bg_color: ' + hx(w.accent)); A('  text_color: 0xFFFFFF'); A('  text_font: montserrat_' + w.font); break;
+        case 'textarea': A('placeholder_text: ' + q(w.text)); A('one_line: ' + (w.oneLine ? 'true' : 'false')); if (w.password) A('password_mode: true'); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); break;
+        case 'keyboard': { const kp = keyboardPairs(s); A('align: TOP_LEFT'); if (kp) A('textarea: ' + pid(s) + '_' + ident(kp.tas[0].name).toLowerCase()); A('bg_color: ' + hx(w.bg)); A('items:'); A('  bg_color: ' + hx(w.accent)); A('  text_color: ' + hx(w.fg)); A('  text_font: montserrat_' + w.font); A('  radius: ' + w.radius); break; }
+        case 'image': { const pic = pictureOf(w); if (blank) { A('bg_color: 0xE4E6EB'); A('border_width: 0'); A('radius: 12'); A('scrollable: false'); A('widgets:'); A('  - label:'); A('      align: CENTER'); A('      text: "\\U0000' + SYMBOL_HEX.IMAGE + '"'); A('      text_color: 0x8D93A1'); A('      text_font: montserrat_14'); } else { const id = 'img_' + pid(s) + '_' + ident(w.name).toLowerCase(); A('src: ' + id); pics.push({id, file: 'epixo_images/' + id + '.png', w: pic.w, h: pic.h, alpha: !!pic.alpha}); files.push({name: 'epixo_images/' + id + '.png', bytes: b64bytes(PNG_URL.exec(w.image.src)[1])}); } break; }
       }
       if ((w.opacity == null ? 100 : w.opacity) < 100) A('opa: ' + R(w.opacity) + '%');
       if (w.hidden) A('hidden: true');
       const tg = tapOf(P, w), act = actionOf(w), click = act && ACTION_EVENT[w.type] == 'CLICKED';
-      if ((tg || click) && (w.type == 'label' || w.type == 'icon')) A('clickable: true');
+      if ((tg || click) && CLICKS[w.type]) A('clickable: true');
       if (tg || click) A('on_click:');
       if (tg) { A('  - lvgl.page.show:'); A('      id: ' + pid(tg)); A('      animation: ' + ANIMS[animIndex(w.onTap.anim)][2]); A('      time: 300ms'); }
       if (click) A('  - script.execute: action_' + act);
-      if (act && !click) { A('on_value:'); A('  - script.execute: action_' + act); }
+      if (act && !click) { A(ACTION_EVENT[w.type] == 'READY' ? 'on_ready:' : 'on_value:'); A('  - script.execute: action_' + act); }
     });
   });
   const acts = actionsOf(P);
   if (acts.length) L.push('', '# Actions. Put what each widget should do inside its lambda, or replace the lambda with other ESPHome actions.', 'script:', ...acts.flatMap(a => ['  - id: action_' + a, '    then:', '      - lambda: |-', '          // ' + a + ': your code here, like id(relay).toggle();']));
-  return {yaml: L.join('\n') + '\n', skipped};
+  if (pics.length) L.push('', '# Pictures used by the image widgets. Keep the epixo_images folder next to this file.', 'image:', ...pics.flatMap(p => ['  - file: ' + p.file, '    id: ' + p.id, '    type: RGB565', '    resize: ' + p.w + 'x' + p.h, ...(p.alpha ? ['    transparency: alpha_channel'] : [])]));
+  return {yaml: L.join('\n') + '\n', skipped, files};
 }
 
 function usedFonts(P) {
@@ -859,11 +1104,13 @@ function memoryReport(P) {
   const fonts = usedFonts(P);
   const flashFonts = fonts.reduce((a, f) => a + (fontKB[f] || 40), 0);
   const nW = P.screens.reduce((a, s) => a + s.widgets.length, 0);
-  const objBytes = {label: 180, button: 330, icon: 180, panel: 150, switch: 170, slider: 210, checkbox: 260, dropdown: 300, arc: 230, bar: 200, chart: 420, spinner: 240, led: 160};
+  const objBytes = {label: 180, button: 330, icon: 180, panel: 150, switch: 170, slider: 210, checkbox: 260, dropdown: 300, arc: 230, bar: 200, chart: 420, spinner: 240, led: 160, image: 160, roller: 320, textarea: 420, keyboard: 950};
   let ram = 0;
   P.screens.forEach(s => { ram += 160; s.widgets.forEach(w => { ram += (objBytes[w.type] || 200) + 60 + (w.text ? String(w.text).length : 0); }); });
   const fb = px * 2;
-  return {screens: P.screens.length, widgets: nW, fonts, flashFontsKB: flashFonts, uiRamKB: Math.ceil(ram / 1024), fullFrameKB: Math.ceil(fb / 1024), partialBufKB: Math.ceil(b.w * Math.ceil(b.h / 10) * 2 / 1024), lvMemKB: Math.max(48, Math.ceil(ram * 1.6 / 1024 / 16) * 16)};
+  let pics = 0;
+  P.screens.forEach(s => s.widgets.forEach(w => { const pic = w.type == 'image' && pictureOf(w); if (pic && !pic.error) pics += picBytes(pic).length; }));
+  return {screens: P.screens.length, widgets: nW, fonts, flashFontsKB: flashFonts, flashImagesKB: Math.ceil(pics / 1024), uiRamKB: Math.ceil(ram / 1024), fullFrameKB: Math.ceil(fb / 1024), partialBufKB: Math.ceil(b.w * Math.ceil(b.h / 10) * 2 / 1024), lvMemKB: Math.max(48, Math.ceil(ram * 1.6 / 1024 / 16) * 16)};
 }
 
 function luminance(hex) {
@@ -919,9 +1166,9 @@ function doctor(P, measure) {
         const need = minTouch * (w.type == 'slider' ? 0.6 : 0.85);
         if (hit < need) add(hit < need * 0.7 ? 'warn' : 'info', s, w, 'touch', nm + ' is about ' + Math.round(hit) + ' px. On this ' + (b.size || '') + ' screen a comfortable finger target is ' + minTouch + ' px.', 'grow');
       }
-      const fg = w.type == 'label' || w.type == 'checkbox' || w.type == 'button' || w.type == 'dropdown' || (w.type == 'icon' && w.onTap && w.onTap.to) ? w.fg : null;
+      const fg = w.type == 'label' || w.type == 'checkbox' || w.type == 'button' || w.type == 'dropdown' || w.type == 'roller' || w.type == 'textarea' || (w.type == 'icon' && w.onTap && w.onTap.to) ? w.fg : null;
       if (fg) {
-        const bg = w.type == 'button' || w.type == 'dropdown' ? w.bg : (hasBg(w) ? w.bg : backdrop(s, w));
+        const bg = w.type == 'button' || w.type == 'dropdown' || w.type == 'roller' || w.type == 'textarea' ? w.bg : (hasBg(w) ? w.bg : backdrop(s, w));
         const ratio = contrast(fg, bg), need = w.type == 'icon' || (w.font || 16) >= 24 ? 3 : 4.5;
         if (ratio < need) add('warn', s, w, 'contrast', nm + ' text contrast is ' + ratio.toFixed(1) + ':1. Aim for ' + need + ':1 so it reads in sunlight.', 'contrast');
       }
@@ -933,6 +1180,10 @@ function doctor(P, measure) {
         if (w.type == 'label' && LH[w.font] * lines.length > w.h + 2 && w.valign == 'center') add('info', s, w, 'tall', nm + ' is shorter than its text line.', 'fitheight');
       }
       if (w.type == 'chart' && nums(w.data).length < 2) add('warn', s, w, 'chartdata', nm + ' needs at least two values.', null);
+      if (w.type == 'image') { const pic = pictureOf(w); if (!pic) add('warn', s, w, 'nopicture', nm + ' has no picture yet. Choose one in the inspector.', null); else if (pic.error) add('error', s, w, 'badpicture', nm + ': ' + pic.error, null); }
+      if (w.type == 'roller' && optionList(w).filter(o => o.trim()).length < 2) add('warn', s, w, 'choices', nm + ' needs at least two choices.', null);
+      if (w.type == 'keyboard' && b.touch && (w.h - 16) / 4 < minTouch * .55) add('warn', s, w, 'keys', nm + ' keys are about ' + Math.max(0, R((w.h - 16) / 4)) + ' px tall. Make it taller so fingers land on the right key.', 'growkeys');
+      if (w.type == 'textarea' && b.touch && !s.widgets.some(o => o.type == 'keyboard')) add('info', s, w, 'nokeyboard', nm + ' has no keyboard on this screen, so nobody can type into it.', 'addkeyboard');
       if ((w.type == 'slider' || w.type == 'bar' || w.type == 'arc') && (+w.min >= +w.max)) add('error', s, w, 'range', nm + ' has min ≥ max.', 'range');
       if (w.onTap && w.onTap.to && !P.screens.some(x => x.id == w.onTap.to)) add('error', s, w, 'deadlink', nm + ' opens a screen that no longer exists.', 'unlink');
     });
@@ -951,10 +1202,15 @@ function applyFix(P, issue, measure) {
   const b = P.board;
   if (!w) return false;
   switch (issue.fix) {
+    case 'growkeys': w.h = Math.min(b.h, Math.max(w.h, R(touchTarget(b) * .55 * 4 + 16))); w.y = clamp(w.y, 0, b.h - w.h); return true;
+    case 'addkeyboard': {
+      const h = clamp(R(b.h * .42), Math.min(b.h, R(touchTarget(b) * .55 * 4 + 16)), b.h), k = mkW(P, 'keyboard', {x: 0, y: b.h - h, w: b.w, h, font: F(clamp(touchTarget(b) * .4, 14, 24))});
+      k.name = uniqueWidgetName(s, k.name, k); s.widgets.push(k); return true;
+    }
     case 'bringin': w.w = Math.min(w.w, b.w); w.h = Math.min(w.h, b.h); w.x = clamp(w.x, 0, b.w - w.w); w.y = clamp(w.y, 0, b.h - w.h); return true;
     case 'shrinkround': roundFit(w, b.w, b.h); if (w.type == 'label' && measure) fitWidget(w); return true;
     case 'grow': { const t = touchTarget(b); if (w.type == 'slider') { const nh = Math.max(w.h, R(t * .25)); w.y -= R((nh - w.h) / 2); w.h = nh; } else { const cx = w.x + w.w / 2, cy = w.y + w.h / 2; if (w.type == 'switch') { w.h = Math.max(w.h, R(t * .8)); w.w = Math.max(w.w, R(w.h * 1.75)); } else { w.w = Math.max(w.w, t); w.h = Math.max(w.h, t); } w.x = R(cx - w.w / 2); w.y = R(cy - w.h / 2); } return true; }
-    case 'contrast': { const bg = w.type == 'button' || w.type == 'dropdown' ? w.bg : (hasBg(w) ? w.bg : backdrop(s, w)); w.fg = luminance(bg) > .4 ? '#0E1525' : '#FFFFFF'; return true; }
+    case 'contrast': { const bg = w.type == 'button' || w.type == 'dropdown' || w.type == 'roller' || w.type == 'textarea' ? w.bg : (hasBg(w) ? w.bg : backdrop(s, w)); w.fg = luminance(bg) > .4 ? '#0E1525' : '#FFFFFF'; return true; }
     case 'fittext': if (!measure) return false; { const lines = String(w.text).split('\n'); const room = w.type == 'button' ? w.w - 16 : w.type == 'checkbox' ? w.w - (w.font || 16) * 1.6 : w.w; let f = w.font; while (f > 12 && Math.max(...lines.map(l => measure(f, l))) > room) f = FONTS[FONTS.indexOf(f) - 1]; w.font = f; if (Math.max(...lines.map(l => measure(f, l))) > room) w.w = R(Math.max(...lines.map(l => measure(f, l))) + (w.type == 'button' ? 20 : 4)); return true; }
     case 'fitheight': w.h = LH[w.font] * String(w.text).split('\n').length + 2; return true;
     case 'range': w.max = +w.min + 100; return true;
@@ -990,7 +1246,8 @@ function cleanWidget(b, w, partial) {
   if (w.thick) p.thick = clamp(R(+w.thick), 1, 200);
   if (w.border != null) p.border = clamp(R(+w.border || 0), 0, 12);
   for (const k of ['value', 'min', 'max']) if (w[k] !== '' && w[k] != null && isFinite(+w[k])) p[k] = R(+w[k]);
-  for (const k of ['checked', 'showValue', 'shadow', 'hidden', 'locked']) if (typeof w[k] == 'boolean') p[k] = w[k];
+  for (const k of ['checked', 'showValue', 'shadow', 'hidden', 'locked', 'oneLine', 'password']) if (typeof w[k] == 'boolean') p[k] = w[k];
+  if (w.image && typeof w.image.src == 'string' && PNG_URL.test(w.image.src) && w.image.src.length < 900000) p.image = {src: w.image.src};
   if (['left', 'center', 'right'].includes(w.align)) p.align = w.align;
   if (['top', 'center', 'bottom'].includes(w.valign)) p.valign = w.valign;
   if (w.icon != null) p.icon = ICONS[w.icon] ? w.icon : 'home';
@@ -1058,11 +1315,12 @@ function findWidget(s, ref) {
   if (!w) throw new Error('No widget called "' + ref + '" on ' + s.name + '. Widgets: ' + (s.widgets.map(x => x.name).join(', ') || 'none'));
   return w;
 }
-const FIELDS = ['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'radius', 'value', 'min', 'max', 'checked', 'showValue', 'thick', 'align', 'valign', 'icon', 'options', 'data', 'shadow', 'border', 'borderColor', 'opacity', 'hidden', 'locked', 'action'];
+const FIELDS = ['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'radius', 'value', 'min', 'max', 'checked', 'showValue', 'thick', 'align', 'valign', 'icon', 'options', 'data', 'shadow', 'border', 'borderColor', 'opacity', 'hidden', 'locked', 'action', 'oneLine', 'password'];
 function widgetBrief(P, w) {
   const o = {name: w.name, type: w.type};
   for (const k of FIELDS) if (w[k] != null && w[k] !== '' && !(k == 'opacity' && w[k] == 100) && !((k == 'hidden' || k == 'locked') && !w[k])) o[k] = w[k];
   if (w.onTap && w.onTap.to) { const t = P.screens.find(s => s.id == w.onTap.to); if (t) o.onTap = {screen: t.name, animation: w.onTap.anim}; }
+  if (w.type == 'image') o.picture = !!(w.image && w.image.src);
   return o;
 }
 function boardBrief(b) { return {id: b.id, maker: b.brand, model: b.name, size: b.size, width: b.w, height: b.h, round: !!b.round, panel: b.panel, chip: b.chip, touch: !!b.touch, rotation: b.rot || 0}; }
@@ -1089,19 +1347,20 @@ function linkTap(P, s, w, to, anim) {
 const WIDGET_SCHEMA = {type: 'object', description: 'A widget. type, x, y, w, h are needed when adding. Coordinates are integer pixels from the top-left of the screen.', properties: {
   type: {type: 'string', enum: Object.keys(TYPES)}, name: {type: 'string', description: 'Letters, digits and _ only. Becomes the C variable name.'},
   x: {type: 'integer'}, y: {type: 'integer'}, w: {type: 'integer'}, h: {type: 'integer'},
-  text: {type: 'string', description: 'label, button, checkbox. Plain ASCII, \\n for a new line.'},
+  text: {type: 'string', description: 'label, button, checkbox, and the hint a textarea shows while empty. Plain ASCII, \\n for a new line.'},
   font: {type: 'integer', enum: FONTS, description: 'Montserrat size in px.'},
   fg: {type: 'string', description: 'Text or icon colour, #RRGGBB.'}, bg: {type: 'string', description: 'Fill or track colour, #RRGGBB or "transparent".'}, accent: {type: 'string', description: 'Indicator colour for switch, slider, arc, bar, checkbox, chart, spinner, led.'},
   radius: {type: 'integer'}, value: {type: 'number'}, min: {type: 'number'}, max: {type: 'number'}, checked: {type: 'boolean'}, showValue: {type: 'boolean', description: 'arc: draw the number in the middle.'},
   thick: {type: 'integer', description: 'arc and spinner line width.'}, align: {type: 'string', enum: ['left', 'center', 'right']}, valign: {type: 'string', enum: ['top', 'center', 'bottom']},
-  icon: {type: 'string', enum: Object.keys(ICONS)}, options: {type: 'string', description: 'dropdown choices, one per line.'}, data: {type: 'string', description: 'chart values, comma separated.'},
-  shadow: {type: 'boolean'}, border: {type: 'integer'}, borderColor: {type: 'string'}, opacity: {type: 'integer', description: '0 to 100.'}, hidden: {type: 'boolean'}, locked: {type: 'boolean'},
+  icon: {type: 'string', enum: Object.keys(ICONS)}, options: {type: 'string', description: 'dropdown and roller choices, one per line. A roller shows value as the selected index.'}, data: {type: 'string', description: 'chart values, comma separated.'},
+  shadow: {type: 'boolean'}, border: {type: 'integer'}, borderColor: {type: 'string'}, opacity: {type: 'integer', description: '0 to 100.'}, hidden: {type: 'boolean'}, locked: {type: 'boolean'}, oneLine: {type: 'boolean', description: 'textarea: a single line, like a password or name field.'}, password: {type: 'boolean', description: 'textarea: show dots instead of letters.'},
   action: {type: 'string', description: 'Firmware hook, like "lights_toggle". Runs ui_action_<name>() in C when a button, card, icon or label is tapped, or when a switch, checkbox, slider or dropdown changes. "" removes it.'}}};
 const SCREEN_REF = {type: 'string', description: 'Screen name. Leave out for the open screen.'};
 
 const DESIGN_RULES = 'Design rules for Epixo screens: they run on LVGL on small ESP32 touch displays. Keep every widget inside the screen (and inside the circle on round displays, about 16% margin). ' +
   'Use calm, premium, iOS-like layouts: generous spacing, rounded cards drawn first with widgets on top, one accent colour, large readable text (Montserrat ' + FONTS[0] + ' to ' + FONTS[FONTS.length - 1] + ' px), touch targets at least the size check_design asks for. ' +
-  'Text is plain ASCII with no emoji. After building, always call check_design and fix what it reports. Use get_screen to see positions as a text map.';
+  'Text is plain ASCII with no emoji. For typing, pair a textarea with a keyboard across the bottom of the screen. Use a roller to pick one of a few values. An image widget needs a picture the person adds in the editor, so use it only as a placeholder for a logo or photo. ' +
+  'Give a button, switch, slider or text field an action name (like "fan" or "save_wifi") when it should run firmware code. After building, always call check_design and fix what it reports. Use get_screen to see positions as a text map.';
 
 const AI_TOOLS = [
   {name: 'get_project', description: 'Overview of the project: board, screens, open screen, LVGL version and design rules. Call this first.', inputSchema: {type: 'object', properties: {}},
@@ -1198,7 +1457,7 @@ const API = {
   R, clamp, FONTS, LH, F, ADV, measureText, fitWidget, C, ICONS, SYMBOL_HEX, TYPES, SQUARE, TAPPABLE, ANIMS, THEMES, BOARDS, VERIFY, TPL, SRC,
   blank, uniqueName, uniqueWidgetName, nameKey, mkW, mkScreen, addTemplate, defaultProject, boardDims, withRotation,
   nums, ident, hexv, iconFont, padOf, toScript, scriptScreen, sid,
-  genC, genH, genPy, genXML, genXMLLoader, genYAML, ACTION_EVENT, actionName, actionOf, actionsOf, actionGuide, genLvConf, usedFonts, packOf, boardPlatformio, mainForPack, genGenericMain,
+  genC, genH, genPy, genXML, genXMLLoader, genYAML, pictureOf, picBytes, decodePNG, ACTION_EVENT, actionName, actionOf, actionsOf, actionGuide, genLvConf, usedFonts, packOf, boardPlatformio, mainForPack, genGenericMain,
   memoryReport, doctor, applyFix, contrast, touchTarget,
   cleanWidget, adaptToBoard, applyTheme, layoutMap, AI_TOOLS, READ_ONLY, runTool, toolSpecs, toolNote, DESIGN_RULES
 };

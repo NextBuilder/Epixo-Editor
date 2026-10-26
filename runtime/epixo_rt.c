@@ -11,10 +11,18 @@
 #define lv_obj_delete lv_obj_del
 #define lv_obj_set_style_shadow_offset_y lv_obj_set_style_shadow_ofs_y
 typedef lv_scr_load_anim_t lv_screen_load_anim_t;
+#define lv_image_create lv_img_create
+#define lv_image_set_src lv_img_set_src
+#define lv_image_cache_drop lv_img_cache_invalidate_src
+#define lv_obj_get_child_count lv_obj_get_child_cnt
+#define lv_malloc lv_mem_alloc
+#define lv_free lv_mem_free
+typedef lv_img_dsc_t lv_image_dsc_t;
 #endif
 
 #define EP_MAX_SCREENS 64
 #define EP_MAX_WIDGETS 1024
+#define EP_MAX_IMAGES 64
 
 typedef struct {
     int id;
@@ -36,8 +44,19 @@ typedef struct {
     uint32_t fg, bg, accent, border_color;
     int has_fg, has_bg, has_accent, has_border_color;
     int font, align, pad, radius, thick, border, value, min, max;
-    int checked, show_value, shadow, opacity, hidden, tap_to, tap_anim;
+    int checked, show_value, shadow, opacity, hidden, tap_to, tap_anim, one_line, password;
+    uint8_t * img;
+    uint32_t img_len, img_cap;
+    int img_w, img_h, img_alpha;
 } ep_props_t;
+
+/* Pictures stay in fixed slots, because image widgets point at the descriptor inside them. */
+typedef struct {
+    int id;
+    lv_obj_t * screen;
+    uint8_t * data;
+    lv_image_dsc_t dsc;
+} ep_image_t;
 
 static ep_screen_t screens[EP_MAX_SCREENS];
 static int screen_count;
@@ -46,6 +65,8 @@ static int widget_count;
 static lv_obj_t * cur_screen;
 static ep_props_t P;
 static int in_widget;
+static ep_image_t images[EP_MAX_IMAGES];
+static int images_ready;
 
 static const lv_font_t * ep_font(int s)
 {
@@ -180,6 +201,7 @@ int epixo_rt_widget_value(int id)
         if(lv_obj_check_type(o, &lv_arc_class)) return lv_arc_get_value(o);
         if(lv_obj_check_type(o, &lv_bar_class)) return lv_bar_get_value(o);
         if(lv_obj_check_type(o, &lv_dropdown_class)) return (int)lv_dropdown_get_selected(o);
+        if(lv_obj_check_type(o, &lv_roller_class)) return (int)lv_roller_get_selected(o);
         return lv_obj_has_state(o, LV_STATE_CHECKED) ? 1 : 0;
     }
     return -1;
@@ -203,8 +225,129 @@ static void ep_arc_value_cb(lv_event_t * e)
     lv_label_set_text_fmt(label, "%d", (int)lv_arc_get_value(arc));
 }
 
+static int ep_b64(char c)
+{
+    if(c >= 'A' && c <= 'Z') return c - 'A';
+    if(c >= 'a' && c <= 'z') return c - 'a' + 26;
+    if(c >= '0' && c <= '9') return c - '0' + 52;
+    if(c == '+') return 62;
+    if(c == '/') return 63;
+    return -1;
+}
+
+static void ep_img_append(const char * s)
+{
+    uint32_t acc = 0;
+    int bits = 0;
+    for(; *s; s++) {
+        int v = ep_b64(*s);
+        if(v < 0) continue;
+        acc = (acc << 6) | (uint32_t)v;
+        bits += 6;
+        if(bits >= 8) {
+            bits -= 8;
+            if(P.img && P.img_len < P.img_cap) P.img[P.img_len++] = (uint8_t)(acc >> bits);
+        }
+    }
+}
+
+static void ep_image_drop(ep_image_t * im)
+{
+    if(im->data) {
+        lv_image_cache_drop(&im->dsc);
+        lv_free(im->data);
+    }
+    im->data = NULL;
+    im->id = -1;
+    im->screen = NULL;
+}
+
+static void ep_images_init(void)
+{
+    if(images_ready) return;
+    for(int i = 0; i < EP_MAX_IMAGES; i++) images[i].id = -1;
+    images_ready = 1;
+}
+
+static void ep_free_images(lv_obj_t * scr)
+{
+    ep_images_init();
+    for(int i = 0; i < EP_MAX_IMAGES; i++) {
+        if(images[i].id >= 0 && (!scr || images[i].screen == scr)) ep_image_drop(&images[i]);
+    }
+}
+
+/* Moves the decoded picture in P into a slot, in the layout this LVGL build draws directly. */
+static ep_image_t * ep_image_take(int id, lv_obj_t * scr)
+{
+    ep_images_init();
+    ep_image_t * im = NULL;
+    for(int i = 0; i < EP_MAX_IMAGES && !im; i++) if(images[i].id == id) im = &images[i];
+    for(int i = 0; i < EP_MAX_IMAGES && !im; i++) if(images[i].id < 0) im = &images[i];
+    if(!im) return NULL;
+    ep_image_drop(im);
+    memset(&im->dsc, 0, sizeof(im->dsc));
+#if LVGL_VERSION_MAJOR >= 9
+    im->data = P.img;
+    im->dsc.header.magic = LV_IMAGE_HEADER_MAGIC;
+    im->dsc.header.cf = P.img_alpha ? LV_COLOR_FORMAT_RGB565A8 : LV_COLOR_FORMAT_RGB565;
+    im->dsc.header.w = P.img_w;
+    im->dsc.header.h = P.img_h;
+    im->dsc.header.stride = P.img_w * 2;
+    im->dsc.data_size = P.img_len;
+#else
+    int n = P.img_w * P.img_h;
+    int per = LV_COLOR_DEPTH == 32 ? 4 : (P.img_alpha ? 3 : 2);
+    uint8_t * d = lv_malloc((size_t)n * per);
+    if(!d) return NULL;
+    for(int i = 0; i < n; i++) {
+        uint8_t lo = P.img[i * 2], hi = P.img[i * 2 + 1], a = P.img_alpha ? P.img[n * 2 + i] : 255;
+        uint8_t * o = d + i * per;
+#if LV_COLOR_DEPTH == 32
+        uint16_t c = (uint16_t)(lo | (hi << 8));
+        uint8_t r = c >> 11, g = (c >> 5) & 63, b = c & 31;
+        o[0] = (uint8_t)((b << 3) | (b >> 2));
+        o[1] = (uint8_t)((g << 2) | (g >> 4));
+        o[2] = (uint8_t)((r << 3) | (r >> 2));
+        o[3] = a;
+#elif LV_COLOR_16_SWAP
+        o[0] = hi;
+        o[1] = lo;
+        if(P.img_alpha) o[2] = a;
+#else
+        o[0] = lo;
+        o[1] = hi;
+        if(P.img_alpha) o[2] = a;
+#endif
+    }
+    lv_free(P.img);
+    im->data = d;
+    im->dsc.header.cf = P.img_alpha ? LV_IMG_CF_TRUE_COLOR_ALPHA : LV_IMG_CF_TRUE_COLOR;
+    im->dsc.header.w = P.img_w;
+    im->dsc.header.h = P.img_h;
+    im->dsc.data_size = (uint32_t)(n * per);
+#endif
+    im->dsc.data = im->data;
+    im->id = id;
+    im->screen = scr;
+    P.img = NULL;
+    return im;
+}
+
+/* A keyboard types into the text field that has focus. */
+static void ep_ta_focus_cb(lv_event_t * e)
+{
+    lv_obj_t * ta = (lv_obj_t *)lv_event_get_target(e);
+    lv_obj_t * scr = lv_obj_get_screen(ta);
+    for(uint32_t i = 0; i < lv_obj_get_child_count(scr); i++) {
+        lv_obj_t * c = lv_obj_get_child(scr, (int32_t)i);
+        if(lv_obj_check_type(c, &lv_keyboard_class)) lv_keyboard_set_textarea(c, ta);
+    }
+}
+
 static void ep_props_default(void)
 {
+    if(P.img) lv_free(P.img);
     memset(&P, 0, sizeof(P));
     P.font = 16;
     P.min = 0;
@@ -372,6 +515,71 @@ static void ep_build(void)
         if(P.checked) lv_led_on(v);
         else lv_led_off(v);
     }
+    else if(strcmp(t, "roller") == 0) {
+        v = lv_roller_create(s);
+        lv_roller_set_options(v, P.options, LV_ROLLER_MODE_NORMAL);
+        lv_obj_set_style_bg_color(v, lv_color_hex(P.bg), 0);
+        lv_obj_set_style_text_color(v, lv_color_hex(P.fg), 0);
+        lv_obj_set_style_text_font(v, ep_font(P.font), 0);
+        lv_obj_set_style_radius(v, P.radius, 0);
+        lv_obj_set_style_border_width(v, 0, 0);
+        lv_obj_set_style_bg_color(v, lv_color_hex(P.accent), LV_PART_SELECTED);
+        lv_obj_set_style_text_color(v, lv_color_hex(0xFFFFFF), LV_PART_SELECTED);
+        lv_obj_set_style_text_font(v, ep_font(P.font), LV_PART_SELECTED);
+        lv_roller_set_selected(v, (uint32_t)(P.value < 0 ? 0 : P.value), LV_ANIM_OFF);
+    }
+    else if(strcmp(t, "textarea") == 0) {
+        v = lv_textarea_create(s);
+        lv_textarea_set_placeholder_text(v, P.text);
+        if(P.one_line) lv_textarea_set_one_line(v, true);
+        if(P.password) lv_textarea_set_password_mode(v, true);
+        lv_obj_set_style_bg_color(v, lv_color_hex(P.bg), 0);
+        lv_obj_set_style_text_color(v, lv_color_hex(P.fg), 0);
+        lv_obj_set_style_text_font(v, ep_font(P.font), 0);
+        lv_obj_set_style_radius(v, P.radius, 0);
+        lv_obj_set_style_border_color(v, lv_color_hex(P.accent), LV_STATE_FOCUSED);
+        lv_obj_add_event_cb(v, ep_ta_focus_cb, LV_EVENT_FOCUSED, NULL);
+        for(uint32_t i = 0; i < lv_obj_get_child_count(s); i++) {
+            lv_obj_t * c = lv_obj_get_child(s, (int32_t)i);
+            if(lv_obj_check_type(c, &lv_keyboard_class) && !lv_keyboard_get_textarea(c)) lv_keyboard_set_textarea(c, v);
+        }
+    }
+    else if(strcmp(t, "keyboard") == 0) {
+        v = lv_keyboard_create(s);
+        lv_obj_set_align(v, LV_ALIGN_TOP_LEFT);
+        lv_obj_set_style_bg_color(v, lv_color_hex(P.bg), 0);
+        lv_obj_set_style_bg_color(v, lv_color_hex(P.accent), LV_PART_ITEMS);
+        lv_obj_set_style_text_color(v, lv_color_hex(P.fg), LV_PART_ITEMS);
+        lv_obj_set_style_text_font(v, ep_font(P.font), LV_PART_ITEMS);
+        lv_obj_set_style_radius(v, P.radius, LV_PART_ITEMS);
+        for(uint32_t i = 0; i < lv_obj_get_child_count(s); i++) {
+            lv_obj_t * c = lv_obj_get_child(s, (int32_t)i);
+            if(lv_obj_check_type(c, &lv_textarea_class)) {
+                lv_keyboard_set_textarea(v, c);
+                break;
+            }
+        }
+    }
+    else if(strcmp(t, "image") == 0) {
+        ep_image_t * im = (P.img && P.img_len == P.img_cap) ? ep_image_take(P.id, s) : NULL;
+        if(im) {
+            v = lv_image_create(s);
+            lv_image_set_src(v, &im->dsc);
+        }
+        else {
+            v = lv_obj_create(s);
+            lv_obj_remove_flag(v, LV_OBJ_FLAG_SCROLLABLE);
+            lv_obj_set_style_bg_color(v, lv_color_hex(0xE4E6EB), 0);
+            lv_obj_set_style_border_width(v, 0, 0);
+            lv_obj_set_style_radius(v, 12, 0);
+            lv_obj_set_style_shadow_width(v, 0, 0);
+            lv_obj_t * l = lv_label_create(v);
+            lv_label_set_text(l, LV_SYMBOL_IMAGE);
+            lv_obj_set_style_text_color(l, lv_color_hex(0x8D93A1), 0);
+            lv_obj_set_style_text_font(l, &lv_font_montserrat_14, 0);
+            lv_obj_center(l);
+        }
+    }
     if(!v) return;
 
     lv_obj_set_pos(v, P.x, P.y);
@@ -379,7 +587,7 @@ static void ep_build(void)
     if(P.opacity < 100) lv_obj_set_style_opa(v, (lv_opa_t)((255 * P.opacity + 50) / 100), 0);
     if(P.hidden) lv_obj_add_flag(v, LV_OBJ_FLAG_HIDDEN);
     if(P.tap_to >= 0) {
-        if(strcmp(t, "label") == 0 || strcmp(t, "icon") == 0) lv_obj_add_flag(v, LV_OBJ_FLAG_CLICKABLE);
+        if(strcmp(t, "label") == 0 || strcmp(t, "icon") == 0 || strcmp(t, "image") == 0) lv_obj_add_flag(v, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(v, ep_tap_cb, LV_EVENT_CLICKED, (void *)(intptr_t)((P.tap_to << 4) | (P.tap_anim & 15)));
     }
     if(widget_count < EP_MAX_WIDGETS) {
@@ -415,6 +623,27 @@ static void ep_prop(const char * k, const char * val)
     else if(!strcmp(k, "hidden")) P.hidden = ep_atoi(val);
     else if(!strcmp(k, "tapTo")) P.tap_to = ep_atoi(val);
     else if(!strcmp(k, "tapAnim")) P.tap_anim = ep_atoi(val);
+    else if(!strcmp(k, "oneLine")) P.one_line = ep_atoi(val);
+    else if(!strcmp(k, "password")) P.password = ep_atoi(val);
+    else if(!strcmp(k, "img")) {
+        const char * q = val;
+        int w = ep_atoi(q);
+        q = strchr(q, ',');
+        int h = q ? ep_atoi(q + 1) : 0;
+        q = q ? strchr(q + 1, ',') : NULL;
+        int alpha = q ? ep_atoi(q + 1) : 0;
+        if(P.img) lv_free(P.img);
+        P.img = NULL;
+        if(w > 0 && h > 0 && w <= 2048 && h <= 2048) {
+            P.img_cap = (uint32_t)w * (uint32_t)h * (alpha ? 3 : 2);
+            P.img = lv_malloc(P.img_cap);
+            P.img_len = 0;
+            P.img_w = w;
+            P.img_h = h;
+            P.img_alpha = alpha;
+        }
+    }
+    else if(!strcmp(k, "imgd")) ep_img_append(val);
 }
 
 static void ep_new_screen(int id, uint32_t bg)
@@ -431,6 +660,7 @@ static void ep_new_screen(int id, uint32_t bg)
         ep_forget_widgets_of(prev);
         if(lv_screen_active() == prev) lv_screen_load(scr);
         lv_obj_delete(prev);
+        ep_free_images(prev);
     }
     else if(screen_count < EP_MAX_SCREENS) {
         screens[screen_count].id = id;
@@ -451,6 +681,7 @@ static void ep_drop_screen(int id)
             lv_screen_load(blank);
         }
         lv_obj_delete(o);
+        ep_free_images(o);
         screens[i] = screens[--screen_count];
         return;
     }
@@ -469,6 +700,7 @@ void epixo_rt_reset(void)
         for(int i = 0; i < screen_count; i++) if(screens[i].obj == act) owned = 1;
         if(!owned) lv_obj_delete(act);
     }
+    ep_free_images(NULL);
     screen_count = 0;
     widget_count = 0;
     cur_screen = NULL;
