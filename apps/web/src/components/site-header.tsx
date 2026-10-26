@@ -141,7 +141,7 @@ export function SiteHeader() {
         </div>
       </div>
       {open && (
-        <nav className="glass fixed inset-x-0 bottom-0 top-[52px] overflow-y-auto lg:hidden" aria-label="Mobile">
+        <nav className="fixed inset-x-0 top-[52px] h-[calc(100dvh-52px)] overflow-y-auto bg-paper lg:hidden" aria-label="Mobile">
           <div className="wrap menu-in py-6">
             {NAV.map(([href, label], i) => (
               <Link key={href} href={href} style={{ "--i": i } as React.CSSProperties} className={`block py-2.5 text-[28px] font-semibold tracking-tight ${on(href) ? "text-ink" : "text-ink/80"}`}>
