@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Download, PencilLine, Repeat2 } from "lucide-react";
+import { ChevronLeft, Download, PencilLine, Repeat2 } from "@/components/icons";
 import { Comments } from "@/components/comments";
 import { LikeButton, OwnerTools, ReportButton, SaveButton, ShareButton } from "@/components/post-actions";
 import { FollowButton } from "@/components/profile/follow-button";

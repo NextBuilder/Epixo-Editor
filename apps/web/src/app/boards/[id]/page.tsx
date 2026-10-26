@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import { ChevronLeft, ExternalLink } from "@/components/icons";
 import { TemplateStill } from "@/components/template-still";
 import { PostGrid } from "@/components/post-card";
 import { Shape, VerifyBadge } from "@/components/verify-badge";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { Bookmark } from "lucide-react";
+import { Bookmark } from "@/components/icons";
 import { Empty } from "@/components/empty";
 import { PostGrid } from "@/components/post-card";
 import { listPosts } from "@/lib/posts";

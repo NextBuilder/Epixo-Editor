@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp } from "@/components/icons";
 import { Avatar } from "./avatar";
 import { timeAgo } from "@/lib/data";
 

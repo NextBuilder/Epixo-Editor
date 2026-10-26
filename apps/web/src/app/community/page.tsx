@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons";
 import { Empty } from "@/components/empty";
 import { PostGrid } from "@/components/post-card";
 import { currentUser } from "@/lib/server";

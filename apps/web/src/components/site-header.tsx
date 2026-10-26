@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Bell, Bookmark, Inbox, LayoutGrid, LogOut, Menu, Moon, Settings, Sparkles, Sun, SunMoon, User, X } from "lucide-react";
+import { Bell, Bookmark, Inbox, LayoutGrid, LogOut, Menu, Moon, Settings, Sparkles, Sun, SunMoon, User, X } from "@/components/icons";
 import { Logo } from "./logo";
 import { Avatar } from "./avatar";
 import { useMe } from "./use-me";

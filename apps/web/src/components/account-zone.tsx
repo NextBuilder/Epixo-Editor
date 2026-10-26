@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, LogOut, MonitorSmartphone, Trash2 } from "lucide-react";
+import { Download, LogOut, MonitorSmartphone, Trash2 } from "@/components/icons";
 
 export function AccountZone({ handle }: { handle: string }) {
   const [ask, setAsk] = useState(false);

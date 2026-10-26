@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, X } from "lucide-react";
+import { Briefcase, X } from "@/components/icons";
 import { HIRE_TYPES } from "@/lib/profile";
 
 type Props = { handle: string; name: string; types: string[]; signedIn: boolean; full?: boolean; label?: string };

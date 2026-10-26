@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid } from "@/components/icons";
 import { ProjectGrid, type ProjectRow } from "@/components/project-grid";
 import { HireInbox, type HireReq } from "@/components/hire-inbox";
 import { Empty } from "@/components/empty";

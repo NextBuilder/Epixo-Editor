@@ -2,11 +2,11 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ImagePlus, X } from "lucide-react";
+import { Check, ImagePlus, X } from "@/components/icons";
 import { Avatar } from "./avatar";
 import { AccountZone } from "./account-zone";
 import { Group, Row } from "./profile/hire-sheet";
-import { PlatformTile } from "./profile/social-links";
+import { SocialEditor } from "./social-editor";
 import { HIRE_TYPES, PLATFORMS, type SocialKey } from "@/lib/profile";
 
 type U = {
@@ -109,15 +109,7 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
         </div>
       </section>
 
-      <Group title="Links" note="Paste your username or the full link. They appear on your profile as buttons.">
-        {PLATFORMS.map(p => (
-          <label key={p.key} className="flex min-h-[52px] items-center gap-3">
-            <PlatformTile k={p.key} size={28} />
-            <span className="w-[104px] shrink-0 text-[15px]">{p.label}</span>
-            <input className="row-input" value={f.socials[p.key] ?? ""} placeholder={p.hint} maxLength={200} onChange={e => set("socials", { ...f.socials, [p.key]: e.target.value })} />
-          </label>
-        ))}
-      </Group>
+      <SocialEditor value={f.socials} onChange={v => set("socials", v)} />
 
       <section id="hire" className="scroll-mt-24">
         <h3 className="group-title font-sans tracking-normal">Hiring</h3>

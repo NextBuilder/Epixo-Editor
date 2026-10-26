@@ -12,8 +12,9 @@ Epixo is built on the work of these projects. Each keeps its own licence.
 | [OpenNext for Cloudflare](https://github.com/opennextjs/opennextjs-cloudflare) | Running the website on Cloudflare Workers | MIT |
 | [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) | Website styling | MIT |
 | [Zod](https://github.com/colinhacks/zod) | Input validation on the server | MIT |
-| [Lucide](https://github.com/lucide-icons/lucide) | Website icons | ISC |
-| Sora, Geist, JetBrains Mono (via [Fontsource](https://fontsource.org)) | Website fonts | SIL Open Font License 1.1 |
+| [Phosphor Icons](https://github.com/phosphor-icons/core) | Interface icons in the editor and website | MIT |
+| [Simple Icons](https://github.com/simple-icons/simple-icons) | Social network marks on profiles | CC0 1.0 |
+| Geist, JetBrains Mono (via [Fontsource](https://fontsource.org)) | Website fonts | SIL Open Font License 1.1 |
 
 Board specifications were cross-checked against ESP32_Display_Panel, [rzeldent/platformio-espressif32-sunton](https://github.com/rzeldent/platformio-espressif32-sunton) and makers' public wiki pages.
 

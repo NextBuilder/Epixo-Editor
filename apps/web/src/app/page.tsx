@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Cpu, HeartPulse, Layers, Sparkles, Usb, Code2 } from "lucide-react";
+import { ArrowRight, Cpu, HeartPulse, Layers, Sparkles, Usb, Code2 } from "@/components/icons";
 import { HeroBench } from "@/components/hero-bench";
 import { PostGrid } from "@/components/post-card";
 import { BOARDS, BRANDS } from "@/lib/data";

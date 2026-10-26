@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const exp = document.getElementById('exportBtn');
   const pub = document.createElement('button');
   pub.className = 'tbtn'; pub.id = 'pubBtn'; pub.title = 'Publish to the community';
-  pub.innerHTML = '<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg><span class="lbl-l">Publish</span>';
+  pub.innerHTML = '<svg class="i" viewBox="0 0 256 256"><path d="M216,112v96a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V112A16,16,0,0,1,56,96H80a8,8,0,0,1,0,16H56v96H200V112H176a8,8,0,0,1,0-16h24A16,16,0,0,1,216,112ZM93.66,69.66,120,43.31V136a8,8,0,0,0,16,0V43.31l26.34,26.35a8,8,0,0,0,11.32-11.32l-40-40a8,8,0,0,0-11.32,0l-40,40A8,8,0,0,0,93.66,69.66Z"/></svg><span class="lbl-l">Publish</span>';
   exp.before(pub);
   const acct = document.createElement('a');
   acct.className = 'tbtn'; acct.style.padding = '0 4px'; acct.style.textDecoration = 'none';

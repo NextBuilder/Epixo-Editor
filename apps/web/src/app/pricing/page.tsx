@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Check } from "lucide-react";
+import { Check } from "@/components/icons";
 import { Waitlist } from "@/components/waitlist";
 
 export const metadata: Metadata = { title: "Pricing", description: "Epixo is free to use. A Pro plan with more AI design credits and team features is on the way." };

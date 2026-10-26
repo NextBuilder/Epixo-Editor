@@ -75,7 +75,7 @@ export const DOCS: Doc[] = [
       <>
         <p>Export builds a zip with the parts you tick. Every part comes with a README that explains how to use it.</p>
         <h2>LVGL C</h2>
-        <p><code>ui/ui.c</code>, <code>ui/ui.h</code> and a matching <code>lv_conf.h</code>. Choose LVGL 8.4, 9.2 to 9.4, or 9.6 in the code panel. Call <code>ui_init()</code> once your display and touch drivers are running.</p>
+        <p><code>ui/ui.c</code>, <code>ui/ui.h</code> and a matching <code>lv_conf.h</code>. Choose LVGL 8.4, 9.2 to 9.4, or 9.6 in the code panel. Call <code>ui_init()</code> once your display and touch drivers are running. To show readings and react to taps, see <a href="/docs/firmware">Connecting your firmware</a>.</p>
         <pre>{`#include "ui.h"
 
 void setup() {
@@ -92,6 +92,43 @@ void setup() {
         <p><code>esphome/epixo_ui.yaml</code> holds an <code>lvgl:</code> block for Home Assistant devices. Charts are left out because ESPHome has no chart widget. See <a href="/docs/esphome">ESPHome</a>.</p>
         <h2>Screen images and project file</h2>
         <p>PNG images rendered by LVGL, ready for a README or a video, and <code>project.epixo.json</code>, which you can open in Epixo again later.</p>
+      </>
+    ),
+  },
+  {
+    slug: "firmware",
+    group: "Start here",
+    title: "Connecting your firmware",
+    summary: "Show live readings and run your own code when someone taps.",
+    body: (
+      <>
+        <p>An exported screen is a normal LVGL program. Your firmware changes what it shows, and your code runs when someone taps a button or moves a slider.</p>
+        <h2>Change what the screen shows</h2>
+        <p>Every widget is a global in <code>ui.h</code>, named <code>ui_&lt;Screen&gt;_&lt;Widget&gt;</code>. Rename a widget in the editor to give it a clear name, like <code>Temperature</code>.</p>
+        <pre>{`lv_label_set_text_fmt(ui_Home_Temperature, "%d°", reading);
+lv_arc_set_value(ui_Home_Dial, reading);
+lv_obj_add_state(ui_Home_Fan, LV_STATE_CHECKED);`}</pre>
+        <p>Call LVGL only from the task that runs <code>lv_timer_handler()</code>, or take the LVGL lock first.</p>
+        <h2>Run your code on a tap</h2>
+        <ol>
+          <li>Select a button, card, icon, label, switch, checkbox, slider or dropdown.</li>
+          <li>Under <strong>Run code</strong>, type a name such as <code>fan</code>.</li>
+          <li>Write <code>ui_action_fan</code> in a file of your own. Buttons call it when tapped. Switches, sliders and dropdowns call it when they change.</li>
+        </ol>
+        <pre>{`#include "ui.h"
+
+void ui_action_fan(lv_event_t * e)
+{
+    lv_obj_t * fan = (lv_obj_t *)lv_event_get_target(e);
+    digitalWrite(FAN_PIN, lv_obj_has_state(fan, LV_STATE_CHECKED));
+}`}</pre>
+        <p>Keep your actions out of <code>ui.c</code>. Epixo writes an empty version of each one there, marked weak, so the project builds before you write yours, and a new export never overwrites your code. Press Try it to see which action a tap runs. The export README lists a starter for every action in your project.</p>
+        <h2>Other formats</h2>
+        <ul>
+          <li><strong>MicroPython:</strong> <code>ui.actions[&quot;fan&quot;] = my_function</code> after <code>import ui</code>.</li>
+          <li><strong>ESPHome:</strong> each action is a script called <code>action_fan</code>. Replace its log line with your steps.</li>
+          <li><strong>LVGL XML:</strong> <code>epixo_xml_init()</code> registers each action, so the same C function runs.</li>
+        </ul>
       </>
     ),
   },
@@ -150,7 +187,12 @@ void setup() {
     body: (
       <>
         <p>The MicroPython export targets lv_micropython builds with LVGL 9. It was checked by running every test project on lv_micropython with LVGL 9.3 and comparing the pixels with the editor.</p>
-        <pre>{`import ui   # builds every screen and loads the first one`}</pre>
+        <pre>{`import ui   # builds every screen and loads the first one
+
+def fan(e):
+    print("Fan switched")
+
+ui.actions["fan"] = fan   # runs when the widget named fan changes`}</pre>
         <h2>Known difference</h2>
         <p>The binding does not expose <code>lv_spinner</code>, so spinners are drawn as an arc. Everything else matched the editor exactly.</p>
       </>
@@ -166,7 +208,7 @@ void setup() {
         <p>The ESPHome export is an <code>lvgl:</code> block with fonts, pages and widgets. Paste it into your device YAML under your display and touchscreen setup.</p>
         <pre>{`packages:
   ui: !include esphome/epixo_ui.yaml`}</pre>
-        <p>Every test project passes <code>esphome config</code>. Charts are left out because ESPHome&apos;s LVGL component has no chart widget. Screen changes from button taps are included.</p>
+        <p>Every test project passes <code>esphome config</code>. Charts are left out because ESPHome&apos;s LVGL component has no chart widget. Screen changes from button taps are included, and each action becomes a script you can fill in.</p>
       </>
     ),
   },

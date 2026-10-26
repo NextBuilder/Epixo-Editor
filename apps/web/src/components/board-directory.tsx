@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { Search } from "@/components/icons";
 import { Shape, VerifyBadge } from "./verify-badge";
 import type { Board } from "@/lib/data";
 

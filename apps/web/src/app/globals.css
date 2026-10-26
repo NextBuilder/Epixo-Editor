@@ -18,6 +18,7 @@
   --color-signal-soft: rgb(0 113 227 / 0.1);
   --color-bezel: #1D1D1F;
   --device-edge: rgb(0 0 0 / 0.6);
+  --brand-neutral: #1D1D1F;
   --color-stage: #F0F0F3;
   --color-live: #248A3D;
   --color-live-soft: rgb(52 199 89 / 0.14);
@@ -57,6 +58,7 @@
     --color-signal-soft: rgb(41 151 255 / 0.16);
     --color-bezel: #0B0B0C;
     --device-edge: rgb(255 255 255 / 0.16);
+    --brand-neutral: #3A3A3C;
     --color-stage: #161618;
     --color-live: #30D158;
     --color-live-soft: rgb(48 209 88 / 0.16);
@@ -86,6 +88,7 @@
   --color-signal-soft: rgb(41 151 255 / 0.16);
   --color-bezel: #0B0B0C;
   --device-edge: rgb(255 255 255 / 0.16);
+  --brand-neutral: #3A3A3C;
   --color-stage: #161618;
   --color-live: #30D158;
   --color-live-soft: rgb(48 209 88 / 0.16);

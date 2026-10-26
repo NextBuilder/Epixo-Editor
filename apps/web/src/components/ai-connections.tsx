@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Link2, Trash2 } from "lucide-react";
+import { Check, Copy, Link2, Trash2 } from "@/components/icons";
 import { timeAgo } from "@/lib/data";
 
 type Conn = { id: string; label: string; client: string; created_at: number; last_used_at: number | null };

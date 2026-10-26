@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
 import { DOCS, DOC_GROUPS } from "@/lib/docs";
 
 export const metadata: Metadata = { title: "Docs", description: "Guides for the Epixo LVGL editor: getting started, AI design, exporting code, board packs, Live Mirror, MicroPython, ESPHome and LVGL XML." };

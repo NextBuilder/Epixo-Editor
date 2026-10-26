@@ -62,23 +62,28 @@ const SYMBOL_NAME = n => 'LV_SYMBOL_' + (ICONS[n] || ICONS.home)[1];
 const SYMBOL_HEX = {HOME:'F015',WIFI:'F1EB',BLUETOOTH:'F293',BELL:'F0F3',SETTINGS:'F013',POWER:'F011',CHARGE:'F0E7',PLAY:'F04B',PAUSE:'F04C',STOP:'F04D',PREV:'F048',NEXT:'F051',VOLUME_MAX:'F028',MUTE:'F026',AUDIO:'F001',REFRESH:'F021',OK:'F00C',CLOSE:'F00D',PLUS:'F067',MINUS:'F068',LEFT:'F053',RIGHT:'F054',UP:'F077',DOWN:'F078',BATTERY_FULL:'F240',EYE_OPEN:'F06E',IMAGE:'F03E',GPS:'F124',TRASH:'F2ED',EDIT:'F304',SAVE:'F0C7',WARNING:'F071',CALL:'F095',ENVELOPE:'F0E0',LIST:'F00B',USB:'F287',UPLOAD:'F093',DOWNLOAD:'F019',LOOP:'F079',SHUFFLE:'F074',KEYBOARD:'F11C',TINT:'F043'};
 
 const TYPES = {
-  label:{n:'Label',g:'basic',lv:'lv_label',i:'<path d="M5 6h14M12 6v13"/>',d:{w:180,h:34,text:'Hello, Epixo',fg:C.ink,font:20,align:'left',valign:'center',bg:'transparent',radius:0}},
-  button:{n:'Button',g:'basic',lv:'lv_button',i:'<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M9 12h6"/>',d:{w:150,h:50,text:'Continue',bg:C.acc,fg:'#FFFFFF',radius:14,font:16}},
-  icon:{n:'Icon',g:'basic',lv:'lv_label',i:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4l-5.3 3 1.2-6-4.5-4.1 6-.7z"/>',d:{w:44,h:44,icon:'home',fg:C.acc}},
-  panel:{n:'Card',g:'basic',lv:'lv_obj',i:'<rect x="3" y="5" width="18" height="14" rx="4"/>',d:{w:240,h:150,bg:C.card,radius:22,shadow:true,border:0,borderColor:'#E4E6EB'}},
-  switch:{n:'Switch',g:'ctl',lv:'lv_switch',i:'<rect x="3" y="7" width="18" height="10" rx="5"/><circle cx="16" cy="12" r="2.6"/>',d:{w:60,h:34,accent:C.green,bg:C.track,checked:true}},
-  slider:{n:'Slider',g:'ctl',lv:'lv_slider',i:'<path d="M3 12h18"/><circle cx="9" cy="12" r="3"/>',d:{w:220,h:10,accent:C.acc,bg:C.track,value:60,min:0,max:100}},
-  checkbox:{n:'Checkbox',g:'ctl',lv:'lv_checkbox',i:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12l3 3 5-6"/>',d:{w:180,h:30,text:'Auto mode',accent:C.acc,fg:C.ink,font:16,checked:true}},
-  dropdown:{n:'Dropdown',g:'ctl',lv:'lv_dropdown',i:'<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M14 11l2 2 2-2"/>',d:{w:190,h:46,options:'Living room\nBedroom\nKitchen',bg:C.card,fg:C.ink,radius:12,font:16}},
-  arc:{n:'Arc',g:'data',lv:'lv_arc',i:'<path d="M6 18a8 8 0 1 1 12 0"/>',d:{w:150,h:150,accent:C.acc,bg:C.track,value:70,min:0,max:100,thick:14,showValue:true,fg:C.ink,font:32}},
-  bar:{n:'Progress',g:'data',lv:'lv_bar',i:'<rect x="3" y="10" width="18" height="4" rx="2"/><path d="M5 12h7"/>',d:{w:220,h:12,accent:C.green,bg:C.track,value:45,min:0,max:100,radius:6}},
-  chart:{n:'Chart',g:'data',lv:'lv_chart',i:'<path d="M3 17l5-5 4 3 8-8"/>',d:{w:300,h:150,accent:C.acc,bg:C.card,data:'12,18,15,26,22,30,27,35',radius:16}},
-  spinner:{n:'Spinner',g:'data',lv:'lv_spinner',i:'<path d="M12 3a9 9 0 1 0 9 9"/>',d:{w:56,h:56,accent:C.acc,bg:C.track,thick:6}},
-  led:{n:'LED',g:'data',lv:'lv_led',i:'<circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>',d:{w:26,h:26,accent:C.green,checked:true}}
+  label:{n:'Label',g:'basic',lv:'lv_label',i:'<path d="M208,56V88a8,8,0,0,1-16,0V64H136V192h24a8,8,0,0,1,0,16H96a8,8,0,0,1,0-16h24V64H64V88a8,8,0,0,1-16,0V56a8,8,0,0,1,8-8H200A8,8,0,0,1,208,56Z"/>',d:{w:180,h:34,text:'Hello, Epixo',fg:C.ink,font:20,align:'left',valign:'center',bg:'transparent',radius:0}},
+  button:{n:'Button',g:'basic',lv:'lv_button',i:'<path d="M56,76a60,60,0,0,1,120,0,8,8,0,0,1-16,0,44,44,0,0,0-88,0,8,8,0,1,1-16,0Zm140,44a27.9,27.9,0,0,0-13.36,3.39A28,28,0,0,0,144,106.7V76a28,28,0,0,0-56,0v80l-3.82-6.13a28,28,0,0,0-48.41,28.17l29.32,50A8,8,0,1,0,78.89,220L49.6,170a12,12,0,1,1,20.78-12l.14.23,18.68,30A8,8,0,0,0,104,184V76a12,12,0,0,1,24,0v68a8,8,0,1,0,16,0V132a12,12,0,0,1,24,0v20a8,8,0,0,0,16,0v-4a12,12,0,0,1,24,0v36c0,21.61-7.1,36.3-7.16,36.42a8,8,0,0,0,3.58,10.73A7.9,7.9,0,0,0,208,232a8,8,0,0,0,7.16-4.42c.37-.73,8.85-18,8.85-43.58V148A28,28,0,0,0,196,120Z"/>',d:{w:150,h:50,text:'Continue',bg:C.acc,fg:'#FFFFFF',radius:14,font:16}},
+  icon:{n:'Icon',g:'basic',lv:'lv_label',i:'<path d="M239.18,97.26A16.38,16.38,0,0,0,224.92,86l-59-4.76L143.14,26.15a16.36,16.36,0,0,0-30.27,0L90.11,81.23,31.08,86a16.46,16.46,0,0,0-9.37,28.86l45,38.83L53,211.75a16.38,16.38,0,0,0,24.5,17.82L128,198.49l50.53,31.08A16.4,16.4,0,0,0,203,211.75l-13.76-58.07,45-38.83A16.43,16.43,0,0,0,239.18,97.26Zm-15.34,5.47-48.7,42a8,8,0,0,0-2.56,7.91l14.88,62.8a.37.37,0,0,1-.17.48c-.18.14-.23.11-.38,0l-54.72-33.65a8,8,0,0,0-8.38,0L69.09,215.94c-.15.09-.19.12-.38,0a.37.37,0,0,1-.17-.48l14.88-62.8a8,8,0,0,0-2.56-7.91l-48.7-42c-.12-.1-.23-.19-.13-.5s.18-.27.33-.29l63.92-5.16A8,8,0,0,0,103,91.86l24.62-59.61c.08-.17.11-.25.35-.25s.27.08.35.25L153,91.86a8,8,0,0,0,6.75,4.92l63.92,5.16c.15,0,.24,0,.33.29S224,102.63,223.84,102.73Z"/>',d:{w:44,h:44,icon:'home',fg:C.acc}},
+  panel:{n:'Card',g:'basic',lv:'lv_obj',i:'<path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200Z"/>',d:{w:240,h:150,bg:C.card,radius:22,shadow:true,border:0,borderColor:'#E4E6EB'}},
+  switch:{n:'Switch',g:'ctl',lv:'lv_switch',i:'<path d="M176,56H80a72,72,0,0,0,0,144h96a72,72,0,0,0,0-144Zm0,128H80A56,56,0,0,1,80,72h96a56,56,0,0,1,0,112Zm0-96a40,40,0,1,0,40,40A40,40,0,0,0,176,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,176,152Z"/>',d:{w:60,h:34,accent:C.green,bg:C.track,checked:true}},
+  slider:{n:'Slider',g:'ctl',lv:'lv_slider',i:'<path d="M40,88H73a32,32,0,0,0,62,0h81a8,8,0,0,0,0-16H135a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16Zm64-24A16,16,0,1,1,88,80,16,16,0,0,1,104,64ZM216,168H199a32,32,0,0,0-62,0H40a8,8,0,0,0,0,16h97a32,32,0,0,0,62,0h17a8,8,0,0,0,0-16Zm-48,24a16,16,0,1,1,16-16A16,16,0,0,1,168,192Z"/>',d:{w:220,h:10,accent:C.acc,bg:C.track,value:60,min:0,max:100}},
+  checkbox:{n:'Checkbox',g:'ctl',lv:'lv_checkbox',i:'<path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM208,208V48H48V208H208Z"/>',d:{w:180,h:30,text:'Auto mode',accent:C.acc,fg:C.ink,font:16,checked:true}},
+  dropdown:{n:'Dropdown',g:'ctl',lv:'lv_dropdown',i:'<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.66-109.66a8,8,0,0,1,0,11.32l-40,40a8,8,0,0,1-11.32,0l-40-40a8,8,0,0,1,11.32-11.32L128,140.69l34.34-34.35A8,8,0,0,1,173.66,106.34Z"/>',d:{w:190,h:46,options:'Living room\nBedroom\nKitchen',bg:C.card,fg:C.ink,radius:12,font:16}},
+  arc:{n:'Arc',g:'data',lv:'lv_arc',i:'<path d="M207.06,72.67A111.24,111.24,0,0,0,128,40h-.4C66.07,40.21,16,91,16,153.13V176a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V152A111.25,111.25,0,0,0,207.06,72.67ZM224,176H119.71l54.76-75.3a8,8,0,0,0-12.94-9.42L99.92,176H32V153.13c0-3.08.15-6.12.43-9.13H56a8,8,0,0,0,0-16H35.27c10.32-38.86,44-68.24,84.73-71.66V80a8,8,0,0,0,16,0V56.33A96.14,96.14,0,0,1,221,128H200a8,8,0,0,0,0,16h23.67c.21,2.65.33,5.31.33,8Z"/>',d:{w:150,h:150,accent:C.acc,bg:C.track,value:70,min:0,max:100,thick:14,showValue:true,fg:C.ink,font:32}},
+  bar:{n:'Progress',g:'data',lv:'lv_bar',i:'<path d="M224,96H184V56a8,8,0,0,0-8-8H56V40a8,8,0,0,0-16,0V216a8,8,0,0,0,16,0v-8h88a8,8,0,0,0,8-8V160h72a8,8,0,0,0,8-8V104A8,8,0,0,0,224,96ZM168,64V96H56V64ZM136,192H56V160h80Zm80-48H56V112H216Z"/>',d:{w:220,h:12,accent:C.green,bg:C.track,value:45,min:0,max:100,radius:6}},
+  chart:{n:'Chart',g:'data',lv:'lv_chart',i:'<path d="M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V48a8,8,0,0,1,16,0v94.37L90.73,98a8,8,0,0,1,10.07-.38l58.81,44.11L218.73,90a8,8,0,1,1,10.54,12l-64,56a8,8,0,0,1-10.07.38L96.39,114.29,40,163.63V200H224A8,8,0,0,1,232,208Z"/>',d:{w:300,h:150,accent:C.acc,bg:C.card,data:'12,18,15,26,22,30,27,35',radius:16}},
+  spinner:{n:'Spinner',g:'data',lv:'lv_spinner',i:'<path d="M232,128a104,104,0,0,1-208,0c0-41,23.81-78.36,60.66-95.27a8,8,0,0,1,6.68,14.54C60.15,61.59,40,93.27,40,128a88,88,0,0,0,176,0c0-34.73-20.15-66.41-51.34-80.73a8,8,0,0,1,6.68-14.54C208.19,49.64,232,87,232,128Z"/>',d:{w:56,h:56,accent:C.acc,bg:C.track,thick:6}},
+  led:{n:'LED',g:'data',lv:'lv_led',i:'<path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-16,0a72,72,0,0,0-73.74-72c-39,.92-70.47,33.39-70.26,72.39a71.65,71.65,0,0,0,27.64,56.3A32,32,0,0,1,96,186v6h64v-6a32.15,32.15,0,0,1,12.47-25.35A71.65,71.65,0,0,0,200,104Zm-16.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z"/>',d:{w:26,h:26,accent:C.green,checked:true}}
 };
 const SQUARE = {arc:1, spinner:1, led:1, icon:1};
 const TAPPABLE = {button:1, panel:1, icon:1, label:1};
 const INTERACTIVE = {button:1, switch:1, slider:1, checkbox:1, dropdown:1, arc:0};
+// Widgets that can run your firmware code, and the LVGL event that runs it.
+const ACTION_EVENT = {button:'CLICKED', panel:'CLICKED', icon:'CLICKED', label:'CLICKED', switch:'VALUE_CHANGED', checkbox:'VALUE_CHANGED', slider:'VALUE_CHANGED', dropdown:'VALUE_CHANGED'};
+const actionName = s => String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 32).replace(/_+$/, '').replace(/^(\d)/, '_$1');
+const actionOf = w => (ACTION_EVENT[w.type] && actionName(w.action)) || null;
+function actionsOf(P) { const s = new Set(); P.screens.forEach(sc => sc.widgets.forEach(w => { const a = actionOf(w); if (a) s.add(a); })); return [...s]; }
 
 const ANIMS = [['move_left','Slide left','MOVE_LEFT'],['move_right','Slide right','MOVE_RIGHT'],['fade','Fade','FADE_IN'],['over_left','Cover left','OVER_LEFT'],['over_right','Cover right','OVER_RIGHT'],['move_top','Slide up','MOVE_TOP'],['move_bottom','Slide down','MOVE_BOTTOM'],['none','Instant','NONE']];
 const animIndex = a => Math.max(0, ANIMS.findIndex(x => x[0] === a));
@@ -580,27 +585,59 @@ function genC(P, opt) {
         if (w.type == 'label' || w.type == 'icon') A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
         A('lv_obj_add_event_cb(' + v + ', ' + fn + ', LV_EVENT_CLICKED, NULL);');
       }
+      const act = actionOf(w);
+      if (act) {
+        if (!tg && (w.type == 'label' || w.type == 'icon')) A('lv_obj_add_flag(' + v + ', LV_OBJ_FLAG_CLICKABLE);');
+        A('lv_obj_add_event_cb(' + v + ', ui_action_' + act + ', LV_EVENT_' + ACTION_EVENT[w.type] + ', NULL);');
+      }
     });
     L.push('}', '');
     return L.join('\n');
   });
-  out.push('#include "ui.h"', '', ...decl, '', ...evs, ...fns);
+  const acts = actionsOf(P), weak = acts.length ? ['#if defined(__GNUC__) || defined(__clang__)', '#define UI_WEAK __attribute__((weak))', '#else', '#define UI_WEAK', '#endif', '',
+    '/* Empty actions so the project builds. Write your own in another file and it replaces these. */', ...acts.flatMap(a => ['UI_WEAK void ui_action_' + a + '(lv_event_t * e)', '{', '    LV_UNUSED(e);', '}', ''])] : [];
+  out.push('#include "ui.h"', '', ...decl, '', ...weak, ...evs, ...fns);
   out.push('lv_obj_t * ui_get_screen(uint32_t index)', '{', '    switch(index) {', ...P.screens.map((s, i) => '        case ' + i + ': return ui_' + ident(s.name) + ';'), '        default: return NULL;', '    }', '}', '');
   out.push('void ui_init(void)', '{', ...P.screens.map(s => '    ui_' + ident(s.name) + '_create();'), '    ' + API.load + '(ui_' + ident(P.screens[0].name) + ');', '}', '');
   let code = out.join('\n');
   if (lv == 96) code = code.replace(/lv_obj_remove_flag\(([^,]+), LV_OBJ_FLAG_SCROLLABLE\)/g, 'lv_obj_set_scrollable($1, false)').replace(/lv_obj_add_flag\(([^,]+), LV_OBJ_FLAG_HIDDEN\)/g, 'lv_obj_set_hidden($1, true)').replace(/lv_obj_add_flag\(([^,]+), LV_OBJ_FLAG_CLICKABLE\)/g, 'lv_obj_set_clickable($1, true)').replace(/lv_chart_set_range\(/g, 'lv_chart_set_axis_range(');
   return code;
 }
+function actionDecls(P) {
+  const acts = actionsOf(P);
+  return acts.length ? ['/* Actions. Write any of these in your own code and it runs when the widget is tapped or changed.', ' * lv_event_get_target(e) gives the widget, for example to read a slider with lv_slider_get_value. */', ...acts.map(a => 'void ui_action_' + a + '(lv_event_t * e);'), ''] : [];
+}
+// The README section that shows how firmware talks to the screens: setting values, and the code each action runs.
+function actionGuide(P) {
+  const all = P.screens.flatMap(s => s.widgets.map(w => ({s, w})));
+  const lab = all.find(x => x.w.type == 'label'), val = all.find(x => ['arc', 'bar', 'slider'].includes(x.w.type));
+  const set = [];
+  if (lab) set.push('lv_label_set_text(' + vname(lab.s, lab.w) + ', "Hello");');
+  if (val) set.push('lv_' + (val.w.type == 'slider' ? 'slider' : val.w.type) + '_set_value(' + vname(val.s, val.w) + ', 42' + (val.w.type == 'arc' ? '' : ', LV_ANIM_ON') + ');');
+  set.push('lv_screen_load(ui_get_screen(' + Math.min(1, P.screens.length - 1) + '));  /* lv_scr_load on LVGL 8 */');
+  const seen = new Map();
+  all.forEach(({s, w}) => { const a = actionOf(w); if (a && !seen.has(a)) seen.set(a, {s, w}); });
+  const read = {switch: ['if (lv_obj_has_state(obj, LV_STATE_CHECKED)) {', '        /* Switched on */', '    } else {', '        /* Switched off */', '    }'], checkbox: ['if (lv_obj_has_state(obj, LV_STATE_CHECKED)) {', '        /* Ticked */', '    }'], slider: ['int32_t value = lv_slider_get_value(obj);', '    /* Use value here */'], dropdown: ['uint32_t choice = lv_dropdown_get_selected(obj);', '    /* 0 is the first option */']};
+  const starters = [...seen].map(([a, {s, w}]) => ['/* ' + w.name + ' on ' + s.name + ' */', 'void ui_action_' + a + '(lv_event_t * e)', '{',
+    ...(read[w.type] ? ['    lv_obj_t * obj = (lv_obj_t *)lv_event_get_target(e);', '    ' + read[w.type].join('\n')] : ['    LV_UNUSED(e);', '    /* Your code here, like turning on a relay */']), '}'].join('\n'));
+  const L = ['## Make it work with your code', '', 'Every widget is a global in `ui.h`, named `ui_<Screen>_<Widget>`. Change them from your firmware:', '', '```c', ...set, '```', '',
+    'Call LVGL only from the task that runs `lv_timer_handler()`, or take the LVGL lock first.', ''];
+  if (starters.length) L.push('### Actions', '', 'These widgets run your code when tapped or changed. Write the functions in a file of your own, like `src/actions.c`, so a new export never overwrites them. Until you do, empty versions in `ui.c` keep the project building.', '', '```c', '#include "ui.h"', '', starters.join('\n\n'), '```', '',
+    'In MicroPython, set `ui.actions["' + [...seen.keys()][0] + '"] = your_function`. In ESPHome, each action is a script called `action_<name>`; replace its log line with your steps.', '');
+  else L.push('To run code when a widget is tapped or changed, select it in Epixo and give it a name under **Run code**. The export then includes a hook for it.', '');
+  return L.join('\n');
+}
 function genH(P) {
   return ['#ifndef EPIXO_UI_H', '#define EPIXO_UI_H', '', '#if defined __has_include', '#if __has_include("lvgl.h")', '#include "lvgl.h"', '#elif __has_include("lvgl/lvgl.h")', '#include "lvgl/lvgl.h"', '#else', '#include "lvgl.h"', '#endif', '#else', '#include "lvgl.h"', '#endif', '', '#ifdef __cplusplus', 'extern "C" {', '#endif', '',
     '#define UI_SCREEN_COUNT ' + P.screens.length, '',
     ...P.screens.flatMap(s => ['extern lv_obj_t * ui_' + ident(s.name) + ';', ...s.widgets.map(w => 'extern lv_obj_t * ' + vname(s, w) + ';')]), '',
-    'void ui_init(void);', 'lv_obj_t * ui_get_screen(uint32_t index);', '', '#ifdef __cplusplus', '}', '#endif', '', '#endif', ''].join('\n');
+    'void ui_init(void);', 'lv_obj_t * ui_get_screen(uint32_t index);', '', ...actionDecls(P), '#ifdef __cplusplus', '}', '#endif', '', '#endif', ''].join('\n');
 }
 
 function genPy(P) {
   const L = ['import lvgl as lv', ''], c = x => 'lv.color_hex(' + hx(x) + ')', f = n => 'lv.font_montserrat_' + n;
   const anyArc = P.screens.some(s => s.widgets.some(w => w.type == 'arc' && w.showValue));
+  if (actionsOf(P).length) L.push('# Actions. In your own code, set ui.actions["name"] = a function that takes the LVGL event.', 'actions = {}', '', 'def run_action(name):', '    def cb(e):', '        f = actions.get(name)', '        if f:', '            f(e)', '    return cb', '');
   if (anyArc) L.push('def arc_value_cb(arc, label):', '    def cb(e):', '        label.set_text(str(arc.get_value()))', '    return cb', '');
   const sn = s => 'scr_' + ident(s.name).toLowerCase();
   P.screens.forEach(s => L.push(sn(s) + ' = lv.obj()', sn(s) + '.remove_flag(lv.obj.FLAG.SCROLLABLE)', sn(s) + '.set_style_bg_color(' + c(s.bg) + ', 0)', sn(s) + '.set_style_bg_opa(lv.OPA.COVER, 0)', ''));
@@ -629,6 +666,8 @@ function genPy(P) {
       if (w.hidden) A(v + '.add_flag(lv.obj.FLAG.HIDDEN)');
       const tg = tapOf(P, w);
       if (tg) { if (w.type == 'label' || w.type == 'icon') A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(lambda e: lv.screen_load_anim(' + sn(tg) + ', lv.SCR_LOAD_ANIM.' + ANIMS[animIndex(w.onTap.anim)][2] + ', 300, 0, False), lv.EVENT.CLICKED, None)'); }
+      const act = actionOf(w);
+      if (act) { if (!tg && (w.type == 'label' || w.type == 'icon')) A(v + '.add_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.add_event_cb(run_action("' + act + '"), lv.EVENT.' + ACTION_EVENT[w.type] + ', None)'); }
       A('');
     });
   });
@@ -646,11 +685,12 @@ function genXML(P) {
     s.widgets.forEach(w => {
       if (w.type == 'spinner' || w.type == 'led') { skipped.push(s.name + '/' + w.name); return; }
       const pos = 'name="' + ident(w.name).toLowerCase() + '" x="' + w.x + '" y="' + w.y + '" width="' + w.w + '" height="' + w.h + '"';
-      const tg = tapOf(P, w);
-      const extra = (w.hidden ? ' hidden="true"' : '') + ((w.opacity == null ? 100 : w.opacity) < 100 ? ' style_opa="' + opaOf(w) + '"' : '') + (tg && (w.type == 'label' || w.type == 'icon') ? ' clickable="true"' : '');
+      const tg = tapOf(P, w), act = actionOf(w);
+      const extra = (w.hidden ? ' hidden="true"' : '') + ((w.opacity == null ? 100 : w.opacity) < 100 ? ' style_opa="' + opaOf(w) + '"' : '') + ((tg || act) && (w.type == 'label' || w.type == 'icon') ? ' clickable="true"' : '');
       const pad = padOf(w) ? ' style_pad_top="' + padOf(w) + '"' : '';
       const kids = [];
       if (tg) kids.push('\t\t\t<screen_load_event trigger="clicked" screen="' + ident(tg.name).toLowerCase() + '" anim_type="' + ANIMS[animIndex(w.onTap.anim)][2].toLowerCase() + '" duration="300"/>');
+      if (act) kids.push('\t\t\t<event_cb trigger="' + ACTION_EVENT[w.type].toLowerCase() + '" callback="ui_action_' + act + '"/>');
       let open = '';
       switch (w.type) {
         case 'label': open = '<lv_label ' + pos + ' text="' + xa(w.text) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '"' + (w.align == 'center' || w.align == 'right' ? ' style_text_align="' + w.align + '"' : '') + pad + (hasBg(w) ? ' style_bg_color="' + col(w.bg) + '" style_bg_opa="255" style_radius="' + (w.radius || 0) + '" style_pad_left="8" style_pad_right="8"' : '') + extra; break;
@@ -675,10 +715,12 @@ function genXML(P) {
   return files;
 }
 function genXMLLoader(P) {
-  const fonts = usedFonts(P), xs = genXML(P);
+  const fonts = usedFonts(P), xs = genXML(P), acts = actionsOf(P);
   return ['#include "lvgl.h"', '', '/* Loads the Epixo XML screens with the LVGL XML module (LV_USE_XML 1). */', '',
     ...xs.map(x => 'extern const char epixo_xml_' + x.name + '[];'), '',
+    ...(acts.length ? ['#if defined(__GNUC__) || defined(__clang__)', '#define UI_WEAK __attribute__((weak))', '#else', '#define UI_WEAK', '#endif', '', '/* Actions. Write any of these in your own code and it replaces the empty one here. */', ...acts.flatMap(a => ['UI_WEAK void ui_action_' + a + '(lv_event_t * e)', '{', '    LV_UNUSED(e);', '}', ''])] : []),
     'lv_obj_t * epixo_xml_init(void)', '{', ...fonts.map(f => '    lv_xml_register_font(NULL, "lv_font_montserrat_' + f + '", &lv_font_montserrat_' + f + ');'),
+    ...acts.map(a => '    lv_xml_register_event_cb(NULL, "ui_action_' + a + '", ui_action_' + a + ');'),
     ...xs.map(x => '    lv_xml_register_component_from_data("' + x.name + '", epixo_xml_' + x.name + ');'),
     '    lv_obj_t * first = lv_xml_create_screen("' + xs[0].name + '");', '    lv_screen_load(first);', '    return first;', '}', ''].join('\n');
 }
@@ -710,10 +752,16 @@ function genYAML(P) {
       }
       if ((w.opacity == null ? 100 : w.opacity) < 100) A('opa: ' + R(w.opacity) + '%');
       if (w.hidden) A('hidden: true');
-      const tg = tapOf(P, w);
-      if (tg) { if (w.type == 'label' || w.type == 'icon') A('clickable: true'); A('on_click:'); A('  - lvgl.page.show:'); A('      id: ' + pid(tg)); A('      animation: ' + ANIMS[animIndex(w.onTap.anim)][2]); A('      time: 300ms'); }
+      const tg = tapOf(P, w), act = actionOf(w), click = act && ACTION_EVENT[w.type] == 'CLICKED';
+      if ((tg || click) && (w.type == 'label' || w.type == 'icon')) A('clickable: true');
+      if (tg || click) A('on_click:');
+      if (tg) { A('  - lvgl.page.show:'); A('      id: ' + pid(tg)); A('      animation: ' + ANIMS[animIndex(w.onTap.anim)][2]); A('      time: 300ms'); }
+      if (click) A('  - script.execute: action_' + act);
+      if (act && !click) { A('on_value:'); A('  - script.execute: action_' + act); }
     });
   });
+  const acts = actionsOf(P);
+  if (acts.length) L.push('', '# Actions. Replace each log line with what the widget should do.', 'script:', ...acts.flatMap(a => ['  - id: action_' + a, '    then:', '      - logger.log: "Action ' + a + '"']));
   return {yaml: L.join('\n') + '\n', skipped};
 }
 
@@ -945,6 +993,7 @@ function cleanWidget(b, w, partial) {
   if (w.icon != null) p.icon = ICONS[w.icon] ? w.icon : 'home';
   if (w.opacity != null) p.opacity = clamp(R(+w.opacity), 0, 100);
   if (w.name) { p.name = String(w.name).replace(/[^A-Za-z0-9_]/g, '').slice(0, 24); if (!p.name) delete p.name; }
+  if (w.action != null) p.action = actionName(w.action);
   return partial ? p : [type, p];
 }
 
@@ -1006,7 +1055,7 @@ function findWidget(s, ref) {
   if (!w) throw new Error('No widget called "' + ref + '" on ' + s.name + '. Widgets: ' + (s.widgets.map(x => x.name).join(', ') || 'none'));
   return w;
 }
-const FIELDS = ['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'radius', 'value', 'min', 'max', 'checked', 'showValue', 'thick', 'align', 'valign', 'icon', 'options', 'data', 'shadow', 'border', 'borderColor', 'opacity', 'hidden', 'locked'];
+const FIELDS = ['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'radius', 'value', 'min', 'max', 'checked', 'showValue', 'thick', 'align', 'valign', 'icon', 'options', 'data', 'shadow', 'border', 'borderColor', 'opacity', 'hidden', 'locked', 'action'];
 function widgetBrief(P, w) {
   const o = {name: w.name, type: w.type};
   for (const k of FIELDS) if (w[k] != null && w[k] !== '' && !(k == 'opacity' && w[k] == 100) && !((k == 'hidden' || k == 'locked') && !w[k])) o[k] = w[k];
@@ -1043,7 +1092,8 @@ const WIDGET_SCHEMA = {type: 'object', description: 'A widget. type, x, y, w, h 
   radius: {type: 'integer'}, value: {type: 'number'}, min: {type: 'number'}, max: {type: 'number'}, checked: {type: 'boolean'}, showValue: {type: 'boolean', description: 'arc: draw the number in the middle.'},
   thick: {type: 'integer', description: 'arc and spinner line width.'}, align: {type: 'string', enum: ['left', 'center', 'right']}, valign: {type: 'string', enum: ['top', 'center', 'bottom']},
   icon: {type: 'string', enum: Object.keys(ICONS)}, options: {type: 'string', description: 'dropdown choices, one per line.'}, data: {type: 'string', description: 'chart values, comma separated.'},
-  shadow: {type: 'boolean'}, border: {type: 'integer'}, borderColor: {type: 'string'}, opacity: {type: 'integer', description: '0 to 100.'}, hidden: {type: 'boolean'}, locked: {type: 'boolean'}}};
+  shadow: {type: 'boolean'}, border: {type: 'integer'}, borderColor: {type: 'string'}, opacity: {type: 'integer', description: '0 to 100.'}, hidden: {type: 'boolean'}, locked: {type: 'boolean'},
+  action: {type: 'string', description: 'Firmware hook, like "lights_toggle". Runs ui_action_<name>() in C when a button, card, icon or label is tapped, or when a switch, checkbox, slider or dropdown changes. "" removes it.'}}};
 const SCREEN_REF = {type: 'string', description: 'Screen name. Leave out for the open screen.'};
 
 const DESIGN_RULES = 'Design rules for Epixo screens: they run on LVGL on small ESP32 touch displays. Keep every widget inside the screen (and inside the circle on round displays, about 16% margin). ' +
@@ -1145,7 +1195,7 @@ const API = {
   R, clamp, FONTS, LH, F, ADV, measureText, fitWidget, C, ICONS, SYMBOL_HEX, TYPES, SQUARE, TAPPABLE, ANIMS, THEMES, BOARDS, VERIFY, TPL, SRC,
   blank, uniqueName, uniqueWidgetName, nameKey, mkW, mkScreen, addTemplate, defaultProject, boardDims, withRotation,
   nums, ident, hexv, iconFont, padOf, toScript, scriptScreen, sid,
-  genC, genH, genPy, genXML, genXMLLoader, genYAML, genLvConf, usedFonts, packOf, boardPlatformio, mainForPack, genGenericMain,
+  genC, genH, genPy, genXML, genXMLLoader, genYAML, ACTION_EVENT, actionName, actionOf, actionsOf, actionGuide, genLvConf, usedFonts, packOf, boardPlatformio, mainForPack, genGenericMain,
   memoryReport, doctor, applyFix, contrast, touchTarget,
   cleanWidget, adaptToBoard, applyTheme, layoutMap, AI_TOOLS, READ_ONLY, runTool, toolSpecs, toolNote, DESIGN_RULES
 };

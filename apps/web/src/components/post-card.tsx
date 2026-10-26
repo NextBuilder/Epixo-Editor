@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle } from "@/components/icons";
 import { Device, deviceWidth } from "./device";
 import { Avatar } from "./avatar";
 import { firstImage, type PostRow } from "@/lib/posts";

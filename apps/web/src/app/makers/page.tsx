@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Search, Users } from "lucide-react";
+import { Search, Users } from "@/components/icons";
 import { Avatar } from "@/components/avatar";
 import { Empty } from "@/components/empty";
 import { HIRE_TYPES } from "@/lib/profile";

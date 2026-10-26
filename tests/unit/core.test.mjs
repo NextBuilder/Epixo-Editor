@@ -134,3 +134,38 @@ test("Design Doctor warns when text overlaps", () => {
   s.widgets.push(E.mkW(p, "label", { x: 20, y: 20, w: 200, h: 40, text: "Two" }));
   assert.equal(E.doctor(p).filter(f => f.code === "overlap").length, 1);
 });
+
+test("actions become firmware hooks in every format", () => {
+  const p = E.defaultProject(), s = p.screens[0];
+  const add = (t, pr) => { const w = E.mkW(p, t, pr); s.widgets.push(w); return w; };
+  add("button", { x: 10, y: 10, w: 100, h: 40, action: "Lights On!" });
+  add("slider", { x: 10, y: 60, w: 200, h: 10, action: "dim" });
+  add("label", { x: 10, y: 90, w: 100, h: 30, action: "lights_on" });
+  add("bar", { x: 10, y: 130, w: 100, h: 10, action: "ignored" });
+  assert.deepEqual(E.actionsOf(p), ["lights_on", "dim"]);
+
+  const h = E.genH(p), c = E.genC(p, { lvgl: 9 }), c8 = E.genC(p, { lvgl: 8 });
+  assert.match(h, /void ui_action_lights_on\(lv_event_t \* e\);/);
+  for (const code of [c, c8]) {
+    assert.equal(code.match(/UI_WEAK void ui_action_lights_on\(/g).length, 1, "one default per action");
+    assert.match(code, /lv_obj_add_event_cb\(ui_Home_Slider\d+, ui_action_dim, LV_EVENT_VALUE_CHANGED, NULL\);/);
+    assert.match(code, /lv_obj_add_flag\(ui_Home_Label\d+, LV_OBJ_FLAG_CLICKABLE\);\n    lv_obj_add_event_cb\(ui_Home_Label\d+, ui_action_lights_on, LV_EVENT_CLICKED/);
+  }
+  assert.doesNotMatch(c + h, /ignored/);
+  assert.match(E.genPy(p), /add_event_cb\(run_action\("dim"\), lv\.EVENT\.VALUE_CHANGED, None\)/);
+  assert.match(E.genXML(p).map(x => x.xml).join(""), /<event_cb trigger="value_changed" callback="ui_action_dim"\/>/);
+  assert.match(E.genXMLLoader(p), /lv_xml_register_event_cb\(NULL, "ui_action_dim", ui_action_dim\);/);
+  const y = E.genYAML(p).yaml;
+  assert.match(y, /on_value:\n\s+- script\.execute: action_dim/);
+  assert.match(y, /script:\n  - id: action_lights_on\n/);
+  assert.match(E.actionGuide(p), /void ui_action_dim\(lv_event_t \* e\)/);
+});
+
+test("action names are safe C identifiers", () => {
+  assert.equal(E.actionName("  Turn ON the fan "), "turn_on_the_fan");
+  assert.equal(E.actionName("3d print"), "_3d_print");
+  assert.equal(E.actionName("!!!"), "");
+  assert.equal(E.actionName("a".repeat(50)).length, 32);
+  const [, w] = E.cleanWidget(E.BOARDS[0], { type: "button", x: 0, y: 0, w: 50, h: 30, action: "x(); system()" });
+  assert.equal(w.action, "x_system");
+});

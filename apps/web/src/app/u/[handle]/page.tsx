@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Clock, LayoutGrid, MapPin, Pin, Wallet } from "lucide-react";
+import { Clock, LayoutGrid, MapPin, Pin, Wallet } from "@/components/icons";
 import { PostCard } from "@/components/post-card";
 import { Avatar, tone } from "@/components/avatar";
 import { Empty } from "@/components/empty";
 import { ShareButton } from "@/components/post-actions";
 import { FollowButton } from "@/components/profile/follow-button";
 import { HireButton } from "@/components/profile/hire-sheet";
-import { SocialLinks } from "@/components/profile/social-links";
+import { PlatformTile, SocialLinks } from "@/components/profile/social-links";
 import { Device, deviceWidth } from "@/components/device";
 import { CountUp, FadeImg } from "@/components/motion/motion";
 import { findBoard } from "@/lib/data";
@@ -152,6 +152,18 @@ export default async function ProfilePage({ params }: Props) {
                 })}
               </div>
             </section>
+          )}
+
+          {isMe && Object.keys(m.socials).length === 0 && (
+            <Link href="/settings#links" className="card card-hover flex items-center gap-4 p-5">
+              <span className="flex shrink-0 -space-x-2">
+                {(["github", "youtube", "linkedin"] as const).map(k => <span key={k} className="rounded-[9px] ring-2 ring-card"><PlatformTile k={k} size={30} /></span>)}
+              </span>
+              <span className="min-w-0">
+                <span className="block font-medium">Add your social links</span>
+                <span className="block text-[15px] text-graphite">GitHub, YouTube, LinkedIn and 28 more.</span>
+              </span>
+            </Link>
           )}
 
           {isMe && !m.hire_open && (

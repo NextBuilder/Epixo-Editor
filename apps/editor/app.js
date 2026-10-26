@@ -5,17 +5,35 @@ const $ = s => document.querySelector(s);
 const h = s => { const t = document.createElement('template'); t.innerHTML = s.trim(); return t.content.firstElementChild; };
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const R = Math.round, clamp = E.clamp;
-const ico = (p, c) => `<svg class="${c || 'i'}" viewBox="0 0 24 24">${p}</svg>`;
+// Icons are Phosphor (MIT), drawn on a 256 grid.
+const ico = (p, c) => `<svg class="${c || 'i'}" viewBox="0 0 256 256">${p}</svg>`;
 const I = {
-  plus:'<path d="M12 5v14M5 12h14"/>', close:'<path d="M6 6l12 12M18 6L6 18"/>', search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/>',
-  dup:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>', trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
-  up:'<path d="M12 19V5M6 11l6-6 6 6"/>', down:'<path d="M12 5v14M6 13l6 6 6-6"/>', lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', unlock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>',
-  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', eyeoff:'<path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 22 12s-1.2 2.4-3.6 4.4M6.3 7.3C3.6 9.1 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.2-1"/>',
-  chip:'<rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>', chev:'<path d="M6 9l6 6 6-6"/>',
-  spark:'<path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/>', screen:'<rect x="4" y="3" width="16" height="18" rx="3"/>', bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
-  usb:'<path d="M12 2v15M12 17a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM8 7l4-4 4 4M7 10v3l5 3M17 9v3l-5 3"/>', dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', cloud:'<path d="M7 18a5 5 0 1 1 .9-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/>',
-  check:'<path d="M4 12.5l5 5L20 6.5"/>', wand:'<path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/>', img:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
-  chat:'<path d="M4 5h16v11H8l-4 4z"/>'
+  plus:'<path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/>',
+  close:'<path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/>',
+  search:'<path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>',
+  dup:'<path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"/>',
+  trash:'<path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/>',
+  up:'<path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/>',
+  down:'<path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/>',
+  lock:'<path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"/>',
+  unlock:'<path d="M208,80H96V56a32,32,0,0,1,32-32c15.37,0,29.2,11,32.16,25.59a8,8,0,0,0,15.68-3.18C171.32,24.15,151.2,8,128,8A48.05,48.05,0,0,0,80,56V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80Zm0,128H48V96H208V208Z"/>',
+  eye:'<path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"/>',
+  eyeoff:'<path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L61.32,66.55C25,88.84,9.38,123.2,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208a127.11,127.11,0,0,0,52.07-10.83l22,24.21a8,8,0,1,0,11.84-10.76Zm47.33,75.84,41.67,45.85a32,32,0,0,1-41.67-45.85ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.16,133.16,0,0,1,25,128c4.69-8.79,19.66-33.39,47.35-49.38l18,19.75a48,48,0,0,0,63.66,70l14.73,16.2A112,112,0,0,1,128,192Zm6-95.43a8,8,0,0,1,3-15.72,48.16,48.16,0,0,1,38.77,42.64,8,8,0,0,1-7.22,8.71,6.39,6.39,0,0,1-.75,0,8,8,0,0,1-8-7.26A32.09,32.09,0,0,0,134,96.57Zm113.28,34.69c-.42.94-10.55,23.37-33.36,43.8a8,8,0,1,1-10.67-11.92A132.77,132.77,0,0,0,231.05,128a133.15,133.15,0,0,0-23.12-30.77C185.67,75.19,158.78,64,128,64a118.37,118.37,0,0,0-19.36,1.57A8,8,0,1,1,106,49.79,134,134,0,0,1,128,48c34.88,0,66.57,13.26,91.66,38.35,18.83,18.83,27.3,37.62,27.65,38.41A8,8,0,0,1,247.31,131.26Z"/>',
+  chip:'<path d="M152,96H104a8,8,0,0,0-8,8v48a8,8,0,0,0,8,8h48a8,8,0,0,0,8-8V104A8,8,0,0,0,152,96Zm-8,48H112V112h32Zm88,0H216V112h16a8,8,0,0,0,0-16H216V56a16,16,0,0,0-16-16H160V24a8,8,0,0,0-16,0V40H112V24a8,8,0,0,0-16,0V40H56A16,16,0,0,0,40,56V96H24a8,8,0,0,0,0,16H40v32H24a8,8,0,0,0,0,16H40v40a16,16,0,0,0,16,16H96v16a8,8,0,0,0,16,0V216h32v16a8,8,0,0,0,16,0V216h40a16,16,0,0,0,16-16V160h16a8,8,0,0,0,0-16Zm-32,56H56V56H200v95.87s0,.09,0,.13,0,.09,0,.13V200Z"/>',
+  chev:'<path d="M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z"/>',
+  spark:'<path d="M208,144a15.78,15.78,0,0,1-10.42,14.94L146,178l-19,51.62a15.92,15.92,0,0,1-29.88,0L78,178l-51.62-19a15.92,15.92,0,0,1,0-29.88L78,110l19-51.62a15.92,15.92,0,0,1,29.88,0L146,110l51.62,19A15.78,15.78,0,0,1,208,144ZM152,48h16V64a8,8,0,0,0,16,0V48h16a8,8,0,0,0,0-16H184V16a8,8,0,0,0-16,0V32H152a8,8,0,0,0,0,16Zm88,32h-8V72a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0V96h8a8,8,0,0,0,0-16Z"/>',
+  screen:'<path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200ZM80,84A12,12,0,1,1,68,72,12,12,0,0,1,80,84Zm40,0a12,12,0,1,1-12-12A12,12,0,0,1,120,84Z"/>',
+  bolt:'<path d="M215.79,118.17a8,8,0,0,0-5-5.66L153.18,90.9l14.66-73.33a8,8,0,0,0-13.69-7l-112,120a8,8,0,0,0,3,13l57.63,21.61L88.16,238.43a8,8,0,0,0,13.69,7l112-120A8,8,0,0,0,215.79,118.17ZM109.37,214l10.47-52.38a8,8,0,0,0-5-9.06L62,132.71l84.62-90.66L136.16,94.43a8,8,0,0,0,5,9.06l52.8,19.8Z"/>',
+  usb:'<path d="M252.44,121.34l-48-32A8,8,0,0,0,192,96v24H72V72h33a32,32,0,1,0,0-16H72A16,16,0,0,0,56,72v48H8a8,8,0,0,0,0,16H56v48a16,16,0,0,0,16,16h32v8a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V176a16,16,0,0,0-16-16H120a16,16,0,0,0-16,16v8H72V136H192v24a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM136,48a16,16,0,1,1-16,16A16,16,0,0,1,136,48ZM120,176h32v32H120Zm88-30.95V111l25.58,17Z"/>',
+  dl:'<path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/>',
+  cloud:'<path d="M160,40A88.09,88.09,0,0,0,81.29,88.67,64,64,0,1,0,72,216h88a88,88,0,0,0,0-176Zm0,160H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.11A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,72,72Z"/>',
+  check:'<path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/>',
+  wand:'<path d="M48,64a8,8,0,0,1,8-8H72V40a8,8,0,0,1,16,0V56h16a8,8,0,0,1,0,16H88V88a8,8,0,0,1-16,0V72H56A8,8,0,0,1,48,64ZM184,192h-8v-8a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16Zm56-48H224V128a8,8,0,0,0-16,0v16H192a8,8,0,0,0,0,16h16v16a8,8,0,0,0,16,0V160h16a8,8,0,0,0,0-16ZM219.31,80,80,219.31a16,16,0,0,1-22.62,0L36.68,198.63a16,16,0,0,1,0-22.63L176,36.69a16,16,0,0,1,22.63,0l20.68,20.68A16,16,0,0,1,219.31,80Zm-54.63,32L144,91.31l-96,96L68.68,208ZM208,68.69,187.31,48l-32,32L176,100.69Z"/>',
+  img:'<path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z"/>',
+  chat:'<path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/>',
+  send:'<path d="M208.49,120.49a12,12,0,0,1-17,0L140,69V216a12,12,0,0,1-24,0V69L64.49,120.49a12,12,0,0,1-17-17l72-72a12,12,0,0,1,17,0l72,72A12,12,0,0,1,208.49,120.49Z"/>',
+  play:'<path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/>',
+  stop:'<path d="M216,56V200a16,16,0,0,1-16,16H56a16,16,0,0,1-16-16V56A16,16,0,0,1,56,40H200A16,16,0,0,1,216,56Z"/>'
 };
 const FONT_KB = {12:13,14:16,16:19,18:23,20:27,22:31,24:36,26:41,28:46,30:52,32:58,34:65,36:72,38:78,40:86,42:93,44:101,46:108,48:117};
 
@@ -299,6 +317,7 @@ function inlineEdit(w) {
   inp.addEventListener('blur', () => fin(true));
 }
 let pdown = false, pdownAt = 0, prelT = 0;
+function actNote(v) { const a = E.actionName(v); return a ? `Your firmware runs <code>ui_action_${a}()</code>. Write it in your own code; the export shows how.` : 'Name it, like <code>lights_on</code>, to run your own firmware code. Try it in Preview.'; }
 function previewPointer(e, down) {
   if (!ENG) return;
   const p = pt(e), x = clamp(p.x, 0, BW() - 1), y = clamp(p.y, 0, BH() - 1);
@@ -308,6 +327,8 @@ function previewPointer(e, down) {
     const held = performance.now() - pdownAt, wait = Math.max(0, 70 - held);
     ENG.pointer(x, y, true);
     prelT = setTimeout(() => { ENG.pointer(x, y, false); }, wait);
+    const hit = [...cur().widgets].reverse().find(w => !w.hidden && x >= w.x && y >= w.y && x < w.x + w.w && y < w.y + w.h), act = hit && E.actionOf(hit);
+    if (act) toast('On your board, this runs ui_action_' + act + '()');
     return;
   }
   if (pdown) ENG.pointer(x, y, true);
@@ -335,7 +356,7 @@ function setMode(m) {
   $('#modepill').hidden = m != 'preview';
   $('#playBtn').classList.toggle('on', m == 'preview');
   $('#playBtn').querySelector('span').textContent = m == 'preview' ? 'Done' : 'Try it';
-  $('#playBtn').querySelector('svg').innerHTML = m == 'preview' ? '<rect x="6" y="6" width="12" height="12" rx="2"/>' : '<path d="M7 4.5l12 7.5-12 7.5z"/>';
+  $('#playBtn').querySelector('svg').innerHTML = m == 'preview' ? I.stop : I.play;
   scrEl.style.cursor = m == 'preview' ? 'pointer' : '';
   if (ENG) {
     if (m == 'preview') { syncAll(); }
@@ -456,7 +477,7 @@ function fieldHTML(w, k) {
   else if (kind == 'font') ctl = `<select class="fld" data-k="${k}">${E.FONTS.map(f => `<option value="${f}"${f == v ? ' selected' : ''}>Montserrat ${f} · ${FONT_KB[f]} KB</option>`).join('')}</select>`;
   else if (kind == 'align') ctl = `<div class="radio">${['left', 'center', 'right'].map(x => `<button data-al="${x}" class="${v == x ? 'on' : ''}">${x[0].toUpperCase() + x.slice(1)}</button>`).join('')}</div>`;
   else if (kind == 'valign') ctl = `<div class="radio">${['top', 'center', 'bottom'].map(x => `<button data-va="${x}" class="${(v || 'top') == x ? 'on' : ''}">${x[0].toUpperCase() + x.slice(1)}</button>`).join('')}</div>`;
-  else if (kind == 'icon') return `<div class="f col"><span class="lbl">${lab}</span><div class="iconpick">${Object.keys(E.ICONS).map(n => `<button data-ic="${n}" class="${v == n ? 'on' : ''}" title="${n}">${ico(E.ICONS[n][0])}</button>`).join('')}</div></div>`;
+  else if (kind == 'icon') return `<div class="f col"><span class="lbl">${lab}</span><div class="iconpick">${Object.keys(E.ICONS).map(n => `<button data-ic="${n}" class="${v == n ? 'on' : ''}" title="${n}"><svg class="i st" viewBox="0 0 24 24">${E.ICONS[n][0]}</svg></button>`).join('')}</div></div>`;
   return `<div class="frow"><span class="lbl">${lab}</span>${ctl}</div>`;
 }
 let insPushed = null;
@@ -488,10 +509,11 @@ function renderInspector() {
   const t = E.TYPES[w.type], fields = TF[w.type], targets = S.p.screens.filter(s => s.id != S.p.cur);
   rb.innerHTML = `<div class="insp-h"><div class="ti">${ico(t.i)}</div><div style="flex:1;min-width:0"><input id="wName" value="${esc(w.name)}" aria-label="Widget name"><small>${t.n} · ${t.lv}</small></div></div>
   <div class="sec"><h4>Layout</h4><div class="g2">${['x', 'y', 'w', 'h'].map(k => `<div class="f"><label class="scrub" data-scrub="${k}">${k.toUpperCase()}</label><input class="fld" type="number" data-k="${k}" value="${w[k]}"></div>`).join('')}</div>
-    <div class="aligns">${[['l','<path d="M4 3v18M8 7h10v4H8zM8 13h6v4H8z"/>','Align left'],['c','<path d="M12 3v18M6 7h12v4H6zM8 13h8v4H8z"/>','Centre horizontally'],['r','<path d="M20 3v18M6 7h10v4H6zM10 13h6v4h-6z"/>','Align right'],['t','<path d="M3 4h18M7 8v10h4V8zM13 8v6h4V8z"/>','Align top'],['m','<path d="M3 12h18M7 6v12h4V6zM13 8v8h4V8z"/>','Centre vertically'],['b','<path d="M3 20h18M7 6v10h4V6zM13 10v6h4v-6z"/>','Align bottom']].map(a => `<button data-align="${a[0]}" title="${a[2]}">${ico(a[1])}</button>`).join('')}</div></div>
+    <div class="aligns">${[['l','<path d="M48,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0Zm16,64V64A16,16,0,0,1,80,48h96a16,16,0,0,1,16,16v40a16,16,0,0,1-16,16H80A16,16,0,0,1,64,104Zm16,0h96V64H80Zm152,48v40a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V152a16,16,0,0,1,16-16H216A16,16,0,0,1,232,152Zm-16,40V152H80v40H216Z"/>','Align left'],['c','<path d="M208,136H136V120h48a16,16,0,0,0,16-16V64a16,16,0,0,0-16-16H136V32a8,8,0,0,0-16,0V48H72A16,16,0,0,0,56,64v40a16,16,0,0,0,16,16h48v16H48a16,16,0,0,0-16,16v40a16,16,0,0,0,16,16h72v16a8,8,0,0,0,16,0V208h72a16,16,0,0,0,16-16V152A16,16,0,0,0,208,136ZM72,64H184v40H72ZM208,192H48V152H208v40Z"/>','Centre horizontally'],['r','<path d="M224,40V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0ZM192,64v40a16,16,0,0,1-16,16H80a16,16,0,0,1-16-16V64A16,16,0,0,1,80,48h96A16,16,0,0,1,192,64Zm-16,0H80v40h96Zm16,88v40a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V152a16,16,0,0,1,16-16H176A16,16,0,0,1,192,152Zm-16,0H40v40H176Z"/>','Align right'],['t','<path d="M224,40a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40ZM208,80v96a16,16,0,0,1-16,16H152a16,16,0,0,1-16-16V80a16,16,0,0,1,16-16h40A16,16,0,0,1,208,80Zm-16,0H152v96h40Zm-72,0V216a16,16,0,0,1-16,16H64a16,16,0,0,1-16-16V80A16,16,0,0,1,64,64h40A16,16,0,0,1,120,80Zm-16,0H64V216h40Z"/>','Align top'],['m','<path d="M224,120H208V72a16,16,0,0,0-16-16H152a16,16,0,0,0-16,16v48H120V48a16,16,0,0,0-16-16H64A16,16,0,0,0,48,48v72H32a8,8,0,0,0,0,16H48v72a16,16,0,0,0,16,16h40a16,16,0,0,0,16-16V136h16v48a16,16,0,0,0,16,16h40a16,16,0,0,0,16-16V136h16a8,8,0,0,0,0-16ZM104,208H64V48h40Zm88-24H152V72h40Z"/>','Centre vertically'],['b','<path d="M224,216a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,216Zm-88-40V80a16,16,0,0,1,16-16h40a16,16,0,0,1,16,16v96a16,16,0,0,1-16,16H152A16,16,0,0,1,136,176Zm16,0h40V80H152ZM48,176V40A16,16,0,0,1,64,24h40a16,16,0,0,1,16,16V176a16,16,0,0,1-16,16H64A16,16,0,0,1,48,176Zm16,0h40V40H64Z"/>','Align bottom']].map(a => `<button data-align="${a[0]}" title="${a[2]}">${ico(a[1])}</button>`).join('')}</div></div>
   <div class="sec"><h4>${w.type == 'icon' ? 'Symbol' : 'Content and style'}</h4>${fields.map(k => fieldHTML(w, k)).join('')}<div class="frow"><span class="lbl">Opacity</span><div class="rangef"><input type="range" min="0" max="100" data-k="opacity" value="${w.opacity == null ? 100 : w.opacity}"><span>${w.opacity == null ? 100 : w.opacity}</span></div></div></div>
-  ${E.TAPPABLE[w.type] ? `<div class="sec"><h4>On tap</h4><div class="frow"><span class="lbl">Go to</span><select class="fld" id="tapTo"><option value="">Nothing</option>${targets.map(s => `<option value="${s.id}"${w.onTap && w.onTap.to == s.id ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
-    <div class="frow"><span class="lbl">Transition</span><select class="fld" id="tapAnim">${E.ANIMS.map(a => `<option value="${a[0]}"${w.onTap && w.onTap.anim == a[0] ? ' selected' : ''}>${a[1]}</option>`).join('')}</select></div><p class="note">Becomes a real LVGL event. Try it in Preview.</p></div>` : ''}
+  ${E.ACTION_EVENT[w.type] ? `<div class="sec"><h4>${E.TAPPABLE[w.type] ? 'On tap' : 'When it changes'}</h4>${E.TAPPABLE[w.type] ? `<div class="frow"><span class="lbl">Go to</span><select class="fld" id="tapTo"><option value="">Nothing</option>${targets.map(s => `<option value="${s.id}"${w.onTap && w.onTap.to == s.id ? ' selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+    <div class="frow"><span class="lbl">Transition</span><select class="fld" id="tapAnim">${E.ANIMS.map(a => `<option value="${a[0]}"${w.onTap && w.onTap.anim == a[0] ? ' selected' : ''}>${a[1]}</option>`).join('')}</select></div>` : ''}
+    <div class="frow"><span class="lbl">Run code</span><input class="fld mono" id="wAct" value="${esc(w.action || '')}" placeholder="lights_on" spellcheck="false" autocomplete="off" autocapitalize="off" maxlength="32"></div><p class="note" id="actNote">${actNote(w.action)}</p></div>` : ''}
   <div class="sec"><div class="g2"><button class="btn2" style="margin:0" id="dupW">${ico(I.dup)}Duplicate</button><button class="btn2 danger" style="margin:0" id="delW">${ico(I.trash)}Delete</button></div></div>`;
   const live = () => { const el = scrEl.querySelector(`[data-id="${w.id}"]`); if (el) el.replaceWith(wEl(w)); renderOverlay(); liveSync(); queueCode(); };
   rb.querySelectorAll('[data-k]:not([data-hex]):not([type=color])').forEach(inp => { const k = inp.dataset.k; inp.addEventListener('input', () => { let v = inp.value;
@@ -506,6 +528,7 @@ function renderInspector() {
   rb.querySelectorAll('[data-ic]').forEach(b => b.onclick = () => mutate(() => { w.icon = b.dataset.ic; }));
   rb.querySelectorAll('[data-align]').forEach(b => b.onclick = () => mutate(() => { const B = S.p.board, a = b.dataset.align; if (a == 'l') w.x = 0; if (a == 'c') w.x = R((B.w - w.w) / 2); if (a == 'r') w.x = B.w - w.w; if (a == 't') w.y = 0; if (a == 'm') w.y = R((B.h - w.h) / 2); if (a == 'b') w.y = B.h - w.h; }));
   const wn = $('#wName'); wn.addEventListener('change', () => { if (wn.value.replace(/[^A-Za-z0-9_]/g, '')) w.name = E.uniqueWidgetName(cur(), wn.value, w); save(); renderAll(); });
+  const wa = $('#wAct'); if (wa) { wa.oninput = () => { $('#actNote').innerHTML = actNote(wa.value); }; wa.onchange = () => mutate(() => { const a = E.actionName(wa.value); if (a) w.action = a; else delete w.action; }); }
   const tt = $('#tapTo'); if (tt) { tt.onchange = () => mutate(() => { w.onTap = tt.value ? {to: tt.value, anim: (w.onTap && w.onTap.anim) || 'move_left'} : null; }); $('#tapAnim').onchange = e => mutate(() => { if (w.onTap) w.onTap.anim = e.target.value; }); }
   $('#dupW').onclick = dup; $('#delW').onclick = del;
   rb.querySelectorAll('[data-scrub]').forEach(l => l.addEventListener('pointerdown', e => { e.preventDefault(); const k = l.dataset.scrub, sx = e.clientX, o = w[k]; push(); l.setPointerCapture(e.pointerId);
@@ -869,7 +892,7 @@ askForm.addEventListener('submit', async e => {
   runAgent(text);
 });
 async function runAgent(text) {
-  AI.ctl = new AbortController(); askForm.classList.add('busy'); askGo.disabled = false; askGo.innerHTML = ico('<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/>');
+  AI.ctl = new AbortController(); askForm.classList.add('busy'); askGo.disabled = false; askGo.innerHTML = ico(I.stop);
   let pushed = false;
   const tools = E.AI_TOOLS.filter(t => t.name != 'get_code').map(t => ({name: t.name, description: t.description, inputSchema: t.inputSchema, execute: inp => {
     const b0 = S.p.board, before = E.READ_ONLY[t.name] ? null : snap();
@@ -898,7 +921,7 @@ async function runAgent(text) {
     AI.chat.filter(c => c.cls == 'ai').pop().text = msg;
   } finally {
     if (pushed) save();
-    AI.ctl = null; AI.pending = null; askForm.classList.remove('busy'); askGo.innerHTML = ico('<path d="M12 19V5M6 11l6-6 6 6"/>'); askGo.disabled = !askIn.value.trim(); renderHeader();
+    AI.ctl = null; AI.pending = null; askForm.classList.remove('busy'); askGo.innerHTML = ico(I.send); askGo.disabled = !askIn.value.trim(); renderHeader();
   }
 }
 
@@ -932,6 +955,7 @@ ${parts.map(p => '- ' + p).join('\n')}
 2. Use the included \`lv_conf.h\` or switch on the same Montserrat sizes in yours.
 3. Call \`ui_init()\` once your display and touch drivers run. \`ui_get_screen(i)\` returns screen *i*.
 
+${E.actionGuide(P)}
 ## Verified by Epixo
 The generator behind this export was checked on every template and a test project with every widget:
 - C output compiles with \`-Wall -Wextra -Werror\` and renders pixel-identical to the editor on LVGL 8.4, 9.2, 9.4 and 9.6.
@@ -1119,7 +1143,7 @@ function openWelcome(newProject) {
       wf.querySelector('#wNext').onclick = () => { step = 1; draw(); };
     } else {
       wh.innerHTML = `<h2>How would you like to start?</h2><p>Pick an idea to make your own, describe the screen to AI, or begin with a blank screen on your ${esc(board.name)}.</p>`;
-      wb.innerHTML = `<form class="ask" id="wAsk" style="width:100%;margin:0 0 14px;background:var(--fill);box-shadow:none"><span class="spark">${ico(I.spark)}</span><input id="wQ" placeholder="Describe your screen, like “a plant monitor with soil moisture”"><button class="send" aria-label="Build with AI">${ico('<path d="M12 19V5M6 11l6-6 6 6"/>')}</button></form>
+      wb.innerHTML = `<form class="ask" id="wAsk" style="width:100%;margin:0 0 14px;background:var(--fill);box-shadow:none"><span class="spark">${ico(I.spark)}</span><input id="wQ" placeholder="Describe your screen, like “a plant monitor with soil moisture”"><button class="send" aria-label="Build with AI">${ico(I.send)}</button></form>
         <div class="choices"><button class="choice" data-k=""><div class="mini" style="aspect-ratio:16/10;display:grid;place-items:center;color:var(--ink3)">${ico(I.plus)}</div><b>Blank screen</b><small>Start from nothing</small></button>${Object.entries(E.TPL).map(([k, v]) => `<button class="choice" data-k="${k}"><div class="mini" data-w="${k}"></div><b>${v.n}</b><small>${v.d}</small></button>`).join('')}</div>`;
       wf.innerHTML = `<div class="stepdots"><i></i><i class="on"></i></div><button class="btn2" id="wBack" style="width:auto;margin:0">Back</button>`;
       const jobs = [];
@@ -1179,7 +1203,7 @@ const endPan = e => { touches.delete(e.pointerId); if (pan && (!pan.pinch || tou
 vp.addEventListener('pointerup', endPan, true); vp.addEventListener('pointercancel', endPan, true);
 
 /* ---------------- appearance and focus ---------------- */
-const THEME_ICONS = {auto: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>', light: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', dark: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'};
+const THEME_ICONS = {auto: '<path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,16.37a86.4,86.4,0,0,1,16,3V212.67a86.4,86.4,0,0,1-16,3Zm32,9.26a87.81,87.81,0,0,1,16,10.54V195.83a87.81,87.81,0,0,1-16,10.54ZM40,128a88.11,88.11,0,0,1,80-87.63V215.63A88.11,88.11,0,0,1,40,128Zm160,50.54V77.46a87.82,87.82,0,0,1,0,101.08Z"/>', light: '<path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z"/>', dark: '<path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z"/>'};
 function themeMode() { try { return localStorage.getItem('epixo.theme') || 'auto'; } catch (e) { return 'auto'; } }
 function renderThemeBtn() { const m = themeMode(), b = $('#themeBtn'); b.innerHTML = ico(THEME_ICONS[m]); b.title = 'Appearance: ' + ({auto: 'automatic', light: 'light', dark: 'dark'})[m]; }
 function setTheme(m) {

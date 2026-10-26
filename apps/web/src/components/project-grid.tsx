@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { MoreHorizontal, Plus, Trash2, ExternalLink, Copy } from "lucide-react";
+import { MoreHorizontal, Plus, Trash2, ExternalLink, Copy } from "@/components/icons";
 import { Device, deviceWidth } from "./device";
 import { renderStill } from "@/lib/lvgl";
 import { timeAgo } from "@/lib/data";

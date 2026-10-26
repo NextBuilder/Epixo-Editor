@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Roll } from "./motion/motion";
 import { useRouter } from "next/navigation";
-import { Heart, Link2, Flag, Trash2, EyeOff, Eye, Check, Bookmark } from "lucide-react";
+import { Heart, Link2, Flag, Trash2, EyeOff, Eye, Check, Bookmark } from "@/components/icons";
 
 async function call(url: string, init?: RequestInit) {
   const r = await fetch(url, { ...init, headers: { "content-type": "application/json", ...(init?.headers ?? {}) } });

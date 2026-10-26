@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Archive, Building2, Check, Clock, Reply, Wallet } from "lucide-react";
+import { Archive, Building2, Check, Clock, Reply, Wallet } from "@/components/icons";
 import { Avatar } from "./avatar";
 import { timeAgo } from "@/lib/data";
 

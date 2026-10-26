@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Bell, Briefcase, Heart, MessageCircle, Repeat2, UserPlus } from "lucide-react";
+import { Bell, Briefcase, Heart, MessageCircle, Repeat2, UserPlus } from "@/components/icons";
 import { Avatar } from "@/components/avatar";
 import { Empty } from "@/components/empty";
 import { MarkSeen } from "@/components/mark-seen";
