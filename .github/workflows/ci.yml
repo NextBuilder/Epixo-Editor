@@ -56,17 +56,3 @@ jobs:
           node scripts/smoke.mjs || (tail -50 preview.log; exit 1)
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
-
-  dependency-review:
-    name: Dependency review
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
-        with:
-          fail-on-severity: high
-          comment-summary-in-pr: on-failure

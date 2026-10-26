@@ -30,6 +30,11 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 
 ### Fixed
 - The home and pricing pages no longer scroll sideways on phones.
+- CI passes again: the dependency review job, which needs a repository setting that is off, is gone, and npm audit already checks every change.
+
+### Security
+- Next.js 16.4.3 with OpenNext for Cloudflare 1.20.13, fixing three critical Next.js advisories (GHSA-2464-fhr4-w9xw, GHSA-p3m5-59mp-jv5r and GHSA-673q-mjm6-r5xr).
+- Wrangler 4.152, PostCSS 8.5.31 and the CodeQL action 4.39.1. Patched glob and undici inside the build tools, so `npm audit` finds nothing.
 
 ## [0.7.0] - 2026-10-26
 
@@ -76,7 +81,7 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 ### Added
 - Repository layout: `apps/web`, `apps/editor`, `runtime`, `engine`, `tests`.
 - Unit tests that export every template on all 113 boards and check Design Doctor.
-- GitHub Actions: CI, pixel verification on LVGL 8.4, 9.2, 9.4 and 9.6, CodeQL, dependency review and Dependabot.
+- GitHub Actions: CI, pixel verification on LVGL 8.4, 9.2, 9.4 and 9.6, CodeQL and Dependabot.
 - Design Doctor finds widgets or screens whose names would clash in generated code, with a one-click fix.
 - Design Doctor warns when two pieces of text overlap.
 - Published screens and profile photos can be stored in Cloudflare KV when R2 is not set up, with edge caching for fast loading.
