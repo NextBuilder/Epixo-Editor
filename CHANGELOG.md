@@ -4,6 +4,22 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-26
+
+### Added
+- A redesigned editor that feels like a native app: the canvas fills the window under floating glass panels, with spring motion, sliding segmented controls, light and dark mode that follows your system, focus mode, zoom to the pointer, space-drag panning and pinch to zoom on touch screens.
+- An Ask AI bar under the canvas. It edits the open screen or builds a new one while you watch, and every AI change is one undo step. Press / to use it.
+- A welcome for first-time makers: pick a popular board, then start from an idea, a blank screen or a sentence for AI, followed by three short tips.
+- Design from Claude, ChatGPT and other AI apps over MCP. Make a private link at /connect, add it as a connector, and changes appear in the open editor within seconds with a note saying who made them.
+- A local MCP server in `apps/mcp` that needs no packages. It saves projects as files, serves the editor with a live two-way link, renders screens with real LVGL so the AI can see its work, and exports code to a folder.
+- One set of AI tools in `core.js`, shared by the editor, the local server and the website, with tests.
+- A Designing with AI guide in the docs.
+
+### Changed
+- Panels and thumbnails redraw much faster: rendered screens and template previews are cached.
+- Pressing on the canvas ends typing in a field, so shortcuts like Delete and ⌘Z act on the design.
+- Preview is now called Try it.
+
 ## [0.5.1] - 2026-10-16
 
 ### Added
@@ -52,7 +68,8 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 - Design Doctor, Live Mirror and AI design.
 - Verification suite comparing every export pixel by pixel.
 
-[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/NextBuilder/Epixo-Editor/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.5.0
 [0.4.0]: https://github.com/NextBuilder/Epixo-Editor/releases/tag/v0.4.0

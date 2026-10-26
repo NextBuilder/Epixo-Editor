@@ -18,7 +18,7 @@ fs.copyFileSync(require.resolve("jszip/dist/jszip.min.js"), path.join(out, "vend
 
 let html = fs.readFileSync(path.join(src, "index.html"), "utf8");
 html = html.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>', '<script src="vendor/jszip.min.js"></script>');
-const head = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><base href="/editor/"><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" href="/brand/epixo-icon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+const head = '<!doctype html><html lang="en"><head><base href="/editor/"><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" href="/brand/epixo-icon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">';
 const styleEnd = html.indexOf("</style>") + "</style>".length;
 html = html.replace('<script src="app.js"></script>', '<script src="hosted.js"></script>\n<script src="app.js"></script>');
 html = head + html.slice(0, styleEnd) + "</head><body>" + html.slice(styleEnd) + "</body></html>";
@@ -32,5 +32,7 @@ const data = {
   widgets: Object.entries(core.TYPES).map(([key, t]) => ({ key, name: t.n, lv: t.lv })),
 };
 fs.mkdirSync(path.join(root, "src", "data"), { recursive: true });
+// The AI tools run on the server too, for the MCP endpoint, so they share the editor's own core.
+fs.copyFileSync(path.join(src, "core.js"), path.join(root, "src", "data", "epixo-core.cjs"));
 fs.writeFileSync(path.join(root, "src", "data", "core.json"), JSON.stringify(data));
 console.log(`editor synced, ${data.boards.length} boards, ${data.templates.length} templates`);

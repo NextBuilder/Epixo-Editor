@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return fail("Bad request");
   }
   if (!Array.isArray(body.messages) || !body.messages.length || body.messages.length > 80) return fail("Bad request");
-  const tools = Array.isArray(body.tools) ? body.tools.slice(0, 12).map(t => ({ name: String(t.name).slice(0, 64), description: String(t.description).slice(0, 1024), input_schema: t.input_schema ?? { type: "object", properties: {} } })) : undefined;
+  const tools = Array.isArray(body.tools) ? body.tools.slice(0, 24).map(t => ({ name: String(t.name).slice(0, 64), description: String(t.description).slice(0, 1024), input_schema: t.input_schema ?? { type: "object", properties: {} } })) : undefined;
   const take = await run("UPDATE users SET ai_credits = ai_credits - 1 WHERE id = ? AND ai_credits > 0", g.user!.id);
   if (!take.meta.changes) return fail("You have used all your AI credits.", 402);
   const r = await fetch("https://api.anthropic.com/v1/messages", {

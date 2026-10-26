@@ -1,6 +1,6 @@
 {
   "name": "epixo",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "description": "Epixo: design LVGL screens for ESP32 displays in the browser.",
   "homepage": "https://github.com/NextBuilder/Epixo-Editor",

@@ -15,6 +15,9 @@ async function api(url, init) {
   return r;
 }
 
+// Last version of each project this editor saved or loaded, so changes from a connected AI can be told apart.
+const seen = {};
+
 /* ---- local project store for signed-out makers ---- */
 const readLocal = () => { try { return JSON.parse(localStorage.getItem(LOCAL) || '{}'); } catch (e) { return {}; } };
 const writeLocal = o => {
@@ -25,7 +28,7 @@ const writeLocal = o => {
 
 function dbFor(signedIn) {
   const doc = pid => signedIn ? {
-    set: d => api('/api/projects/' + pid, {method: 'PUT', headers: {'content-type': 'application/json'}, body: d.json}),
+    set: async d => { const j = await (await api('/api/projects/' + pid, {method: 'PUT', headers: {'content-type': 'application/json'}, body: d.json})).json(); seen[pid] = j.updated_at; },
     get: async () => { const t = await (await api('/api/projects/' + pid)).text(); return {exists: true, data: () => ({json: t})}; },
     delete: () => api('/api/projects/' + pid, {method: 'DELETE'})
   } : {
@@ -153,6 +156,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  if (user) followAI(A);
+
   const clean = () => history.replaceState(null, '', '/editor/');
   try {
     if (qs.get('open')) {
@@ -176,6 +181,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   clean();
 });
+
+// While a project is open, check every few seconds whether Claude or ChatGPT changed it through an AI connection.
+function followAI(A) {
+  let busy = false;
+  const tick = async () => {
+    if (busy || document.hidden) return;
+    const pid = A.project().pid;
+    busy = true;
+    try {
+      const r = await fetch('/api/projects/' + pid + '/rev', {credentials: 'same-origin', cache: 'no-store'});
+      if (!r.ok) return;
+      const v = await r.json();
+      if (seen[pid] == null) { seen[pid] = v.updated_at; return; }
+      if (v.updated_at <= seen[pid] || !v.updated_by) return;
+      seen[pid] = v.updated_at;
+      const p = JSON.parse(await (await api('/api/projects/' + pid, {cache: 'no-store'})).text());
+      p.pid = pid;
+      A.applyRemote(p, {text: v.updated_by + ': ' + (v.update_note || 'Updated the design'), switchScreen: /^Designed|^Added a template/.test(v.update_note)});
+    } catch (e) {} finally { busy = false; }
+  };
+  setInterval(tick, 3000);
+  document.addEventListener('visibilitychange', tick);
+}
 
 function openPublish(A) {
   const P = A.project(), esc = A.esc;

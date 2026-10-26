@@ -59,7 +59,9 @@ function save() {
   saveT = setTimeout(() => { try { localStorage.setItem(LKEY, JSON.stringify(S.p)); } catch (e) {} }, 200);
   cloudDirty = true; clearTimeout(cloudT); cloudT = setTimeout(cloudSave, 1500);
   renderSaveState();
+  watchers.forEach(fn => fn(S.p));
 }
+const watchers = [];
 function projectRef(pid) { return CAP.db.collection('data/users/' + CAP.uid).doc(pid); }
 async function cloudSave() {
   if (!CAP.db || !CAP.uid || cloudBusy) return;
@@ -195,8 +197,21 @@ function applyZoom() {
   $('#stage').style.setProperty('--iz', 1 / z); $('#zoomV').textContent = R(z * 100) + '%'; $('#boardtag').style.transform = `translateX(-50%) scale(${1 / z})`;
   canvas.style.imageRendering = z >= 2 ? 'pixelated' : 'auto';
 }
-function fit() { const b = S.p.board, bz = bezel(), fw = b.w + 2 * bz, fh = b.h + 2 * bz, r = vp.getBoundingClientRect(), pad = innerWidth < 900 ? 60 : 130; S.zoom = Math.floor(clamp(Math.min((r.width - pad) / fw, (r.height - pad - 50) / fh), .15, 4) * 100) / 100; S.lastFit = true; applyZoom(); renderOverlay(); }
-function setZoom(z) { S.zoom = clamp(R(z * 100) / 100, .15, 8); S.lastFit = false; applyZoom(); renderOverlay(); }
+// The visible canvas is the window minus the floating panels, top bar and AI bar. The same sizes drive .stagewrap's padding.
+function canvasArea() {
+  const cs = getComputedStyle($('#app')), v = k => parseFloat(cs.getPropertyValue(k)) || 0, focus = $('#app').classList.contains('focus');
+  const mob = innerWidth <= 900, side = mob || focus ? 0 : 48, gap = v('--gap');
+  const w = vp.clientWidth - (focus ? 0 : v('--lw') + v('--rw')) - 2 * gap - 2 * side;
+  const h = vp.clientHeight - (gap + v('--top') + (mob ? 16 : 40)) - (S.code ? vp.clientHeight * .42 + 40 : v('--dock') + (mob ? 16 : 60));
+  return {w: Math.max(80, w), h: Math.max(80, h)};
+}
+function fit() { const b = S.p.board, bz = bezel(), fw = b.w + 2 * bz, fh = b.h + 2 * bz + 40, a = canvasArea(); S.zoom = Math.floor(clamp(Math.min(a.w / fw, a.h / fh), .15, 4) * 100) / 100; S.lastFit = true; applyZoom(); renderOverlay(); }
+function setZoom(z, at) {
+  const old = S.zoom, st = $('#stage'); let p = null;
+  if (at) { const r = st.getBoundingClientRect(); p = {x: (at.x - r.left) / old, y: (at.y - r.top) / old}; }
+  S.zoom = clamp(R(z * 100) / 100, .15, 8); S.lastFit = false; applyZoom(); renderOverlay();
+  if (p) { const r = st.getBoundingClientRect(); vp.scrollLeft += r.left + p.x * S.zoom - at.x; vp.scrollTop += r.top + p.y * S.zoom - at.y; }
+}
 
 function issueBoxes() {
   if (S.right != 'doctor' || S.mode != 'design') return '';
@@ -232,6 +247,8 @@ function hitAt(p) { const ws = cur().widgets; for (let i = ws.length - 1; i >= 0
 scrEl.addEventListener('pointerdown', e => {
   if (S.mode == 'preview') { previewPointer(e, true); return; }
   if (e.button !== 0) return;
+  // Pressing on the canvas ends typing, so shortcuts like Delete and ⌘Z act on the design.
+  const ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) ae.blur();
   const p = pt(e), w = hitAt(p);
   if (!w) { if (S.sel) { S.sel = null; renderSel(); } return; }
   if (S.sel != w.id) { S.sel = w.id; renderSel(); }
@@ -317,7 +334,7 @@ function setMode(m) {
   S.mode = m; if (m == 'preview') { S.sel = null; S.hover = null; }
   $('#modepill').hidden = m != 'preview';
   $('#playBtn').classList.toggle('on', m == 'preview');
-  $('#playBtn').querySelector('span').textContent = m == 'preview' ? 'Stop' : 'Preview';
+  $('#playBtn').querySelector('span').textContent = m == 'preview' ? 'Done' : 'Try it';
   $('#playBtn').querySelector('svg').innerHTML = m == 'preview' ? '<rect x="6" y="6" width="12" height="12" rx="2"/>' : '<path d="M7 4.5l12 7.5-12 7.5z"/>';
   scrEl.style.cursor = m == 'preview' ? 'pointer' : '';
   if (ENG) {
@@ -329,22 +346,48 @@ function setMode(m) {
 }
 
 /* ---------------- left panel ---------------- */
+// Rendered thumbnails are kept by their exact script, so unchanged screens never render twice.
 let thumbJob = 0;
+const THUMBS = new Map();
 async function paintThumbs(list) {
-  const job = ++thumbJob, th = await thumbEngine();
-  if (!th || job != thumbJob) return;
-  const b = S.p.board; if (th.w != b.w || th.h != b.h) th.init(b.w, b.h);
+  const job = ++thumbJob, b = S.p.board, todo = [];
   for (const [cv, proj, scr] of list) {
+    const key = b.w + 'x' + b.h + '|' + E.scriptScreen(proj, scr), hit = THUMBS.get(key);
+    if (hit) { cv.width = b.w; cv.height = b.h; cv.getContext('2d').drawImage(hit, 0, 0); } else todo.push([cv, proj, scr, key]);
+  }
+  if (!todo.length) return;
+  const th = await thumbEngine();
+  if (!th || job != thumbJob) return;
+  if (th.w != b.w || th.h != b.h) th.init(b.w, b.h);
+  for (const [cv, proj, scr, key] of todo) {
     if (job != thumbJob) return;
     th.exec('X\n' + E.scriptScreen(proj, scr) + '\nL\t' + E.sid(scr.id) + '\n');
     cv.width = b.w; cv.height = b.h; th.img = null; th.renderTo(cv.getContext('2d'), 400);
+    const keep = document.createElement('canvas'); keep.width = b.w; keep.height = b.h; keep.getContext('2d').drawImage(cv, 0, 0);
+    THUMBS.set(key, keep); if (THUMBS.size > 120) THUMBS.delete(THUMBS.keys().next().value);
     await new Promise(r => setTimeout(r, 0));
   }
 }
+const TPLS = new Map();
+function templatePreview(key, b) {
+  const k = key + '|' + b.w + 'x' + b.h + (b.round ? 'r' : '');
+  if (!TPLS.has(k)) { const tmp = E.blank(b); const ss = E.addTemplate(tmp, key, b.w, b.h, b.round); TPLS.set(k, [tmp, ss[0]]); }
+  return TPLS.get(k);
+}
 function miniCanvas(host) { const b = S.p.board, cv = document.createElement('canvas'); if (b.round) cv.className = 'round'; cv.width = b.w; cv.height = b.h; const r = b.w / b.h; cv.style.aspectRatio = r; cv.style.width = r >= 1.6 ? '92%' : 'auto'; cv.style.height = r >= 1.6 ? 'auto' : '92%'; host.replaceChildren(cv); return cv; }
+// iOS-style segmented control: one thumb slides under the chosen tab.
+function segThumb(seg) {
+  let t = seg.querySelector('.thumb'); if (!t) { t = document.createElement('span'); t.className = 'thumb'; seg.prepend(t); }
+  const on = seg.querySelector('button.on'); if (!on || !on.offsetWidth) return;
+  t.style.left = on.offsetLeft + 'px'; t.style.width = on.offsetWidth + 'px';
+}
+const shown = {left: null, right: null};
+function swapIn(el, side, tab) { if (shown[side] != tab) { el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); shown[side] = tab; } }
 function renderLeft() {
   document.querySelectorAll('#leftTabs button').forEach(b => b.classList.toggle('on', b.dataset.t == S.left));
+  segThumb($('#leftTabs'));
   const body = $('#leftBody'), t = S.left;
+  swapIn(body, 'left', t);
   if (t == 'widgets') {
     const q = S.q.toLowerCase(), groups = [['basic', 'Basics'], ['ctl', 'Controls'], ['data', 'Data and status']];
     body.innerHTML = `<label class="search">${ico(I.search)}<input id="wq" placeholder="Search widgets" value="${esc(S.q)}" autocomplete="off"></label>` +
@@ -388,7 +431,7 @@ function renderLeft() {
     const b = S.p.board;
     body.innerHTML = `<div class="grp">Fitted to ${b.w} × ${b.h}${b.round ? ' round' : ''}</div><div class="scards">${Object.entries(E.TPL).map(([k, v]) => `<div class="scard" data-k="${k}" tabindex="0" role="button"><div class="mini" data-tmini="${k}"></div><div class="meta col"><b>${v.n}</b><span>${v.d}</span></div></div>`).join('')}</div><p class="hint">Templates rebuild themselves for your board, and text is sized with Montserrat's real glyph widths so it fits.</p>`;
     const jobs = [];
-    body.querySelectorAll('[data-tmini]').forEach(m => { const tmp = E.blank(b); const ss = E.addTemplate(tmp, m.dataset.tmini, b.w, b.h, b.round); jobs.push([miniCanvas(m), tmp, ss[0]]); });
+    body.querySelectorAll('[data-tmini]').forEach(m => { const [tmp, scr] = templatePreview(m.dataset.tmini, b); jobs.push([miniCanvas(m), tmp, scr]); });
     paintThumbs(jobs);
     body.querySelectorAll('[data-k]').forEach(c => { const go = () => { mutate(() => { const ss = E.addTemplate(S.p, c.dataset.k, b.w, b.h, b.round); S.p.cur = ss[0].id; S.sel = null; }); toast('Added ' + E.TPL[c.dataset.k].n); closeMob(); }; c.addEventListener('click', go); c.addEventListener('keydown', e => { if (e.key == 'Enter') go(); }); });
   }
@@ -422,7 +465,7 @@ rb.addEventListener('focusin', e => { if (e.target.matches('.fld,input') && insP
 rb.addEventListener('focusout', () => { insPushed = null; });
 function renderRight() {
   document.querySelectorAll('#rightTabs button').forEach(b => b.classList.toggle('on', b.dataset.t == S.right));
-  updateDocBadge();
+  updateDocBadge(); segThumb($('#rightTabs')); swapIn(rb, 'right', S.right);
   if (S.right == 'design') renderInspector(); else if (S.right == 'doctor') renderDoctor(); else renderDevice();
 }
 function renderInspector() {
@@ -435,7 +478,7 @@ function renderInspector() {
     <div class="sec"><h4>Board <button class="tbtn" id="chgBoard" style="height:24px;font-size:11px;color:var(--accent)">Change</button></h4>
       <dl class="kv"><dt>Maker</dt><dd>${esc(b.brand)}</dd><dt>Model</dt><dd>${esc(b.name)}</dd><dt>Display</dt><dd>${b.size} ${b.panel}${b.round ? ' · round' : ''}</dd><dt>Resolution</dt><dd>${b.w} × ${b.h}${b.rot == 90 ? ' (rotated)' : ''}</dd><dt>Chip</dt><dd>${esc(b.chip)}</dd>${b.lcd ? `<dt>LCD driver</dt><dd>${esc(b.lcd)}</dd>` : ''}${b.tp ? `<dt>Touch</dt><dd>${esc(b.tp)}</dd>` : `<dt>Touch</dt><dd>${b.touch ? 'Yes' : 'No'}</dd>`}<dt>Board pack</dt><dd>${b.pack ? (b.pack.startsWith('espanel') ? 'ESP32_Display_Panel' : 'esp32-smartdisplay') : 'UI files only'}</dd></dl>
       <p class="note"><span class="vchip ${b.v || 'spec'}">${V.label}</span> ${V.note}${b.src ? ` <a href="${esc(b.src)}" target="_blank" rel="noopener">Source</a>` : ''}</p></div>
-    <div class="sec"><h4>Shortcuts</h4><div class="keys"><span>Command menu</span><kbd>⌘K</kbd><span>Preview on LVGL</span><kbd>P</kbd><span>Duplicate</span><kbd>⌘D</kbd><span>Nudge 1 / 10 px</span><kbd>← ⇧←</kbd><span>Free move (no snap)</span><kbd>⌥ drag</kbd><span>Fit to view</span><kbd>⇧1</kbd></div></div>`;
+    <div class="sec"><h4>Shortcuts</h4><div class="keys"><span>Command menu</span><kbd>⌘K</kbd><span>Try it on LVGL</span><kbd>P</kbd><span>Ask AI</span><kbd>/</kbd><span>Focus mode</span><kbd>\\</kbd><span>Pan the canvas</span><kbd>Space drag</kbd><span>Duplicate</span><kbd>⌘D</kbd><span>Nudge 1 / 10 px</span><kbd>← ⇧←</kbd><span>Free move (no snap)</span><kbd>⌥ drag</kbd><span>Fit to view</span><kbd>⇧1</kbd><span>Zoom to the pointer</span><kbd>⌘ scroll</kbd></div></div>`;
     const sn = $('#scrName'); sn.addEventListener('change', () => { s.name = E.uniqueName({screens: S.p.screens.filter(x => x != s)}, sn.value); save(); renderAll(); });
     rb.querySelectorAll('[data-th]').forEach(x => x.onclick = () => applyTheme(E.THEMES[x.dataset.th]));
     $('#chgBoard').onclick = openBoards;
@@ -475,14 +518,7 @@ function bindColor(root, set, done) {
 }
 function liveInspector() { const w = selW(); if (!w || S.right != 'design') return; ['x', 'y', 'w', 'h'].forEach(k => { const i = rb.querySelector(`input[data-k="${k}"]`); if (i && document.activeElement !== i) i.value = w[k]; }); }
 function applyTheme(t) {
-  mutate(() => { const s = cur(); s.bg = t.bg; const U = v => String(v || '').toUpperCase(), any = (k, v) => E.THEMES.some(x => U(x[k]) == U(v)) || U(E.C[k]) == U(v);
-    s.widgets.forEach(w => { const T = w.type;
-      if (T == 'panel' && any('card', w.bg)) w.bg = t.card;
-      if (['label', 'icon', 'checkbox', 'arc'].includes(T)) { if (any('ink', w.fg)) w.fg = t.ink; else if (any('ink2', w.fg)) w.fg = t.ink2; }
-      if (T == 'button') { if (any('card', w.bg)) { w.bg = t.card; if (any('ink', w.fg)) w.fg = t.ink; } else if (any('acc', w.bg)) w.bg = t.acc; }
-      if (T == 'dropdown' || T == 'chart') { if (any('card', w.bg)) w.bg = t.card; if (w.fg && any('ink', w.fg)) w.fg = t.ink; }
-      if (['slider', 'bar', 'switch', 'spinner', 'arc'].includes(T) && any('track', w.bg)) w.bg = t.track;
-      if (w.accent && any('acc', w.accent)) w.accent = t.acc; }); });
+  mutate(() => E.applyTheme(cur(), t));
   toast(t.n + ' theme applied to ' + cur().name);
 }
 
@@ -493,6 +529,7 @@ function updateDocBadge() {
   const er = DOC.filter(i => i.sev == 'error').length, wn = DOC.filter(i => i.sev == 'warn').length;
   const b = document.querySelector('#rightTabs [data-t="doctor"]');
   b.innerHTML = 'Doctor' + (er ? `<em>${er}</em>` : wn ? `<em class="warn">${wn}</em>` : '<em class="ok">✓</em>');
+  segThumb($('#rightTabs'));
 }
 function renderDoctor() {
   const er = DOC.filter(i => i.sev == 'error').length, wn = DOC.filter(i => i.sev == 'warn').length, inf = DOC.filter(i => i.sev == 'info').length;
@@ -534,6 +571,7 @@ function renderDevice() {
       <button class="btn2" id="fwBtn">${ico(I.dl)}Export firmware project</button>`
       : `<p class="note" style="margin:0">This board has no driver pack yet. Export the runtime source (<code>epixo_rt.c</code>) and call <code>epixo_rt_line()</code> with each line received over serial after your own display setup.</p><button class="btn2" id="fwBtn">${ico(I.dl)}Export runtime source</button>`}
     <p class="note">The runtime is the same C code that draws this editor's canvas, compiled for your board.</p></div>
+    <div class="sec"><h4>AI apps</h4><p class="note" style="margin:0">${document.querySelector('.livepill') ? 'This editor is linked to your AI app through the Epixo MCP server. Ask Claude or ChatGPT for a screen and watch it appear here.' : window.EPX_HOSTED ? 'Let Claude or ChatGPT design here. Connect them once, then ask for a screen in plain words and watch it build in this editor.' : 'Claude, ChatGPT and other AI apps can design here through the Epixo MCP server in <code>apps/mcp</code>. Run it and open the editor it serves to watch them work live.'}</p>${window.EPX_HOSTED ? `<a class="btn2" href="/connect" target="_blank" rel="noopener" style="text-decoration:none">${ico(I.spark)}Connect Claude or ChatGPT</a>` : ''}</div>
     <div class="sec"><h4>Protocol</h4><p class="note" style="margin:0">Plain text lines over serial: <code>S</code> screen, <code>W</code> widget, <code>P</code> property, <code>E</code> end, <code>L</code> load. Any tool can drive it, including your own scripts.</p></div>`;
   $('#mirBtn').onclick = () => MIR.on ? mirrorClose() : mirrorOpen();
   const mp = $('#mirPush'); if (mp) mp.onclick = () => mirrorSend(E.toScript(S.p));
@@ -600,7 +638,7 @@ function hl(src, lang) {
 let codeT;
 function queueCode() { if (!S.code) return; clearTimeout(codeT); codeT = setTimeout(renderCode, 150); }
 async function renderCode() {
-  $('#codePanel').hidden = !S.code; document.querySelector('.center').classList.toggle('codeopen', S.code); $('#codeBtn').classList.toggle('on', S.code);
+  $('#codePanel').hidden = !S.code; $('#app').classList.toggle('codeopen', S.code); $('#codeBtn').classList.toggle('on', S.code);
   if (!S.code) return;
   const tabs = codeTabs(); if (!tabs.some(t => t[0] == S.ctab)) S.ctab = 'c';
   $('#codeTabs').innerHTML = tabs.map(([k, n]) => `<button class="ctab${S.ctab == k ? ' on' : ''}" data-c="${k}">${n}</button>`).join('') + `<div class="grow"></div><select class="lvsel" id="lvSel" aria-label="LVGL version">${LVT.map(([v, n]) => `<option value="${v}"${S.lv == v ? ' selected' : ''}>${n}</option>`).join('')}</select><button class="tbtn" id="copyCode">${ico(I.dup)}Copy</button><button class="tbtn" id="closeCode" aria-label="Close code">${ico(I.close)}</button>`;
@@ -622,32 +660,31 @@ function toggleCode() { S.code = !S.code; renderCode(); setTimeout(() => S.lastF
 /* ---------------- header & render ---------------- */
 function renderHeader() {
   const b = S.p.board; $('#pname').value = S.p.name;
-  $('#boardChip').innerHTML = `<span class="dot">${ico(I.chip)}</span><b>${esc(b.brand)} · ${esc(b.name)}</b><em>${b.w}×${b.h}</em>${ico(I.chev)}`;
+  $('#boardChip').innerHTML = `<span class="dot">${ico(I.chip)}</span><span class="bc"><b>${esc(b.name)}</b><em>${esc(b.brand)} · ${b.w} × ${b.h}${b.round ? ' · round' : ''}</em></span>${ico(I.chev)}`;
   $('#undoBtn').disabled = !S.hist.length; $('#redoBtn').disabled = !S.fut.length;
 }
 function renderSel() { renderOverlay(); if (S.right == 'design') renderInspector(); if (S.left == 'layers') renderLeft(); }
 let docT;
-function renderAll() { renderHeader(); renderCanvas(); renderOverlay(); renderLeft(); clearTimeout(docT); DOC = E.doctor(S.p, measure); renderRight(); queueCode(); }
+function renderAll() { renderHeader(); renderCanvas(); renderOverlay(); renderLeft(); clearTimeout(docT); DOC = E.doctor(S.p, measure); renderRight(); queueCode(); renderAskMode(); }
 
 /* ---------------- actions ---------------- */
 function dup() { const w = selW(); if (!w) return; mutate(() => { const n = Object.assign(JSON.parse(JSON.stringify(w)), {id: 'w' + (++S.p.seq)}); S.p.counts[w.type] = (S.p.counts[w.type] || 0) + 1; n.name = E.uniqueWidgetName(cur(), E.TYPES[w.type].n.replace(/\W/g, '') + S.p.counts[w.type]); n.x = Math.min(w.x + 12, BW() - w.w); n.y = Math.min(w.y + 12, BH() - w.h); cur().widgets.push(n); S.sel = n.id; }); }
 function del() { const w = selW(); if (!w) return; mutate(() => { cur().widgets = cur().widgets.filter(x => x.id != w.id); S.sel = null; }); }
 function setBoard(b) {
   const o = S.p.board; if (o.id == b.id && o.w == b.w && o.h == b.h) return;
-  const toRound = b.round && !o.round, side = Math.min(b.w, b.h) * 0.72;
-  const kr = toRound ? Math.min(side / o.w, side / o.h) : 0, x0 = toRound ? (b.w - o.w * kr) / 2 : 0, y0 = toRound ? (b.h - o.h * kr) / 2 : 0;
-  mutate(() => { const sx = toRound ? kr : b.w / o.w, sy = toRound ? kr : b.h / o.h, k = Math.min(sx, sy);
-    S.p.screens.forEach(s => s.widgets.forEach(w => { w.x = R(x0 + w.x * sx); w.y = R(y0 + w.y * sy);
-      if (E.SQUARE[w.type]) { const z = R(Math.min(w.w * sx, w.h * sy)); w.x = R(w.x + (w.w * sx - z) / 2); w.w = w.h = z; } else { w.w = Math.max(4, R(w.w * sx)); w.h = Math.max(4, R(w.h * sy)); }
-      if (w.font) w.font = E.F(w.font * k); if (w.radius) w.radius = R(w.radius * k); if (w.thick) w.thick = Math.max(2, R(w.thick * k)); }));
-    S.p.board = b; });
-  TH = null; fit(); const n = E.doctor(S.p, measure).filter(i => i.sev != 'info').length; toast('Layout adapted to ' + b.w + ' × ' + b.h + (toRound ? ' and fitted inside the circle' : '') + (n ? '. Doctor has ' + n + ' suggestions.' : ''));
+  let toRound = false;
+  mutate(() => { toRound = E.adaptToBoard(S.p, b); });
+  TH = null; fit(); flashFrame();
+  const n = E.doctor(S.p, measure).filter(i => i.sev != 'info').length;
+  toast('Layout adapted to ' + b.w + ' × ' + b.h + (toRound ? ' and fitted inside the circle' : '') + (n ? '. Doctor has ' + n + ' suggestions.' : ''));
 }
+function flashFrame() { const f = $('#frame'); f.classList.remove('flash'); void f.offsetWidth; f.classList.add('flash'); }
 
 /* ---------------- modals ---------------- */
 function modal(html, onClose) {
   const root = $('#modalRoot'), sc = h(`<div class="scrim">${html}</div>`); root.appendChild(sc);
-  const close = () => { sc.remove(); document.removeEventListener('keydown', k); onClose && onClose(); };
+  let closed = false;
+  const close = () => { if (closed) return; closed = true; sc.classList.add('out'); setTimeout(() => sc.remove(), 220); document.removeEventListener('keydown', k); onClose && onClose(); };
   const k = e => { if (e.key == 'Escape') { e.stopPropagation(); close(); } };
   document.addEventListener('keydown', k); sc.addEventListener('pointerdown', e => { if (e.target == sc) close(); }); sc.querySelectorAll('[data-x]').forEach(b => b.onclick = close);
   return {el: sc, close};
@@ -709,39 +746,20 @@ led{checked,accent}
 Each widget may have "name" (letters and digits). Colours are "#RRGGBB".`;
 }
 function sanitize(d) {
-  const b = S.p.board, hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v.toUpperCase() : null;
+  const hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v.toUpperCase() : null;
   const out = {name: String((d && d.name) || 'AI Screen').replace(/[^A-Za-z0-9 ]/g, '').slice(0, 24) || 'AI Screen', bg: hex(d && d.bg) || E.C.bg, widgets: []};
-  for (const w of (Array.isArray(d && d.widgets) ? d.widgets.slice(0, 60) : [])) { const p = cleanWidget(w); if (p) out.widgets.push(p); }
+  for (const w of (Array.isArray(d && d.widgets) ? d.widgets.slice(0, 60) : [])) { const p = E.cleanWidget(S.p.board, w); if (p) out.widgets.push(p); }
   return out;
 }
-function cleanWidget(w, partial) {
-  const b = S.p.board, hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v.toUpperCase() : null;
-  const t = w && String(w.type || '').toLowerCase(), type = t == 'card' || t == 'container' || t == 'obj' ? 'panel' : t == 'progress' ? 'bar' : t;
-  if (!partial && !E.TYPES[type]) return null;
-  const p = {}, n = (v, a, z) => clamp(R(+v || 0), a, z);
-  if (!partial || w.w != null) p.w = n(w.w, 4, b.w); if (!partial || w.h != null) p.h = n(w.h, 4, b.h);
-  if (!partial || w.x != null) p.x = n(w.x, -b.w, b.w); if (!partial || w.y != null) p.y = n(w.y, -b.h, b.h);
-  if (!partial) { p.x = clamp(p.x, 0, b.w - p.w); p.y = clamp(p.y, 0, b.h - p.h); if (E.SQUARE[type]) p.w = p.h = Math.min(p.w, p.h); }
-  for (const k of ['fg', 'bg', 'accent', 'borderColor']) if (hex(w[k])) p[k] = hex(w[k]);
-  if (w.bg === 'transparent' || w.bg === 'none') p.bg = 'transparent';
-  for (const k of ['text', 'options', 'data']) if (w[k] != null) p[k] = String(w[k]).replace(/[^\x20-\x7E\n]/g, '').slice(0, 160);
-  if (w.font) p.font = E.F(+w.font); if (w.radius != null) p.radius = clamp(R(+w.radius || 0), 0, 600); if (w.thick) p.thick = clamp(R(+w.thick), 1, 200);
-  for (const k of ['value', 'min', 'max']) if (w[k] !== '' && w[k] != null && isFinite(+w[k])) p[k] = R(+w[k]);
-  for (const k of ['checked', 'showValue', 'shadow', 'hidden']) if (typeof w[k] == 'boolean') p[k] = w[k];
-  if (['left', 'center', 'right'].includes(w.align)) p.align = w.align; if (['top', 'center', 'bottom'].includes(w.valign)) p.valign = w.valign;
-  if (w.icon != null) p.icon = E.ICONS[w.icon] ? w.icon : 'home';
-  if (w.opacity != null) p.opacity = clamp(R(+w.opacity), 0, 100);
-  if (w.name) p.name = String(w.name).replace(/[^A-Za-z0-9_]/g, '').slice(0, 24); if (!p.name) delete p.name;
-  return partial ? p : [type, p];
-}
 function pickTemplate(t) { t = t.toLowerCase(); const map = [['lock', /lock|keypad|pin|door/], ['thermostat', /thermo|heat|temp|climate|hvac|fan/], ['weather', /weather|forecast|rain|sun/], ['music', /music|player|song|audio|radio/], ['fitness', /fit|ring|step|health|activity|workout/], ['energy', /energy|solar|power|battery|inverter|chart|monitor|sensor|plant|air/], ['settings', /setting|toggle|list|menu|config/]]; for (const [k, r] of map) if (r.test(t)) return k; return 'home'; }
+function aiErrHTML(c) { return c == 'signed_out' && window.EPX_HOSTED ? 'Sign in to use AI design. <a href="/login?next=/editor">Sign in</a>' : c == 'no_credits' && window.EPX_HOSTED ? 'You have used all your AI credits. You can still <a href="/connect" target="_blank">design with Claude or ChatGPT</a> for free.' : esc(aiErr(c)); }
 function aiErr(c) { return c == 'signed_out' ? 'Sign in to use AI design.' : c == 'no_credits' ? 'You have used all your AI credits.' : c == 'ai_off' ? 'AI is not switched on for this site yet.' : c == 'rate_limited' ? 'Too many requests right now. Try again in a minute.' : c == 'invalid_json' || c == 'empty' ? 'The design came back incomplete. Try again or ask for fewer elements.' : c == 'refused' ? 'That request was declined. Try describing it differently.' : c == 'image_rejected' ? 'That image could not be read. Try a JPEG or PNG under 20 MB.' : c == 'images_unavailable' ? 'Image input is not available in this view.' : 'Something interrupted the request. Try again.'; }
 function openAI(startTab) {
   let tab = startTab || 'describe', mode = 'new', ctl = null, img = null;
-  const chat = [];
   const b = S.p.board;
-  const m = modal(`<div class="sheet md"><div class="sheet-h"><div class="mark" style="background:linear-gradient(135deg,#FF9F0A,#FF2D55);box-shadow:none">${ico(I.spark)}</div><div style="flex:1;min-width:0"><h2>Epixo AI</h2><p>Designs native LVGL screens for ${b.w} × ${b.h}${b.round ? ' round' : ''}. ${window.EPX_HOSTED ? 'Uses your Epixo AI credits.' : 'Uses your AI account.'}</p></div>${xBtn}</div>
-    <div style="padding:14px 18px 0"><div class="radio" id="aiTabs"><button data-t="describe">Describe a screen</button><button data-t="sketch">Sketch or photo</button><button data-t="copilot">Copilot</button></div></div>
+  if (startTab == 'copilot') { $('#askIn').focus(); return; }
+  const m = modal(`<div class="sheet md"><div class="sheet-h"><div class="ask" style="width:auto;height:auto;padding:0;box-shadow:none;background:none"><span class="spark">${ico(I.spark)}</span></div><div style="flex:1;min-width:0"><h2>Epixo AI</h2><p>Designs native LVGL screens for ${b.w} × ${b.h}${b.round ? ' round' : ''}. ${window.EPX_HOSTED ? 'Uses your Epixo AI credits.' : 'Uses your AI account.'}</p></div>${xBtn}</div>
+    <div style="padding:0 20px 12px"><div class="radio" id="aiTabs"><button data-t="describe">Describe a screen</button><button data-t="sketch">Sketch or photo</button></div></div>
     <div class="ai" id="aiBody"></div></div>`, () => ctl && ctl.abort());
   const body = m.el.querySelector('#aiBody');
   const draw = () => {
@@ -752,13 +770,11 @@ function openAI(startTab) {
     else if (tab == 'sketch') body.innerHTML = `<label class="drop" id="drop"><input type="file" id="imgIn" accept="image/png,image/jpeg,image/webp" hidden>${img ? `<img id="imgPrev" alt="">` : ico(I.img)}<div><b>${img ? esc(img.name) : 'Drop a sketch, screenshot or photo'}</b><div class="note" style="margin:2px 0 0">${img ? 'Choose another file to replace it.' : 'Pencil on paper works. Epixo rebuilds it as real widgets.'}</div></div></label>
       <textarea id="aiq" placeholder="Optional: anything the picture does not show, like colours or what each button does" style="min-height:60px"></textarea>
       <div class="airow"><div class="radio" id="aimode"><button data-m="new" class="on">Add as new screen</button><button data-m="replace">Replace current</button></div><div class="grow"></div><button class="btn2" id="aistop" hidden style="width:auto;margin:0">Stop</button><button class="primary" id="aigo">${ico(I.spark)}Build from image</button></div><div class="status" id="aist"></div>`;
-    else body.innerHTML = `<div class="chat" id="chatLog">${chat.length ? '' : '<div class="msg ai">I can edit the open screen for you. Try “make the title bigger and centre it”, “add a battery bar under the header” or “switch everything to a dark theme”.</div>'}</div>
-      <div class="airow" style="flex-wrap:nowrap"><textarea id="aiq" placeholder="Ask for a change to ${esc(cur().name)}" style="min-height:44px;height:44px"></textarea><button class="btn2" id="aistop" hidden style="width:auto;margin:0">Stop</button><button class="primary" id="aigo">Send</button></div><div class="status" id="aist"></div>`;
     const q = body.querySelector('#aiq'), st = body.querySelector('#aist'), go = body.querySelector('#aigo'), stop = body.querySelector('#aistop');
     body.querySelectorAll('.pchip').forEach(c => c.onclick = () => { q.value = c.textContent; q.focus(); });
     body.querySelectorAll('#aimode button').forEach(x => x.onclick = () => { mode = x.dataset.m; body.querySelectorAll('#aimode button').forEach(y => y.classList.toggle('on', y == x)); });
     stop.onclick = () => ctl && ctl.abort();
-    q.addEventListener('keydown', e => { if (e.key == 'Enter' && (e.metaKey || e.ctrlKey || (tab == 'copilot' && !e.shiftKey))) { e.preventDefault(); go.click(); } });
+    q.addEventListener('keydown', e => { if (e.key == 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); go.click(); } });
     if (tab == 'sketch') {
       const inp = body.querySelector('#imgIn'), drop = body.querySelector('#drop');
       if (img) { const u = URL.createObjectURL(img); body.querySelector('#imgPrev').src = u; }
@@ -766,13 +782,11 @@ function openAI(startTab) {
       drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); }); drop.addEventListener('dragleave', () => drop.classList.remove('over'));
       drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f && /^image\//.test(f.type)) { img = f; draw(); } });
     }
-    if (tab == 'copilot') { const log = body.querySelector('#chatLog'); chat.forEach(c => log.appendChild(h(`<div class="msg ${c.cls}">${esc(c.text)}</div>`))); log.scrollTop = log.scrollHeight; }
     setTimeout(() => q.focus(), 30);
     go.onclick = async () => {
       const text = q.value.trim();
       if (tab == 'describe' && !text) { q.focus(); return; }
       if (tab == 'sketch' && !img) { st.textContent = 'Choose an image first.'; return; }
-      if (tab == 'copilot' && !text) { q.focus(); return; }
       await capsReady;
       if (!CAP.sample) {
         if (tab == 'describe') { const k = pickTemplate(text); mutate(() => { const ss = E.addTemplate(S.p, k, b.w, b.h, b.round); S.p.cur = ss[0].id; S.sel = null; }); st.textContent = 'AI is not available in this view, so Epixo started from the closest template: ' + E.TPL[k].n + '.'; }
@@ -781,7 +795,6 @@ function openAI(startTab) {
       }
       ctl = new AbortController(); go.disabled = true; stop.hidden = false;
       try {
-        if (tab == 'copilot') { await runCopilot(text, q, st); return; }
         st.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>' + (tab == 'sketch' ? 'Reading your image' : 'Designing your screen');
         const prompt = 'You design embedded touch screen UIs that run on LVGL. Create ONE screen.\n' + aiSpec() + '\n' + (tab == 'sketch' ? 'Rebuild the attached image (a sketch, screenshot or photo of a UI) as this screen. Keep its layout and content, clean it up, and make it look premium. ' + (text ? 'Notes: ' + text.slice(0, 500) : '') : 'Request: "' + text.slice(0, 600) + '"') + '\nReply with only JSON: {"name":"ScreenName","bg":"#RRGGBB","widgets":[{"type":"label","name":"Title","x":24,"y":20,"w":300,"h":40,"text":"Hello","fg":"#0E1525","font":28}]} with 6 to 30 widgets.';
         const opts = {signal: ctl.signal, cache: false, modelTier: 'default'};
@@ -793,46 +806,100 @@ function openAI(startTab) {
         const issues = E.doctor(S.p, measure).filter(i => i.screen == S.p.cur && i.sev != 'info').length;
         st.textContent = 'Added “' + cur().name + '” with ' + cur().widgets.length + ' widgets.' + (issues ? ' Design Doctor found ' + issues + ' things to polish.' : '');
         setTimeout(() => m.close(), issues ? 1600 : 900);
-      } catch (e) { const c = e && e.code; if (c == 'cancelled') st.textContent = 'Stopped.'; else if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(c)) st.textContent = 'AI was not allowed in this view.'; else st.textContent = aiErr(c); }
+      } catch (e) { const c = e && e.code; if (c == 'cancelled') st.textContent = 'Stopped.'; else if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(c)) st.textContent = 'AI was not allowed in this view.'; else st.innerHTML = aiErrHTML(c); }
       finally { go.disabled = false; stop.hidden = true; ctl = null; }
     };
   };
-  async function runCopilot(text, q, st) {
-    const log = body.querySelector('#chatLog');
-    const add = (cls, t) => { chat.push({cls, text: t}); const el = h(`<div class="msg ${cls}">${esc(t)}</div>`); log.appendChild(el); log.scrollTop = log.scrollHeight; return el; };
-    add('me', text); q.value = '';
-    st.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>Thinking';
-    let pushed = false; const once = () => { if (!pushed) { push(); pushed = true; } };
-    const s = cur();
-    const find = n => s.widgets.find(w => w.name.toLowerCase() == String(n || '').toLowerCase() || w.id == n);
-    const brief = () => s.widgets.map(w => Object.assign({name: w.name, type: w.type}, ...['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'value', 'checked', 'hidden', 'align', 'icon'].filter(k => w[k] != null && w[k] !== '').map(k => ({[k]: w[k]}))));
-    const tools = [
-      {name: 'get_screen', description: 'Returns the open screen: name, background and every widget with its fields. Call this first.', execute: () => ({screen: s.name, bg: s.bg, width: S.p.board.w, height: S.p.board.h, widgets: brief()})},
-      {name: 'update_widget', description: 'Change fields of one widget, found by name. Only the fields you pass change. Returns the updated widget.', inputSchema: {type: 'object', properties: {name: {type: 'string'}, changes: {type: 'object'}}, required: ['name', 'changes']}, execute: inp => { const w = find(inp.name); if (!w) throw new Error('No widget named ' + inp.name); once(); Object.assign(w, cleanWidget(Object.assign({type: w.type}, inp.changes || {}), true)); if (E.SQUARE[w.type]) w.h = w.w; liveSync(); return {ok: true, widget: brief().find(b => b.name == w.name)}; }},
-      {name: 'add_widget', description: 'Add a widget to the open screen. Pass type, x, y, w, h and any fields. Returns its name.', inputSchema: {type: 'object', properties: {type: {type: 'string'}, x: {type: 'number'}, y: {type: 'number'}, w: {type: 'number'}, h: {type: 'number'}}, required: ['type', 'x', 'y', 'w', 'h']}, execute: inp => { const r = cleanWidget(inp); if (!r) throw new Error('Unknown widget type'); once(); const w = E.mkW(S.p, r[0], r[1]); if (w.type == 'label' && !w.valign) w.valign = 'center'; w.name = E.uniqueWidgetName(s, w.name, w); s.widgets.push(w); liveSync(); return {ok: true, name: w.name}; }},
-      {name: 'delete_widget', description: 'Remove one widget by name.', inputSchema: {type: 'object', properties: {name: {type: 'string'}}, required: ['name']}, execute: inp => { const w = find(inp.name); if (!w) throw new Error('No widget named ' + inp.name); once(); s.widgets = s.widgets.filter(x => x != w); liveSync(); return {ok: true}; }},
-      {name: 'set_background', description: 'Set the screen background colour (#RRGGBB).', inputSchema: {type: 'object', properties: {color: {type: 'string'}}, required: ['color']}, execute: inp => { if (!/^#[0-9a-f]{6}$/i.test(inp.color || '')) throw new Error('Use #RRGGBB'); once(); s.bg = inp.color.toUpperCase(); liveSync(); return {ok: true}; }},
-      {name: 'check_design', description: 'Run Design Doctor on the open screen. Returns problems like text overflow, low contrast or small touch targets.', execute: () => E.doctor(S.p, measure).filter(i => i.screen == s.id).map(i => ({severity: i.sev, problem: i.msg}))}
-    ];
-    const rules = 'You are Epixo Copilot inside an LVGL UI editor. Edit the open screen with the tools to do what the user asks. Rules:\n' + aiSpec() + '\nAlways call get_screen first. Keep edits minimal and precise. After editing, call check_design and fix anything you caused. Finish with one or two plain sentences saying what you changed.';
-    const turns = [{role: 'user', content: rules}];
-    chat.filter(c => c.cls == 'me' || c.cls == 'ai').slice(-8).forEach(c => turns.push({role: c.cls == 'me' ? 'user' : 'assistant', content: c.text}));
-    if (turns[turns.length - 1].role != 'user') turns.push({role: 'user', content: text});
-    const bubble = add('ai', '…');
-    try {
-      const r = await CAP.sample(turns, {signal: ctl.signal, tools, modelTier: 'default', onText: ({text: t}) => { bubble.textContent = t.split('\n\n').pop() || t; }});
-      const finalText = (r.text.split('\n\n').filter(Boolean).pop() || 'Done.').trim();
-      bubble.textContent = finalText; chat[chat.length - 1].text = finalText;
-      if (pushed) { save(); renderAll(); }
-      st.textContent = pushed ? 'Changes applied. ⌘Z undoes them all at once.' : '';
-    } catch (e) {
-      if (pushed) { save(); renderAll(); }
-      bubble.textContent = e && e.code == 'cancelled' ? 'Stopped.' : e && e.code == 'tools_unavailable' ? 'Copilot cannot edit screens in this view.' : aiErr(e && e.code);
-      chat[chat.length - 1].text = bubble.textContent; st.textContent = '';
-    } finally { const go = body.querySelector('#aigo'), stop = body.querySelector('#aistop'); if (go) go.disabled = false; if (stop) stop.hidden = true; ctl = null; }
-  }
   m.el.querySelectorAll('#aiTabs button').forEach(x => x.onclick = () => { if (ctl) ctl.abort(); tab = x.dataset.t; draw(); });
   draw();
+}
+
+/* ---------------- AI bar ---------------- */
+const AI = {mode: 'edit', chat: [], ctl: null, open: false};
+const askIn = $('#askIn'), askGo = $('#askGo'), askPop = $('#askPop'), askForm = $('#ask');
+const SUGGEST = {
+  edit: ['Make the title bigger and centre it', 'Switch this screen to a dark theme', 'Add a battery bar under the header', 'Fix everything Design Doctor found'],
+  new: ['A thermostat with a big dial and fan modes', 'A bike computer with speed, distance and time', 'A 3D printer status screen with progress', 'An air quality monitor with an AQI gauge']
+};
+function renderAskMode() {
+  $('#askMode').textContent = AI.mode == 'edit' ? 'Edit this screen' : 'New screen';
+  askIn.placeholder = AI.mode == 'edit' ? 'Ask AI to change ' + cur().name : 'Describe a new screen for AI to build';
+}
+function renderAskPop() {
+  if (!AI.open) { askPop.hidden = true; return; }
+  askPop.hidden = false;
+  askPop.innerHTML = `<div class="ah"><b>Epixo AI</b><div class="radio" id="askModes"><button data-m="edit" class="${AI.mode == 'edit' ? 'on' : ''}">Edit this screen</button><button data-m="new" class="${AI.mode == 'new' ? 'on' : ''}">New screen</button></div><button class="x" id="askX" aria-label="Close">${ico(I.close)}</button></div>
+    <div class="chat" id="askLog">${AI.chat.map(c => `<div class="msg ${c.cls}">${esc(c.text)}</div>`).join('') || `<div class="msg ai">${AI.mode == 'edit' ? 'Tell me what to change on ' + esc(cur().name) + '. I can move, restyle, add and remove widgets, link screens and fix problems. Every change is one undo step.' : 'Describe the screen you want, and I will build it with real LVGL widgets sized for your ' + esc(S.p.board.name) + '.'}</div>`}</div>
+    ${AI.chat.length ? '' : `<div class="sugg">${SUGGEST[AI.mode].map(t => `<button class="pchip">${esc(t)}</button>`).join('')}</div>`}`;
+  const log = askPop.querySelector('#askLog'); log.scrollTop = log.scrollHeight;
+  askPop.querySelector('#askX').onclick = () => { AI.open = false; renderAskPop(); };
+  askPop.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { AI.mode = b.dataset.m; renderAskMode(); renderAskPop(); askIn.focus(); });
+  askPop.querySelectorAll('.pchip').forEach(b => b.onclick = () => { askIn.value = b.textContent; askGo.disabled = false; askForm.requestSubmit(); });
+}
+function aiSay(cls, text) {
+  AI.chat.push({cls, text}); if (AI.chat.length > 40) AI.chat.shift();
+  if (askPop.hidden) return null;
+  const log = askPop.querySelector('#askLog');
+  if (AI.chat.length == 1 || !log || askPop.querySelector('.sugg')) { renderAskPop(); return askPop.querySelector('#askLog').lastElementChild; }
+  const el = h(`<div class="msg ${cls}">${esc(text)}</div>`);
+  // Steps the AI takes go above its reply, which is still being written.
+  if (cls == 'tool' && AI.pending && AI.pending.isConnected) { log.insertBefore(el, AI.pending); const c = AI.chat.pop(), i = AI.chat.lastIndexOf(AI.chat.filter(x => x.cls == 'ai').pop()); AI.chat.splice(i < 0 ? AI.chat.length : i, 0, c); }
+  else log.appendChild(el);
+  log.scrollTop = 1e9;
+  return el;
+}
+askIn.addEventListener('input', () => { askGo.disabled = !askIn.value.trim() && !AI.ctl; });
+askIn.addEventListener('focus', () => { if (!AI.open) { AI.open = true; renderAskPop(); } });
+askIn.addEventListener('keydown', e => { if (e.key == 'Escape') { e.stopPropagation(); if (AI.ctl) AI.ctl.abort(); else { AI.open = false; renderAskPop(); askIn.blur(); } } });
+$('#askMode').onclick = () => { AI.mode = AI.mode == 'edit' ? 'new' : 'edit'; renderAskMode(); if (AI.open) renderAskPop(); askIn.focus(); };
+document.addEventListener('pointerdown', e => { if (AI.open && !AI.ctl && !e.target.closest('#askPop,#ask,.scrim,.toast')) { AI.open = false; renderAskPop(); } });
+askForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  if (AI.ctl) { AI.ctl.abort(); return; }
+  const text = askIn.value.trim(); if (!text) return;
+  AI.open = true; if (!AI.chat.length) renderAskPop();
+  aiSay('me', text); askIn.value = '';
+  await capsReady;
+  if (!CAP.sample) {
+    if (document.querySelector('.livepill')) aiSay('ai', 'This editor is linked to your AI app. Ask Claude or ChatGPT there, and every change appears here as it happens.');
+    else if (AI.mode == 'new') { const k = pickTemplate(text), b = S.p.board; mutate(() => { const ss = E.addTemplate(S.p, k, b.w, b.h, b.round); S.p.cur = ss[0].id; S.sel = null; }); aiSay('ai', 'AI is not available in this view, so I started you from the closest template: ' + E.TPL[k].n + '. Change anything you like.'); }
+    else aiSay('ai', 'AI is not available in this view. On epixo.app, or with Claude or ChatGPT connected through the Epixo MCP server, I can edit this screen for you.');
+    return;
+  }
+  runAgent(text);
+});
+async function runAgent(text) {
+  AI.ctl = new AbortController(); askForm.classList.add('busy'); askGo.disabled = false; askGo.innerHTML = ico('<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/>');
+  let pushed = false;
+  const tools = E.AI_TOOLS.filter(t => t.name != 'get_code').map(t => ({name: t.name, description: t.description, inputSchema: t.inputSchema, execute: inp => {
+    const b0 = S.p.board, before = E.READ_ONLY[t.name] ? null : snap();
+    const out = E.runTool(S.p, t.name, inp, measure);
+    if (before && snap() != before) {
+      if (!pushed) { S.hist.push(before); if (S.hist.length > 150) S.hist.shift(); S.fut = []; pushed = true; }
+      fixSel(); boardChanged(b0); if (b0.id != S.p.board.id) { TH = null; fit(); }
+      renderAll(); flashFrame(); aiSay('tool', '✓ ' + E.toolNote(t.name, inp));
+    }
+    return out;
+  }}));
+  const w = selW();
+  const rules = 'You are Epixo AI inside a visual editor for LVGL touch screens on ESP32 displays. Use the tools to do what the maker asks, then reply in one or two short, friendly sentences saying what you did. Never paste JSON or code in the reply.\n' + E.DESIGN_RULES +
+    '\nThe board is ' + S.p.board.brand + ' ' + S.p.board.name + ', ' + S.p.board.w + ' x ' + S.p.board.h + (S.p.board.round ? ', round' : '') + '. The open screen is "' + cur().name + '".' + (w ? ' The maker has selected the widget "' + w.name + '"; "this" or "it" usually means that widget.' : '') +
+    (AI.mode == 'new' ? '\nThe maker wants a NEW screen: build it in one design_screen call with every widget, then check_design and fix what it finds.' : '\nThe maker wants changes to the open screen: call get_screen first, keep edits minimal and precise, then check_design.');
+  const turns = [{role: 'user', content: rules}];
+  AI.chat.filter(c => c.cls == 'me' || c.cls == 'ai').slice(-8).forEach(c => turns.push({role: c.cls == 'me' ? 'user' : 'assistant', content: c.text}));
+  const bubble = AI.pending = aiSay('ai', '…');
+  try {
+    const r = await CAP.sample(turns, {signal: AI.ctl.signal, tools, modelTier: 'default', onText: ({text: t}) => { if (bubble) bubble.textContent = t.split('\n\n').pop() || t; }});
+    const fin = (r.text.split('\n\n').filter(Boolean).pop() || 'Done.').trim();
+    if (bubble) bubble.textContent = fin; AI.chat.filter(c => c.cls == 'ai').pop().text = fin;
+  } catch (e) {
+    const msg = e && e.code == 'cancelled' ? 'Stopped. Changes so far are kept, and ⌘Z undoes them.' : e && e.code == 'tools_unavailable' ? 'AI cannot edit screens in this view.' : aiErr(e && e.code);
+    if (bubble) { bubble.textContent = msg; if (window.EPX_HOSTED && (e && (e.code == 'signed_out' || e.code == 'no_credits'))) bubble.innerHTML = aiErrHTML(e.code); }
+    AI.chat.filter(c => c.cls == 'ai').pop().text = msg;
+  } finally {
+    if (pushed) save();
+    AI.ctl = null; AI.pending = null; askForm.classList.remove('busy'); askGo.innerHTML = ico('<path d="M12 19V5M6 11l6-6 6 6"/>'); askGo.disabled = !askIn.value.trim(); renderHeader();
+  }
 }
 
 /* ---------------- export ---------------- */
@@ -984,7 +1051,7 @@ async function openProjects() {
     }));
   };
   draw();
-  m.el.querySelector('#pNew').onclick = async () => { if (cloud) await cloudSave(); const b0 = S.p.board, p = E.blank(S.p.board); p.pid = newPid(); p.name = 'Untitled UI'; const s = E.mkScreen(p, 'Home'); p.cur = s.id; S.hist = []; S.fut = []; S.p = p; S.sel = null; boardChanged(b0); if (ENG) { ENG.synced.clear(); syncAll(); } save(); renderAll(); m.close(); toast('New project'); };
+  m.el.querySelector('#pNew').onclick = async () => { if (cloud) await cloudSave(); m.close(); setTimeout(() => openWelcome(true), 240); };
   m.el.querySelector('#pOpen').onchange = e => openProjectFile(e.target.files[0], st, m);
   const ps = m.el.querySelector('#pSave'); if (ps) ps.onclick = async () => { await cloudSave(); st.textContent = cloudOk === true ? 'Saved to your account.' : 'Cloud save did not work. Your project is still saved in this browser.'; draw(); };
 }
@@ -996,7 +1063,9 @@ function openPalette() {
     ...Object.entries(E.TPL).map(([k, v]) => ({n: 'Template: ' + v.n, g: 'Template', run: () => { const b = S.p.board; mutate(() => { const ss = E.addTemplate(S.p, k, b.w, b.h, b.round); S.p.cur = ss[0].id; S.sel = null; }); }})),
     ...E.THEMES.map(t => ({n: 'Theme: ' + t.n, g: 'Style', run: () => applyTheme(t)})),
     {n: 'Choose board', g: 'Project', run: openBoards}, {n: 'Projects', g: 'Project', run: openProjects}, {n: 'Export', g: 'Project', run: () => openExport()},
-    {n: 'Ask AI to design a screen', g: 'AI', run: () => openAI('describe')}, {n: 'Build a screen from a sketch or photo', g: 'AI', run: () => openAI('sketch')}, {n: 'Copilot: edit this screen', g: 'AI', run: () => openAI('copilot')},
+    {n: 'Ask AI to design a screen', g: 'AI', run: () => { AI.mode = 'new'; renderAskMode(); askIn.focus(); }}, {n: 'Build a screen from a sketch or photo', g: 'AI', run: () => openAI('sketch')}, {n: 'Ask AI to change this screen', g: 'AI', run: () => { AI.mode = 'edit'; renderAskMode(); askIn.focus(); }},
+    {n: 'Appearance: light', g: 'View', run: () => setTheme('light')}, {n: 'Appearance: dark', g: 'View', run: () => setTheme('dark')}, {n: 'Appearance: automatic', g: 'View', run: () => setTheme('auto')}, {n: 'Focus mode', g: 'View', run: toggleFocus},
+    {n: 'Start a new project', g: 'Project', run: () => openWelcome(true)}, {n: 'Show the welcome tour', g: 'Help', run: () => openWelcome(false)},
     {n: 'Design Doctor', g: 'View', run: () => { S.right = 'doctor'; renderRight(); renderOverlay(); }}, {n: 'Fix all Doctor issues', g: 'Edit', run: () => { S.right = 'doctor'; renderRight(); const b = $('#fixAll'); if (b) b.click(); }},
     {n: 'Live Mirror', g: 'Device', run: () => { S.right = 'device'; renderRight(); }},
     {n: S.code ? 'Hide code' : 'Show code', g: 'View', run: toggleCode}, {n: S.mode == 'preview' ? 'Stop preview' : 'Preview on LVGL', g: 'View', run: () => setMode(S.mode == 'preview' ? 'design' : 'preview')},
@@ -1020,7 +1089,111 @@ async function screenshot() {
   if (ok) toast('Saved ' + cur().name + ' as PNG');
 }
 let toastT;
-function toast(t) { document.querySelectorAll('.toast').forEach(x => x.remove()); const el = h(`<div class="toast" role="status">${esc(t)}</div>`); document.body.appendChild(el); clearTimeout(toastT); toastT = setTimeout(() => el.remove(), 2400); }
+function toast(t) { document.querySelectorAll('.toast').forEach(x => x.remove()); const el = h(`<div class="toast" role="status">${esc(t)}</div>`); document.body.appendChild(el); clearTimeout(toastT); toastT = setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 2600); }
+
+/* ---------------- welcome for first-time makers ---------------- */
+const POPULAR = [['sunton-cyd-esp32-2432s028r', 'The Cheap Yellow Display. A great first board.'], ['waveshare-esp32-s3-touch-lcd-4-3', 'A roomy 4.3 inch touch panel.'], ['waveshare-esp32-s3-touch-amoled-1-75', 'A bright round AMOLED, like a watch.'], ['m5stack-core2', 'A finished device in a case.'], ['elecrow-crowpanel-7-0-hmi', 'A big 7 inch control panel.'], ['lilygo-t-display-s3', 'A small, tall stick display.']];
+const seenWelcome = () => { try { return !!localStorage.getItem('epixo.welcomed'); } catch (e) { return true; } };
+const markWelcome = () => { try { localStorage.setItem('epixo.welcomed', '1'); } catch (e) {} };
+function boardShape(b, k) { const s = (k || 40) / Math.max(b.w, b.h); return `<span class="bshape"><i style="width:${R(b.w * s)}px;height:${R(b.h * s)}px;border-radius:${b.round ? '50%' : '5px'}"></i></span>`; }
+function openWelcome(newProject) {
+  let step = 0, board = S.p.board;
+  const m = modal(`<div class="sheet welcome"><div class="wh"></div><div class="wb sheet-b"></div><div class="wf"></div></div>`, () => { markWelcome(); });
+  const wh = m.el.querySelector('.wh'), wb = m.el.querySelector('.wb'), wf = m.el.querySelector('.wf');
+  const start = (key, prompt) => {
+    m.close();
+    const b0 = S.p.board, p = E.blank(board); p.pid = newPid();
+    if (key) { p.name = E.TPL[key].n; p.cur = E.addTemplate(p, key, board.w, board.h, board.round)[0].id; } else { p.name = 'My first screen'; p.cur = E.mkScreen(p, 'Home').id; }
+    if (S.p.screens.some(s => s.widgets.length)) cloudSave();
+    S.hist = []; S.fut = []; S.p = p; S.sel = null; boardChanged(b0); if (ENG) { ENG.synced.clear(); syncAll(); } TH = null; save(); renderAll(); requestAnimationFrame(() => { fit(); flashFrame(); });
+    if (prompt) { AI.mode = 'new'; renderAskMode(); askIn.value = prompt; askGo.disabled = false; askForm.requestSubmit(); }
+    else if (!newProject) setTimeout(() => coach(0), 700);
+  };
+  const draw = () => {
+    if (step == 0) {
+      wh.innerHTML = `<img class="ico" src="assets/epixo-mark.png" alt=""><h2>${newProject ? 'Start a new project' : 'Welcome to Epixo'}</h2><p>Design touch screens for ESP32 displays. What you see here is drawn by real LVGL, so it looks the same on your board. First, which display are you using?</p>`;
+      wb.innerHTML = `<div class="choices">${POPULAR.map(([id, d]) => { const b = E.BOARDS.find(x => x.id == id); return b ? `<button class="choice${board.id == id ? ' on' : ''}" data-b="${id}">${boardShape(b)}<b>${esc(b.name)}</b><small>${esc(b.brand)} · ${b.size} · ${d}</small></button>` : ''; }).join('')}</div>`;
+      wf.innerHTML = `<div class="stepdots"><i class="on"></i><i></i></div><button class="btn2" id="wOther" style="width:auto;margin:0">Find my board</button><button class="primary" id="wNext">Continue</button>`;
+      wb.querySelectorAll('[data-b]').forEach(x => x.onclick = () => { board = E.withRotation(E.BOARDS.find(b => b.id == x.dataset.b), 0); step = 1; draw(); });
+      wf.querySelector('#wOther').onclick = () => { m.close(); openBoards(); };
+      wf.querySelector('#wNext').onclick = () => { step = 1; draw(); };
+    } else {
+      wh.innerHTML = `<h2>How would you like to start?</h2><p>Pick an idea to make your own, describe the screen to AI, or begin with a blank screen on your ${esc(board.name)}.</p>`;
+      wb.innerHTML = `<form class="ask" id="wAsk" style="width:100%;margin:0 0 14px;background:var(--fill);box-shadow:none"><span class="spark">${ico(I.spark)}</span><input id="wQ" placeholder="Describe your screen, like “a plant monitor with soil moisture”"><button class="send" aria-label="Build with AI">${ico('<path d="M12 19V5M6 11l6-6 6 6"/>')}</button></form>
+        <div class="choices"><button class="choice" data-k=""><div class="mini" style="aspect-ratio:16/10;display:grid;place-items:center;color:var(--ink3)">${ico(I.plus)}</div><b>Blank screen</b><small>Start from nothing</small></button>${Object.entries(E.TPL).map(([k, v]) => `<button class="choice" data-k="${k}"><div class="mini" data-w="${k}"></div><b>${v.n}</b><small>${v.d}</small></button>`).join('')}</div>`;
+      wf.innerHTML = `<div class="stepdots"><i></i><i class="on"></i></div><button class="btn2" id="wBack" style="width:auto;margin:0">Back</button>`;
+      const jobs = [];
+      wb.querySelectorAll('[data-w]').forEach(el => { const prev = S.p.board; S.p.board = board; const [tmp, scr] = templatePreview(el.dataset.w, board); jobs.push([miniCanvas(el), tmp, scr]); S.p.board = prev; });
+      const prev = S.p.board; S.p.board = board; paintThumbs(jobs).finally(() => { S.p.board = prev; }); S.p.board = prev;
+      wb.querySelectorAll('[data-k]').forEach(x => x.onclick = () => start(x.dataset.k || null));
+      wb.querySelector('#wAsk').onsubmit = e => { e.preventDefault(); const q = wb.querySelector('#wQ').value.trim(); if (q) start(null, q); else wb.querySelector('#wQ').focus(); };
+      wf.querySelector('#wBack').onclick = () => { step = 0; draw(); };
+    }
+  };
+  draw();
+}
+const TIPS = [
+  ['#leftPanel', 'Add widgets', 'Drag a widget onto the screen, or tap it to drop it in the middle. Double-click any text to edit it.', 'right'],
+  ['#ask', 'Ask AI', 'Describe a change in plain words, like “make the buttons bigger”. AI edits the screen while you watch, and ⌘Z undoes it.', 'up'],
+  ['#playBtn', 'Try it', 'Tap through your screens on real LVGL, just like on the device. When you are happy, press Export.', 'down']
+];
+function coach(i) {
+  document.querySelectorAll('.tipcard').forEach(x => x.remove());
+  const t = TIPS[i]; if (!t || innerWidth <= 900) return;
+  const target = $(t[0]).getBoundingClientRect(), el = h(`<div class="tipcard glass" role="dialog" aria-label="${esc(t[1])}"><b>${esc(t[1])}</b><p>${esc(t[2])}</p><div class="tf"><span>${i + 1} of ${TIPS.length}</span><button class="primary" style="height:32px">${i < TIPS.length - 1 ? 'Next' : 'Got it'}</button></div></div>`);
+  $('#app').appendChild(el);
+  const r = el.getBoundingClientRect();
+  const pos = t[3] == 'right' ? {left: target.right + 12, top: target.top + 40} : t[3] == 'up' ? {left: target.left + target.width / 2 - r.width / 2, top: target.top - r.height - 12} : {left: target.right - r.width, top: target.bottom + 12};
+  el.style.left = clamp(pos.left, 12, innerWidth - r.width - 12) + 'px'; el.style.top = clamp(pos.top, 12, innerHeight - r.height - 12) + 'px';
+  el.querySelector('button').onclick = () => coach(i + 1);
+}
+
+/* ---------------- canvas gestures ---------------- */
+// Space or the middle button pans; two fingers pinch to zoom and drag to pan on touch screens.
+let panKey = false, pan = null;
+const touches = new Map();
+document.addEventListener('keydown', e => { if (e.code == 'Space' && !e.repeat && !/input|textarea|select/i.test(e.target.tagName) && !$('#modalRoot').children.length) { panKey = true; vp.style.cursor = 'grab'; e.preventDefault(); } });
+document.addEventListener('keyup', e => { if (e.code == 'Space') { panKey = false; vp.style.cursor = ''; } });
+vp.addEventListener('pointerdown', e => {
+  if (e.pointerType == 'touch') {
+    touches.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    if (touches.size == 2) { e.stopPropagation(); if (drag) { onUp(); } const [a, b] = [...touches.values()]; pan = {pinch: Math.hypot(a.x - b.x, a.y - b.y), z: S.zoom, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2}; }
+    else if (!e.target.closest('#frame')) pan = {x: e.clientX, y: e.clientY, sl: vp.scrollLeft, st: vp.scrollTop};
+    return;
+  }
+  if (!(panKey || e.button == 1)) return;
+  e.preventDefault(); e.stopPropagation(); vp.setPointerCapture(e.pointerId); vp.style.cursor = 'grabbing';
+  pan = {x: e.clientX, y: e.clientY, sl: vp.scrollLeft, st: vp.scrollTop};
+}, true);
+vp.addEventListener('pointermove', e => {
+  if (e.pointerType == 'touch' && touches.has(e.pointerId)) touches.set(e.pointerId, {x: e.clientX, y: e.clientY});
+  if (!pan) return;
+  if (pan.pinch && touches.size == 2) {
+    const [a, b] = [...touches.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    setZoom(pan.z * Math.hypot(a.x - b.x, a.y - b.y) / pan.pinch, {x: mx, y: my});
+    vp.scrollLeft -= mx - pan.mx; vp.scrollTop -= my - pan.my; pan.mx = mx; pan.my = my; return;
+  }
+  if (pan.x != null) { vp.scrollLeft = pan.sl - (e.clientX - pan.x); vp.scrollTop = pan.st - (e.clientY - pan.y); }
+}, true);
+const endPan = e => { touches.delete(e.pointerId); if (pan && (!pan.pinch || touches.size < 2)) { pan = null; vp.style.cursor = panKey ? 'grab' : ''; } };
+vp.addEventListener('pointerup', endPan, true); vp.addEventListener('pointercancel', endPan, true);
+
+/* ---------------- appearance and focus ---------------- */
+const THEME_ICONS = {auto: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>', light: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>', dark: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'};
+function themeMode() { try { return localStorage.getItem('epixo.theme') || 'auto'; } catch (e) { return 'auto'; } }
+function renderThemeBtn() { const m = themeMode(), b = $('#themeBtn'); b.innerHTML = ico(THEME_ICONS[m]); b.title = 'Appearance: ' + ({auto: 'automatic', light: 'light', dark: 'dark'})[m]; }
+function setTheme(m) {
+  try { m == 'auto' ? localStorage.removeItem('epixo.theme') : localStorage.setItem('epixo.theme', m); } catch (e) {}
+  if (m == 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = m;
+  renderThemeBtn(); toast(({auto: 'Appearance follows your system', light: 'Light appearance', dark: 'Dark appearance'})[m]);
+}
+$('#themeBtn').onclick = () => setTheme(({auto: 'light', light: 'dark', dark: 'auto'})[themeMode()]);
+function toggleFocus() {
+  const on = $('#app').classList.toggle('focus');
+  $('#focusBtn').classList.toggle('on', on);
+  if (S.lastFit) fit(); else applyZoom();
+  if (on) toast('Focus mode. Press \\ to bring the panels back.');
+}
 
 /* ---------------- mobile ---------------- */
 function closeMob() { if (innerWidth > 900) return; S.mob = null; $('#leftPanel').classList.remove('open'); $('#rightPanel').classList.remove('open'); document.querySelectorAll('#mobilebar button').forEach(b => b.classList.remove('on')); }
@@ -1031,6 +1204,7 @@ $('#mobilebar').addEventListener('click', e => {
   document.querySelectorAll('#mobilebar button').forEach(x => x.classList.toggle('on', x == b));
   if (m == 'design' || m == 'doctor') { S.right = m; $('#leftPanel').classList.remove('open'); $('#rightPanel').classList.add('open'); renderRight(); }
   else { S.left = m; $('#rightPanel').classList.remove('open'); $('#leftPanel').classList.add('open'); renderLeft(); }
+  segThumb($('#leftTabs')); segThumb($('#rightTabs'));
 });
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeMob);
 
@@ -1039,11 +1213,11 @@ $('#leftTabs').addEventListener('click', e => { const b = e.target.closest('butt
 $('#rightTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.right = b.dataset.t; if (S.right == 'doctor') DOC = E.doctor(S.p, measure); renderRight(); renderOverlay(); });
 $('#pname').addEventListener('change', e => { push(); S.p.name = e.target.value.trim() || 'Untitled UI'; save(); renderHeader(); });
 $('#saveState').onclick = openProjects;
-$('#boardChip').onclick = openBoards; $('#aiBtn').onclick = () => openAI(); $('#exportBtn').onclick = () => openExport(); $('#palBtn').onclick = openPalette; $('#verBtn').onclick = openVerify;
+$('#boardChip').onclick = openBoards; $('#aiBtn').onclick = () => openAI(); $('#exportBtn').onclick = () => openExport(); $('#palBtn').onclick = openPalette;
 $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo; $('#codeBtn').onclick = toggleCode; $('#shotBtn').onclick = screenshot;
 $('#playBtn').onclick = () => setMode(S.mode == 'preview' ? 'design' : 'preview'); $('#exitPrev').onclick = () => setMode('design');
-$('#zoomIn').onclick = () => setZoom(S.zoom * 1.25); $('#zoomOut').onclick = () => setZoom(S.zoom / 1.25); $('#zoomV').onclick = fit; $('#fitBtn').onclick = fit;
-vp.addEventListener('wheel', e => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(S.zoom * (e.deltaY < 0 ? 1.08 : 1 / 1.08)); } }, {passive: false});
+$('#zoomIn').onclick = () => setZoom(S.zoom * 1.25); $('#zoomOut').onclick = () => setZoom(S.zoom / 1.25); $('#zoomV').onclick = fit; $('#focusBtn').onclick = toggleFocus;
+vp.addEventListener('wheel', e => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(S.zoom * Math.exp(-clamp(e.deltaY, -40, 40) * .012), {x: e.clientX, y: e.clientY}); } }, {passive: false});
 vp.addEventListener('pointerdown', e => { if (S.mode == 'design' && !e.target.closest('#frame') && S.sel) { S.sel = null; renderSel(); } });
 addEventListener('resize', () => { if (S.lastFit) fit(); });
 document.addEventListener('keydown', e => {
@@ -1061,6 +1235,8 @@ document.addEventListener('keydown', e => {
   if (mod && (e.key == '=' || e.key == '+')) { e.preventDefault(); setZoom(S.zoom * 1.25); return; } if (mod && e.key == '-') { e.preventDefault(); setZoom(S.zoom / 1.25); return; }
   if (e.shiftKey && (e.key == '!' || e.code == 'Digit1')) { e.preventDefault(); fit(); return; }
   if (e.key.toLowerCase() == 'p' && !mod) { setMode(S.mode == 'preview' ? 'design' : 'preview'); return; }
+  if (e.key == '\\' && !mod) { toggleFocus(); return; }
+  if (e.key == '/' && !mod) { e.preventDefault(); $('#askIn').focus(); return; }
   if (e.key == 'Escape') { if (S.mode == 'preview') setMode('design'); else if (S.sel) { S.sel = null; renderSel(); } return; }
   const w = selW(); if (!w) return;
   if (e.key == 'Delete' || e.key == 'Backspace') { e.preventDefault(); del(); return; }
@@ -1070,7 +1246,21 @@ document.addEventListener('keydown', e => {
 document.addEventListener('visibilitychange', () => { if (document.hidden) cloudSave(); });
 
 window.EpixoApp = {
-  E, project: () => S.p, toast, modal, xBtn, esc, cloudSave, newPid, engineOn: () => engineState == 'on',
+  E, project: () => S.p, watch: fn => watchers.push(fn), view: () => ({screen: S.p.cur, selected: S.sel}),
+  // A change made by an AI somewhere else. It lands as one undo step, keeps what the maker had open, and does not save back.
+  applyRemote(p, msg) {
+    p = migrate(p); if (!p) return false;
+    const b = S.p.board, keepScreen = S.p.cur, keepSel = S.sel, sameProject = p.pid == S.p.pid;
+    if (sameProject) push(); else { S.hist = []; S.fut = []; }
+    S.p = p;
+    if (sameProject && !msg.switchScreen && p.screens.some(s => s.id == keepScreen)) S.p.cur = keepScreen;
+    S.sel = keepSel; fixSel(); boardChanged(b);
+    if (ENG) { ENG.synced.clear(); syncAll(); } TH = null;
+    try { localStorage.setItem(LKEY, JSON.stringify(S.p)); } catch (e) {}
+    renderAll(); if (!sameProject) requestAnimationFrame(() => fit());
+    if (msg.text) toast(msg.text);
+    return true;
+  }, toast, modal, xBtn, esc, cloudSave, newPid, engineOn: () => engineState == 'on',
   async png(scr) { for (let i = 0; i < 100 && engineState == 'loading'; i++) await new Promise(r => setTimeout(r, 100)); return engineState == 'on' ? renderPNG(scr) : null; },
   async open(p, msg) {
     await capsReady; p = migrate(p); if (!p) return false;
@@ -1081,7 +1271,12 @@ window.EpixoApp = {
 };
 S.p = load(); S.lv = S.p.lvgl || 9;
 DOC = E.doctor(S.p, measure);
-renderAll();
-requestAnimationFrame(() => fit());
+renderThemeBtn(); renderAll();
+requestAnimationFrame(() => { fit(); segThumb($('#leftTabs')); segThumb($('#rightTabs')); });
 startEngine();
+// First visit: a short welcome. Skipped when the page opens a project by link, or when an AI app drives the editor.
+addEventListener('load', () => setTimeout(() => {
+  if (seenWelcome() || /[?&](open|remix|template|board|new)=/.test(location.search) || document.querySelector('script[src="live.js"]') || $('#modalRoot').children.length) return;
+  openWelcome(false);
+}, 400));
 })();

@@ -48,6 +48,7 @@ export default async function Dashboard() {
         </div>
         <div className="flex gap-3">
           <Link href="/settings" className="btn btn-quiet">Edit profile</Link>
+          <Link href="/connect" className="btn btn-quiet">Connect Claude or ChatGPT</Link>
           <a href="/editor?new=1" className="btn btn-primary">New project</a>
         </div>
       </div>

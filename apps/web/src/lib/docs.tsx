@@ -19,7 +19,7 @@ export const DOCS: Doc[] = [
         <ul>
           <li>Drag a widget from the left panel onto the canvas.</li>
           <li>Select it to change text, colours, size and behaviour on the right.</li>
-          <li>Set a button&apos;s On tap action to move to another screen. Press Preview to try it.</li>
+          <li>Set a button&apos;s On tap action to move to another screen. Press Try it to tap through it on real LVGL.</li>
         </ul>
         <h2>4. Check it with Doctor</h2>
         <p>Doctor looks for text that will clip, buttons too small for a finger on your screen&apos;s real size, low contrast and memory that will not fit. Most problems have a one-click fix.</p>
@@ -27,6 +27,42 @@ export const DOCS: Doc[] = [
         <p>Press Export and tick what you need. For a board with a ready-to-build pack you get a PlatformIO project you can upload straight away. See <a href="/docs/export">Exporting code</a>.</p>
         <h2>Saving your work</h2>
         <p>Sign in and your projects save to your account as you work. You can find them in your <a href="/dashboard">dashboard</a>. Without signing in, your work stays in this browser.</p>
+      </>
+    ),
+  },
+  {
+    slug: "ai",
+    group: "Start here",
+    title: "Designing with AI",
+    summary: "Ask for a screen in plain words, in the editor or from Claude and ChatGPT.",
+    body: (
+      <>
+        <p>Epixo&apos;s AI builds real LVGL screens, not pictures of them. Everything it makes is made of normal widgets you can select, change and export, and every change it makes is one step you can undo.</p>
+        <h2>In the editor</h2>
+        <p>Type into the <b>Ask AI</b> bar at the bottom of the editor, or press <b>/</b> to jump to it.</p>
+        <ul>
+          <li><b>Edit this screen</b> changes what is open: “make the title bigger”, “switch to a dark theme”, “add a battery bar under the header”. Select a widget first and you can just say “make this red”.</li>
+          <li><b>New screen</b> builds a whole screen from a description, sized for your board.</li>
+          <li>To rebuild a sketch or a photo of another device, press the sparkle button at the top and choose <b>Sketch or photo</b>.</li>
+        </ul>
+        <p>AI in the editor uses your Epixo AI credits.</p>
+        <h2>From Claude or ChatGPT</h2>
+        <p>Already pay for Claude or ChatGPT? Connect it to Epixo and design from there, with no Epixo credits used. Your AI can create projects, build and change screens, line widgets up, apply themes, run Design Doctor and read the generated code.</p>
+        <ol>
+          <li>Open <a href="/connect">AI connections</a> and make a link for your app.</li>
+          <li>Add it as a connector. In Claude: Settings, Connectors, Add custom connector. In ChatGPT: Settings, Apps &amp; Connectors, turn on Developer mode, then Create.</li>
+          <li>Keep your project open in the editor. Changes from your AI appear within a few seconds, with a note saying who made them.</li>
+        </ol>
+        <p>Each link only lets that app work on your Epixo projects. Remove it on the same page and it stops working at once.</p>
+        <h2>Fully local, with live previews</h2>
+        <p>The Epixo source includes an MCP server that runs on your own computer. It keeps projects as files, works offline and lets your AI look at real LVGL renders of its own work. Open <code>localhost:7457</code> while it runs and the editor updates live as your AI designs, and your edits go straight back to it. See <code>apps/mcp/README.md</code> in the source for setup.</p>
+        <h2>Tips for good results</h2>
+        <ul>
+          <li>Say what the screen is for and what matters most: “a garage door panel, the Open button should be huge”.</li>
+          <li>Name real data: “temperature, humidity and a 24 hour chart”.</li>
+          <li>Ask for one change at a time when you are fine-tuning.</li>
+          <li>Finish with “check the design and fix problems”. AI runs Design Doctor for you.</li>
+        </ul>
       </>
     ),
   },

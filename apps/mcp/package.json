@@ -1,0 +1,14 @@
+{
+  "name": "epixo-mcp",
+  "version": "0.6.0",
+  "private": true,
+  "description": "Epixo MCP server: let Claude, ChatGPT and other AI apps design LVGL screens while you watch live.",
+  "type": "module",
+  "bin": {
+    "epixo-mcp": "server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "SEE LICENSE IN ../../LICENSE"
+}

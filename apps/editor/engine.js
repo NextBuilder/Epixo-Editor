@@ -7,6 +7,7 @@ for (let i = 0; i < 64; i++) L6[i] = (i * 255 / 63 + .5) | 0;
 
 let modPromise = null;
 function compile(url) {
+  if (typeof url !== 'string') return WebAssembly.compile(url);
   if (!modPromise) {
     modPromise = fetch(url).then(r => {
       if (!r.ok) throw new Error('engine download failed (' + r.status + ')');

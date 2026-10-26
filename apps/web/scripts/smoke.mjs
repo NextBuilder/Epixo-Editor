@@ -1,5 +1,5 @@
 const base = process.argv[2] ?? "http://localhost:8787";
-const pages = ["/", "/community", "/makers", "/boards", "/templates", "/docs", "/docs/getting-started", "/pricing", "/privacy", "/terms", "/login", "/editor/", "/editor/epixo-lvgl.wasm", "/manifest.webmanifest"];
+const pages = ["/", "/community", "/makers", "/boards", "/templates", "/docs", "/docs/getting-started", "/docs/ai", "/pricing", "/connect", "/privacy", "/terms", "/login", "/editor/", "/editor/epixo-lvgl.wasm", "/manifest.webmanifest"];
 
 async function waitForServer() {
   for (let i = 0; i < 90; i++) {
@@ -26,6 +26,10 @@ const me = cookie ? await fetch(base + "/api/projects", { headers: { cookie } })
 const signedIn = login.status === 307 && me?.status === 200;
 if (!signedIn) failed++;
 console.log(`${signedIn ? "ok  " : "FAIL"} test sign-in and account API`);
+
+const mcp = await fetch(base + "/api/mcp/epx_not_a_real_token_000000000000", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) });
+if (mcp.status !== 401) failed++;
+console.log(`${mcp.status === 401 ? "ok  " : "FAIL"} AI connection links are checked`);
 
 const blocked = await fetch(base + "/api/waitlist", { method: "POST", headers: { origin: "https://evil.example", "content-type": "application/json", ...(cookie ? { cookie } : {}) }, body: JSON.stringify({ email: "smoke@example.com" }) });
 if (blocked.status !== 403) failed++;

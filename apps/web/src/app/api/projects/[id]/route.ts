@@ -24,7 +24,7 @@ export async function PUT(req: Request, ctx: Ctx) {
   const owner = await first<{ owner_id: string }>("SELECT owner_id FROM projects WHERE id = ?", id);
   if (owner && owner.owner_id !== g.user!.id) return fail("This project belongs to someone else.", 403);
   const t = now();
-  if (owner) await run("UPDATE projects SET name = ?, board_id = ?, board_label = ?, w = ?, h = ?, screens = ?, json = ?, updated_at = ? WHERE id = ?", meta.name, meta.boardId, meta.boardLabel, meta.w, meta.h, meta.screens, text, t, id);
+  if (owner) await run("UPDATE projects SET name = ?, board_id = ?, board_label = ?, w = ?, h = ?, screens = ?, json = ?, updated_at = ?, updated_by = '', update_note = '' WHERE id = ?", meta.name, meta.boardId, meta.boardLabel, meta.w, meta.h, meta.screens, text, t, id);
   else {
     const count = await first<{ n: number }>("SELECT COUNT(*) AS n FROM projects WHERE owner_id = ?", g.user!.id);
     if ((count?.n ?? 0) >= 500) return fail("You have reached 500 saved projects. Delete some to save more.", 403);

@@ -22,11 +22,17 @@
 
 Most UI tools draw an approximation of LVGL and hope the device agrees. Epixo doesn't guess. Its canvas **is** LVGL, compiled to WebAssembly and running in your browser, so every pixel you design is the pixel your board will show.
 
-It runs entirely in the browser, with nothing to install, and is built for beginners and professionals alike.
+It runs entirely in the browser, with nothing to install, and is built for beginners and professionals alike. A short welcome helps first-time makers pick their board and start from an idea, a blank screen or a sentence for AI.
 
 <br>
 
 ## Features
+
+### Design with AI, including Claude and ChatGPT
+
+Type what you want into the **Ask AI** bar, like “a thermostat with a big dial” or “make this button bigger”, and watch it build with real widgets. Every change is one undo step.
+
+Already use Claude or ChatGPT? Connect it to Epixo and design from there. Epixo is an [MCP](https://modelcontextprotocol.io) server, so your AI can create projects, build and change screens, line widgets up, run Design Doctor and read the code while you watch the editor update live. Connect from your account at `/connect`, or run the [local server](apps/mcp/README.md) for an offline setup that also lets your AI look at real LVGL renders of its own work.
 
 ### Design Doctor
 
@@ -64,9 +70,10 @@ Publish your screens with a single click. Anyone can open your project in the ed
 |---|---|
 | **Live Mirror** | See your design on a real board over USB while you edit. |
 | **AI design** | Describe a screen or upload a sketch and get an editable layout. |
+| **Feels native** | Floating glass panels, spring motion, light and dark mode, focus mode, pinch and pan, and a layout for phones. |
 | **13 widgets, 42 icons** | Labels, buttons, switches, sliders, arcs, bars, charts, dropdowns, LEDs and more. |
 | **Themes** | Restyle a whole project in one tap, from Daylight to Midnight. |
-| **Keyboard first** | Command menu, nudging, duplicating and full undo history. |
+| **Keyboard first** | Command menu, Ask AI with `/`, nudging, duplicating and full undo history. |
 | **Accessible** | Touch-target and contrast checks, and full reduced-motion support. |
 
 <br>
@@ -113,7 +120,8 @@ A project is a small JSON file describing the board, the screens and the widgets
 | Part | What it is |
 |---|---|
 | `apps/editor` | The editor: plain JavaScript with no framework, plus the LVGL engine in WebAssembly |
-| `apps/web` | The Epixo website and community, built with Next.js and running on Cloudflare's edge |
+| `apps/web` | The Epixo website and community, built with Next.js and running on Cloudflare's edge, plus the remote MCP endpoint for AI apps |
+| `apps/mcp` | The local MCP server: lets AI apps design in Epixo on your computer, with a live editor and real LVGL renders |
 | `runtime` | The small C runtime that builds LVGL screens from a script, shared by the canvas, Live Mirror and exports |
 | `engine` | The WebAssembly build of LVGL and the runtime |
 | `tests` | Unit tests and the pixel verification suite |
@@ -133,7 +141,8 @@ Found a problem? Please report it privately, as described in the [security polic
 - [x] LVGL engine in the browser with 113 boards
 - [x] Pixel-verified exports for C, XML, ESPHome and MicroPython
 - [x] Community, remixing and maker profiles
-- [ ] Guided first run and a friendlier editor for beginners
+- [x] Guided first run and a friendlier editor for beginners
+- [x] Design from Claude, ChatGPT and other AI apps over MCP
 - [ ] "Which export do I need?" chooser
 - [ ] Images, tabs, rollers and keyboards
 - [ ] Live data bindings from sensors

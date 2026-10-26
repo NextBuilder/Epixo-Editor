@@ -913,12 +913,241 @@ function applyFix(P, issue, measure) {
   return false;
 }
 
+/* ---------------- AI tools ----------------
+   One set of tools drives the project for every AI: the in-editor Copilot, the local MCP server and the remote MCP endpoint.
+   Each tool takes the project, changes it in place and returns plain JSON. */
+
+const HEX = v => /^#[0-9a-f]{6}$/i.test(v || '') ? String(v).toUpperCase() : null;
+const TYPE_ALIAS = {card: 'panel', container: 'panel', obj: 'panel', progress: 'bar', text: 'label', toggle: 'switch', gauge: 'arc', dial: 'arc', select: 'dropdown', loader: 'spinner'};
+
+// Turns loose input (from an AI or a file) into safe widget fields. With partial set, only the given fields come back.
+function cleanWidget(b, w, partial) {
+  if (!w || typeof w != 'object') return null;
+  const t = String(w.type || '').toLowerCase(), type = TYPE_ALIAS[t] || t;
+  if (!partial && !TYPES[type]) return null;
+  const p = {}, n = (v, a, z) => clamp(R(+v || 0), a, z);
+  if (!partial || w.w != null) p.w = n(w.w, 4, b.w);
+  if (!partial || w.h != null) p.h = n(w.h, 4, b.h);
+  if (!partial || w.x != null) p.x = n(w.x, -b.w, b.w);
+  if (!partial || w.y != null) p.y = n(w.y, -b.h, b.h);
+  if (!partial) { p.x = clamp(p.x, 0, b.w - p.w); p.y = clamp(p.y, 0, b.h - p.h); if (SQUARE[type]) p.w = p.h = Math.min(p.w, p.h); }
+  for (const k of ['fg', 'bg', 'accent', 'borderColor']) if (HEX(w[k])) p[k] = HEX(w[k]);
+  if (w.bg === 'transparent' || w.bg === 'none') p.bg = 'transparent';
+  for (const k of ['text', 'options', 'data']) if (w[k] != null) p[k] = (Array.isArray(w[k]) ? w[k].join(k == 'options' ? '\n' : ',') : String(w[k])).replace(/[^\x20-\x7E\n]/g, '').slice(0, 160);
+  if (w.font) p.font = F(+w.font);
+  if (w.radius != null) p.radius = clamp(R(+w.radius || 0), 0, 600);
+  if (w.thick) p.thick = clamp(R(+w.thick), 1, 200);
+  if (w.border != null) p.border = clamp(R(+w.border || 0), 0, 12);
+  for (const k of ['value', 'min', 'max']) if (w[k] !== '' && w[k] != null && isFinite(+w[k])) p[k] = R(+w[k]);
+  for (const k of ['checked', 'showValue', 'shadow', 'hidden', 'locked']) if (typeof w[k] == 'boolean') p[k] = w[k];
+  if (['left', 'center', 'right'].includes(w.align)) p.align = w.align;
+  if (['top', 'center', 'bottom'].includes(w.valign)) p.valign = w.valign;
+  if (w.icon != null) p.icon = ICONS[w.icon] ? w.icon : 'home';
+  if (w.opacity != null) p.opacity = clamp(R(+w.opacity), 0, 100);
+  if (w.name) { p.name = String(w.name).replace(/[^A-Za-z0-9_]/g, '').slice(0, 24); if (!p.name) delete p.name; }
+  return partial ? p : [type, p];
+}
+
+// Moves and resizes every widget when the board changes, so a design survives a new screen size or shape.
+function adaptToBoard(P, b) {
+  const o = P.board, toRound = b.round && !o.round, side = Math.min(b.w, b.h) * 0.72;
+  const kr = toRound ? Math.min(side / o.w, side / o.h) : 0, x0 = toRound ? (b.w - o.w * kr) / 2 : 0, y0 = toRound ? (b.h - o.h * kr) / 2 : 0;
+  const sx = toRound ? kr : b.w / o.w, sy = toRound ? kr : b.h / o.h, k = Math.min(sx, sy);
+  P.screens.forEach(s => s.widgets.forEach(w => {
+    w.x = R(x0 + w.x * sx); w.y = R(y0 + w.y * sy);
+    if (SQUARE[w.type]) { const z = R(Math.min(w.w * sx, w.h * sy)); w.x = R(w.x + (w.w * sx - z) / 2); w.w = w.h = z; } else { w.w = Math.max(4, R(w.w * sx)); w.h = Math.max(4, R(w.h * sy)); }
+    if (w.font) w.font = F(w.font * k); if (w.radius) w.radius = R(w.radius * k); if (w.thick) w.thick = Math.max(2, R(w.thick * k));
+  }));
+  P.board = b;
+  return toRound;
+}
+
+// Recolours a screen with a theme, changing only the colours that came from a theme so custom colours stay.
+function applyTheme(s, t) {
+  const U = v => String(v || '').toUpperCase(), any = (k, v) => THEMES.some(x => U(x[k]) == U(v)) || U(C[k]) == U(v);
+  s.bg = t.bg;
+  s.widgets.forEach(w => {
+    const T = w.type;
+    if (T == 'panel' && any('card', w.bg)) w.bg = t.card;
+    if (['label', 'icon', 'checkbox', 'arc'].includes(T)) { if (any('ink', w.fg)) w.fg = t.ink; else if (any('ink2', w.fg)) w.fg = t.ink2; }
+    if (T == 'button') { if (any('card', w.bg)) { w.bg = t.card; if (any('ink', w.fg)) w.fg = t.ink; } else if (any('acc', w.bg)) w.bg = t.acc; }
+    if (T == 'dropdown' || T == 'chart') { if (any('card', w.bg)) w.bg = t.card; if (w.fg && any('ink', w.fg)) w.fg = t.ink; }
+    if (['slider', 'bar', 'switch', 'spinner', 'arc'].includes(T) && any('track', w.bg)) w.bg = t.track;
+    if (w.accent && any('acc', w.accent)) w.accent = t.acc;
+  });
+}
+
+// A text picture of the screen, so a language model can see positions and overlaps without an image.
+function layoutMap(P, s, cols) {
+  const b = P.board; cols = cols || 48;
+  const rows = Math.max(8, R(cols * b.h / b.w / 2)), sx = b.w / cols, sy = b.h / rows;
+  const g = Array.from({length: rows}, () => Array(cols).fill('.'));
+  if (b.round) for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) if (Math.hypot((c + .5) * sx - b.w / 2, (r + .5) * sy - b.h / 2) > Math.min(b.w, b.h) / 2) g[r][c] = ' ';
+  const keys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', legend = [];
+  s.widgets.filter(w => !w.hidden).forEach((w, i) => {
+    const k = keys[i % keys.length]; legend.push(k + ' ' + w.name + ' (' + w.type + ')');
+    const c0 = clamp(Math.floor(w.x / sx), 0, cols - 1), c1 = clamp(Math.ceil((w.x + w.w) / sx) - 1, 0, cols - 1);
+    const r0 = clamp(Math.floor(w.y / sy), 0, rows - 1), r1 = clamp(Math.ceil((w.y + w.h) / sy) - 1, 0, rows - 1);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (g[r][c] != ' ') g[r][c] = k;
+  });
+  return {map: g.map(r => r.join('')).join('\n'), legend, cell: R(sx) + ' x ' + R(sy) + ' px per character'};
+}
+
+function findScreen(P, ref) {
+  if (ref == null || ref === '') return P.screens.find(s => s.id == P.cur) || P.screens[0];
+  const k = String(ref).toLowerCase();
+  const s = P.screens.find(x => x.id == ref || x.name.toLowerCase() == k || nameKey(x.name) == nameKey(ref));
+  if (!s) throw new Error('No screen called "' + ref + '". Screens: ' + P.screens.map(x => x.name).join(', '));
+  return s;
+}
+function findWidget(s, ref) {
+  const k = String(ref || '').toLowerCase();
+  const w = s.widgets.find(x => x.id == ref || x.name.toLowerCase() == k);
+  if (!w) throw new Error('No widget called "' + ref + '" on ' + s.name + '. Widgets: ' + (s.widgets.map(x => x.name).join(', ') || 'none'));
+  return w;
+}
+const FIELDS = ['x', 'y', 'w', 'h', 'text', 'font', 'fg', 'bg', 'accent', 'radius', 'value', 'min', 'max', 'checked', 'showValue', 'thick', 'align', 'valign', 'icon', 'options', 'data', 'shadow', 'border', 'borderColor', 'opacity', 'hidden', 'locked'];
+function widgetBrief(P, w) {
+  const o = {name: w.name, type: w.type};
+  for (const k of FIELDS) if (w[k] != null && w[k] !== '' && !(k == 'opacity' && w[k] == 100) && !((k == 'hidden' || k == 'locked') && !w[k])) o[k] = w[k];
+  if (w.onTap && w.onTap.to) { const t = P.screens.find(s => s.id == w.onTap.to); if (t) o.onTap = {screen: t.name, animation: w.onTap.anim}; }
+  return o;
+}
+function boardBrief(b) { return {id: b.id, maker: b.brand, model: b.name, size: b.size, width: b.w, height: b.h, round: !!b.round, panel: b.panel, chip: b.chip, touch: !!b.touch, rotation: b.rot || 0}; }
+function issuesOf(P, measure, s) { return doctor(P, measure).filter(i => !s || i.screen == s.id).map(i => { const sc = P.screens.find(x => x.id == i.screen), w = sc && sc.widgets.find(x => x.id == i.widget); return {severity: i.sev, screen: sc ? sc.name : null, widget: w ? w.name : null, problem: i.msg, autoFix: !!i.fix}; }); }
+function placeWidgets(P, s, list) {
+  const made = [];
+  for (const item of [].concat(list || []).slice(0, 80)) {
+    const r = cleanWidget(P.board, item);
+    if (!r) throw new Error('Unknown widget type "' + (item && item.type) + '". Use one of: ' + Object.keys(TYPES).join(', '));
+    const w = mkW(P, r[0], r[1]);
+    if (w.type == 'label' && !w.valign) w.valign = 'center';
+    w.name = uniqueWidgetName(s, w.name, w);
+    s.widgets.push(w); made.push(w);
+  }
+  return made;
+}
+function linkTap(P, s, w, to, anim) {
+  if (to == null || to === '') { w.onTap = null; return; }
+  if (!TAPPABLE[w.type]) throw new Error(w.name + ' is a ' + w.type + '. Only buttons, cards, icons and labels can open a screen.');
+  const t = findScreen(P, to);
+  w.onTap = {to: t.id, anim: ANIMS.some(a => a[0] == anim) ? anim : 'move_left'};
+}
+
+const WIDGET_SCHEMA = {type: 'object', description: 'A widget. type, x, y, w, h are needed when adding. Coordinates are integer pixels from the top-left of the screen.', properties: {
+  type: {type: 'string', enum: Object.keys(TYPES)}, name: {type: 'string', description: 'Letters, digits and _ only. Becomes the C variable name.'},
+  x: {type: 'integer'}, y: {type: 'integer'}, w: {type: 'integer'}, h: {type: 'integer'},
+  text: {type: 'string', description: 'label, button, checkbox. Plain ASCII, \\n for a new line.'},
+  font: {type: 'integer', enum: FONTS, description: 'Montserrat size in px.'},
+  fg: {type: 'string', description: 'Text or icon colour, #RRGGBB.'}, bg: {type: 'string', description: 'Fill or track colour, #RRGGBB or "transparent".'}, accent: {type: 'string', description: 'Indicator colour for switch, slider, arc, bar, checkbox, chart, spinner, led.'},
+  radius: {type: 'integer'}, value: {type: 'number'}, min: {type: 'number'}, max: {type: 'number'}, checked: {type: 'boolean'}, showValue: {type: 'boolean', description: 'arc: draw the number in the middle.'},
+  thick: {type: 'integer', description: 'arc and spinner line width.'}, align: {type: 'string', enum: ['left', 'center', 'right']}, valign: {type: 'string', enum: ['top', 'center', 'bottom']},
+  icon: {type: 'string', enum: Object.keys(ICONS)}, options: {type: 'string', description: 'dropdown choices, one per line.'}, data: {type: 'string', description: 'chart values, comma separated.'},
+  shadow: {type: 'boolean'}, border: {type: 'integer'}, borderColor: {type: 'string'}, opacity: {type: 'integer', description: '0 to 100.'}, hidden: {type: 'boolean'}, locked: {type: 'boolean'}}};
+const SCREEN_REF = {type: 'string', description: 'Screen name. Leave out for the open screen.'};
+
+const DESIGN_RULES = 'Design rules for Epixo screens: they run on LVGL on small ESP32 touch displays. Keep every widget inside the screen (and inside the circle on round displays, about 16% margin). ' +
+  'Use calm, premium, iOS-like layouts: generous spacing, rounded cards drawn first with widgets on top, one accent colour, large readable text (Montserrat ' + FONTS[0] + ' to ' + FONTS[FONTS.length - 1] + ' px), touch targets at least the size check_design asks for. ' +
+  'Text is plain ASCII with no emoji. After building, always call check_design and fix what it reports. Use get_screen to see positions as a text map.';
+
+const AI_TOOLS = [
+  {name: 'get_project', description: 'Overview of the project: board, screens, open screen, LVGL version and design rules. Call this first.', inputSchema: {type: 'object', properties: {}},
+    run(P) { const s = findScreen(P); return {name: P.name, board: boardBrief(P.board), lvgl: P.lvgl || 9, openScreen: s.name, screens: P.screens.map(x => ({name: x.name, widgets: x.widgets.length, background: x.bg})), templates: Object.keys(TPL), themes: THEMES.map(t => t.n), rules: DESIGN_RULES}; }},
+  {name: 'get_screen', description: 'Every widget on a screen with all its fields, plus a text map of the layout and any Design Doctor problems.', inputSchema: {type: 'object', properties: {screen: SCREEN_REF}},
+    run(P, a, m) { const s = findScreen(P, a.screen); return {screen: s.name, background: s.bg, width: P.board.w, height: P.board.h, round: !!P.board.round, widgets: s.widgets.map(w => widgetBrief(P, w)), layout: layoutMap(P, s), problems: issuesOf(P, m, s)}; }},
+  {name: 'design_screen', description: 'Build a whole screen in one go: give it a name, a background and all its widgets in drawing order (cards first). Adds a new screen, or replaces the widgets of an existing screen with replace set.', inputSchema: {type: 'object', properties: {name: {type: 'string'}, background: {type: 'string', description: '#RRGGBB'}, replace: {type: 'boolean', description: 'Replace the widgets of the screen with this name instead of adding a new one.'}, widgets: {type: 'array', items: WIDGET_SCHEMA}}, required: ['name', 'widgets']},
+    run(P, a, m) {
+      let s = a.replace ? P.screens.find(x => x.name.toLowerCase() == String(a.name).toLowerCase()) : null;
+      if (s) s.widgets = []; else s = mkScreen(P, a.name || 'Screen');
+      if (HEX(a.background)) s.bg = HEX(a.background);
+      const made = placeWidgets(P, s, a.widgets); P.cur = s.id;
+      return {ok: true, screen: s.name, widgets: made.map(w => w.name), problems: issuesOf(P, m, s)};
+    }},
+  {name: 'add_widgets', description: 'Add one or more widgets to a screen. Returns their names.', inputSchema: {type: 'object', properties: {screen: SCREEN_REF, widgets: {type: 'array', items: WIDGET_SCHEMA}}, required: ['widgets']},
+    run(P, a) { const s = findScreen(P, a.screen); return {ok: true, screen: s.name, added: placeWidgets(P, s, a.widgets).map(w => w.name)}; }},
+  {name: 'update_widgets', description: 'Change fields of widgets found by name. Only the fields you pass change. Pass onTap as a screen name to make it open that screen, or "" to remove the link.', inputSchema: {type: 'object', properties: {screen: SCREEN_REF, changes: {type: 'array', items: {type: 'object', properties: Object.assign({target: {type: 'string', description: 'Name of the widget to change.'}, onTap: {type: 'string'}, animation: {type: 'string', enum: ANIMS.map(x => x[0])}}, WIDGET_SCHEMA.properties), required: ['target']}}}, required: ['changes']},
+    run(P, a) {
+      const s = findScreen(P, a.screen), out = [];
+      for (const c of [].concat(a.changes || [])) {
+        const w = findWidget(s, c.target), f = cleanWidget(P.board, Object.assign({}, c, {type: w.type}), true);
+        delete f.type; if (f.name) f.name = uniqueWidgetName(s, f.name, w);
+        Object.assign(w, f); if (SQUARE[w.type] && (c.w != null || c.h != null)) w.w = w.h = Math.min(w.w, w.h);
+        if (c.onTap !== undefined) linkTap(P, s, w, c.onTap, c.animation);
+        out.push(widgetBrief(P, w));
+      }
+      return {ok: true, widgets: out};
+    }},
+  {name: 'delete_widgets', description: 'Remove widgets by name.', inputSchema: {type: 'object', properties: {screen: SCREEN_REF, names: {type: 'array', items: {type: 'string'}}}, required: ['names']},
+    run(P, a) { const s = findScreen(P, a.screen), gone = [].concat(a.names || []).map(n => findWidget(s, n)); s.widgets = s.widgets.filter(w => !gone.includes(w)); return {ok: true, removed: gone.map(w => w.name)}; }},
+  {name: 'arrange_widgets', description: 'Line widgets up precisely. align: left, center, right, top, middle or bottom (to the screen, or to each other with relative). distribute: horizontal or vertical spaces them evenly. order: front or back changes drawing order.', inputSchema: {type: 'object', properties: {screen: SCREEN_REF, names: {type: 'array', items: {type: 'string'}}, align: {type: 'string', enum: ['left', 'center', 'right', 'top', 'middle', 'bottom']}, relative: {type: 'boolean'}, distribute: {type: 'string', enum: ['horizontal', 'vertical']}, order: {type: 'string', enum: ['front', 'back']}}, required: ['names']},
+    run(P, a) {
+      const s = findScreen(P, a.screen), ws = [].concat(a.names || []).map(n => findWidget(s, n)), b = P.board;
+      if (!ws.length) throw new Error('Name at least one widget.');
+      const L = Math.min(...ws.map(w => w.x)), T = Math.min(...ws.map(w => w.y)), Rt = Math.max(...ws.map(w => w.x + w.w)), Bt = Math.max(...ws.map(w => w.y + w.h));
+      const box = a.relative && ws.length > 1 ? {x: L, y: T, w: Rt - L, h: Bt - T} : {x: 0, y: 0, w: b.w, h: b.h};
+      ws.forEach(w => {
+        if (a.align == 'left') w.x = box.x; if (a.align == 'right') w.x = box.x + box.w - w.w; if (a.align == 'center') w.x = R(box.x + (box.w - w.w) / 2);
+        if (a.align == 'top') w.y = box.y; if (a.align == 'bottom') w.y = box.y + box.h - w.h; if (a.align == 'middle') w.y = R(box.y + (box.h - w.h) / 2);
+      });
+      if (a.distribute && ws.length > 2) {
+        const hz = a.distribute == 'horizontal', k = hz ? 'x' : 'y', d = hz ? 'w' : 'h', sorted = [...ws].sort((p, q) => p[k] - q[k]);
+        const start = sorted[0][k], end = sorted[sorted.length - 1][k] + sorted[sorted.length - 1][d], gap = (end - start - sorted.reduce((t, w) => t + w[d], 0)) / (sorted.length - 1);
+        let pos = start; sorted.forEach(w => { w[k] = R(pos); pos += w[d] + gap; });
+      }
+      if (a.order) { s.widgets = s.widgets.filter(w => !ws.includes(w)); s.widgets = a.order == 'front' ? s.widgets.concat(ws) : ws.concat(s.widgets); }
+      return {ok: true, widgets: ws.map(w => widgetBrief(P, w))};
+    }},
+  {name: 'manage_screen', description: 'Add, rename, duplicate, delete or open a screen, or set its background colour.', inputSchema: {type: 'object', properties: {action: {type: 'string', enum: ['add', 'rename', 'duplicate', 'delete', 'open', 'background']}, screen: SCREEN_REF, name: {type: 'string', description: 'New name for add, rename or duplicate.'}, background: {type: 'string', description: '#RRGGBB'}}, required: ['action']},
+    run(P, a) {
+      if (a.action == 'add') { const s = mkScreen(P, a.name || 'Screen', HEX(a.background) || findScreen(P).bg); P.cur = s.id; return {ok: true, screen: s.name}; }
+      const s = findScreen(P, a.screen);
+      if (a.action == 'rename') { s.name = uniqueName({screens: P.screens.filter(x => x != s)}, a.name || s.name); return {ok: true, screen: s.name}; }
+      if (a.action == 'duplicate') { const n = JSON.parse(JSON.stringify(s)); n.id = 's' + (++P.seq); n.name = uniqueName(P, a.name || s.name + ' copy'); n.widgets.forEach(w => w.id = 'w' + (++P.seq)); P.screens.splice(P.screens.indexOf(s) + 1, 0, n); P.cur = n.id; return {ok: true, screen: n.name}; }
+      if (a.action == 'delete') { if (P.screens.length < 2) throw new Error('A project needs at least one screen.'); P.screens = P.screens.filter(x => x != s); P.screens.forEach(x => x.widgets.forEach(w => { if (w.onTap && w.onTap.to == s.id) w.onTap = null; })); if (P.cur == s.id) P.cur = P.screens[0].id; return {ok: true, removed: s.name}; }
+      if (a.action == 'open') { P.cur = s.id; return {ok: true, screen: s.name}; }
+      if (a.action == 'background') { if (!HEX(a.background)) throw new Error('Use a colour like #1C1C1E.'); s.bg = HEX(a.background); return {ok: true, screen: s.name, background: s.bg}; }
+      throw new Error('Unknown action.');
+    }},
+  {name: 'add_template', description: 'Add a finished template, rebuilt for this board. Some templates add several linked screens.', inputSchema: {type: 'object', properties: {template: {type: 'string', enum: Object.keys(TPL)}}, required: ['template']},
+    run(P, a) { if (!TPL[a.template]) throw new Error('Templates: ' + Object.keys(TPL).join(', ')); const b = P.board, ss = addTemplate(P, a.template, b.w, b.h, b.round); P.cur = ss[0].id; return {ok: true, screens: ss.map(s => s.name)}; }},
+  {name: 'apply_theme', description: 'Restyle a screen, or every screen, with a theme. Custom colours are kept.', inputSchema: {type: 'object', properties: {theme: {type: 'string', enum: THEMES.map(t => t.n)}, screen: SCREEN_REF, all: {type: 'boolean'}}, required: ['theme']},
+    run(P, a) { const t = THEMES.find(x => x.n.toLowerCase() == String(a.theme).toLowerCase()); if (!t) throw new Error('Themes: ' + THEMES.map(x => x.n).join(', ')); const ss = a.all ? P.screens : [findScreen(P, a.screen)]; ss.forEach(s => applyTheme(s, t)); return {ok: true, theme: t.n, screens: ss.map(s => s.name)}; }},
+  {name: 'find_boards', description: 'Search the ' + BOARDS.length + ' supported displays by maker, model, chip or size like "800x480".', inputSchema: {type: 'object', properties: {query: {type: 'string'}, round: {type: 'boolean'}, limit: {type: 'integer'}}},
+    run(P, a) { const q = String(a.query || '').toLowerCase().split(/\s+/).filter(Boolean); return {boards: BOARDS.filter(b => (a.round == null || !!b.round == a.round) && q.every(t => (b.brand + ' ' + b.name + ' ' + b.chip + ' ' + b.size + ' ' + b.w + 'x' + b.h + ' ' + b.panel).toLowerCase().includes(t))).slice(0, clamp(+a.limit || 15, 1, 50)).map(boardBrief)}; }},
+  {name: 'set_board', description: 'Switch the project to another display by board id (from find_boards). Every screen is adapted to the new size and shape.', inputSchema: {type: 'object', properties: {board: {type: 'string'}, rotated: {type: 'boolean', description: 'Turn the display 90 degrees.'}}, required: ['board']},
+    run(P, a, m) { const b = BOARDS.find(x => x.id == a.board); if (!b) throw new Error('No board with id "' + a.board + '". Use find_boards.'); adaptToBoard(P, withRotation(b, a.rotated ? 90 : 0)); return {ok: true, board: boardBrief(P.board), problems: issuesOf(P, m).length}; }},
+  {name: 'check_design', description: 'Run Design Doctor: text that will not fit, touch targets that are too small, low contrast, widgets off screen, broken links and more.', inputSchema: {type: 'object', properties: {screen: {type: 'string', description: 'Leave out to check every screen.'}}},
+    run(P, a, m) { const s = a.screen ? findScreen(P, a.screen) : null, list = issuesOf(P, m, s); return {ready: !list.some(i => i.severity == 'error'), problems: list}; }},
+  {name: 'fix_design', description: 'Apply every automatic Design Doctor fix, on one screen or all of them.', inputSchema: {type: 'object', properties: {screen: {type: 'string'}}},
+    run(P, a, m) { const s = a.screen ? findScreen(P, a.screen) : null; let n = 0; for (let pass = 0; pass < 3; pass++) doctor(P, m).filter(i => i.fix && i.sev != 'info' && (!s || i.screen == s.id)).forEach(i => { if (applyFix(P, i, m)) n++; }); return {ok: true, fixed: n, remaining: issuesOf(P, m, s)}; }},
+  {name: 'get_code', description: 'The generated code for the project: c, h, micropython, xml or esphome.', inputSchema: {type: 'object', properties: {format: {type: 'string', enum: ['c', 'h', 'micropython', 'xml', 'esphome']}, lvgl: {type: 'integer', enum: [8, 9, 96], description: '8 for LVGL 8.x, 9 for 9.0 to 9.5, 96 for 9.6 and later.'}}, required: ['format']},
+    run(P, a) { const f = a.format; if (f == 'c') return {code: genC(P, {lvgl: [8, 9, 96].includes(a.lvgl) ? a.lvgl : P.lvgl || 9})}; if (f == 'h') return {code: genH(P)}; if (f == 'micropython') return {code: genPy(P)}; if (f == 'xml') return {files: genXML(P).map(x => ({name: x.name + '.xml', code: x.xml}))}; if (f == 'esphome') return {code: genYAML(P).yaml}; throw new Error('Formats: c, h, micropython, xml, esphome'); }}
+];
+// Tools that only read the project. Callers can skip saving after these.
+const READ_ONLY = {get_project: 1, get_screen: 1, find_boards: 1, check_design: 1, get_code: 1};
+
+function runTool(P, name, input, measure) {
+  const t = AI_TOOLS.find(x => x.name == name);
+  if (!t) throw new Error('Unknown tool ' + name);
+  return t.run(P, input || {}, measure || measureText);
+}
+// A short, friendly line saying what a tool call changed, shown to the maker.
+function toolNote(name, a) {
+  a = a || {};
+  const n = k => Array.isArray(a[k]) ? a[k].length : 0, s = (k, one) => n(k) + ' ' + one + (n(k) == 1 ? '' : 's');
+  return ({design_screen: 'Designed ' + (typeof a.name == 'string' ? a.name.slice(0, 40) : 'a screen'), add_widgets: 'Added ' + s('widgets', 'widget'), update_widgets: 'Changed ' + s('changes', 'widget'),
+    delete_widgets: 'Removed ' + s('names', 'widget'), arrange_widgets: 'Arranged widgets', manage_screen: 'Updated screens', add_template: 'Added a template',
+    apply_theme: 'Applied ' + (typeof a.theme == 'string' ? a.theme.slice(0, 20) : 'a') + ' theme', set_board: 'Changed the board', fix_design: 'Fixed design problems'})[name] || 'Updated the design';
+}
+const toolSpecs = () => AI_TOOLS.map(t => ({name: t.name, description: t.description, inputSchema: t.inputSchema}));
+
 const API = {
   R, clamp, FONTS, LH, F, ADV, measureText, fitWidget, C, ICONS, SYMBOL_HEX, TYPES, SQUARE, TAPPABLE, ANIMS, THEMES, BOARDS, VERIFY, TPL, SRC,
   blank, uniqueName, uniqueWidgetName, nameKey, mkW, mkScreen, addTemplate, defaultProject, boardDims, withRotation,
   nums, ident, hexv, iconFont, padOf, toScript, scriptScreen, sid,
   genC, genH, genPy, genXML, genXMLLoader, genYAML, genLvConf, usedFonts, packOf, boardPlatformio, mainForPack, genGenericMain,
-  memoryReport, doctor, applyFix, contrast, touchTarget
+  memoryReport, doctor, applyFix, contrast, touchTarget,
+  cleanWidget, adaptToBoard, applyTheme, layoutMap, AI_TOOLS, READ_ONLY, runTool, toolSpecs, toolNote, DESIGN_RULES
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = API;
 root.EpixoCore = API;
