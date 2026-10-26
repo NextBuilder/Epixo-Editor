@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ImagePlus, X } from "@/components/icons";
+import { Check, ImagePlus, Plus, X } from "@/components/icons";
 import { Avatar } from "./avatar";
 import { AccountZone } from "./account-zone";
 import { Group, Row } from "./profile/hire-sheet";
@@ -103,7 +103,7 @@ export function SettingsForm({ user, posts }: { user: U; posts: { id: string; ti
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5 pt-3 shadow-[inset_0_0.5px_0_var(--color-line-strong)]">
             {SUGGEST.filter(s => !f.skills.includes(s)).slice(0, 10).map(s => (
-              <button key={s} className="chip h-7 px-2.5 text-[13px] text-graphite" onClick={() => addSkill(s)}>+ {s}</button>
+              <button key={s} className="chip h-7 gap-1 px-2.5 text-[13px] text-graphite" onClick={() => addSkill(s)}><Plus size={12} weight="bold" />{s}</button>
             ))}
           </div>
         </div>

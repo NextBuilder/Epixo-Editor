@@ -367,6 +367,30 @@ const TPL = {
   settings:{n:'Settings List',d:'iOS-style rows with icons and switches',build(W,H,rd){const b=box(W,H,rd),u=b.u,land=W>H*1.25,A=[];const top=header(A,b,'Settings',null,{land});
     settingsRows(A,b,top,[['Wi-Fi','wifi',true],['Bluetooth','bluetooth',true,'#2F6BFF'],['Notifications','bell',false,C.red],['Auto brightness','eye',true,C.orange],['Sounds','volume',false,C.pink],['Location','gps',true,C.green]],land);
     return[{name:'Settings',w:A}]}},
+  wifi:{n:'Wi-Fi Setup',d:'Pick a network, type the password, join',build(W,H,rd){const b=box(W,H,rd),u=b.u,land=W>H*1.25,A=[];
+    const nets='Home 5G\nOffice\nGuest\nWorkshop',ink={bg:C.card,fg:C.ink,accent:C.acc};
+    // Round and very short screens have no room for a keyboard, so they pick a network and join.
+    if(rd||H<300){
+      const bh=R(Math.max(u*13,Math.min(44,b.h*.25))),top=rd?R(b.y+u*12):header(A,b,'Wi-Fi','',{land}),rh=R(b.y+b.h-bh-u*3-top);
+      if(rd) A.push(['label',{x:b.x,y:b.y,w:b.w,h:R(u*9),text:'Wi-Fi',font:F(u*7),fg:C.ink,align:'center'}]);
+      A.push(['roller',{x:b.x,y:top,w:b.w,h:rh,options:nets,value:0,font:F(Math.min(u*5,rh/3.4)),...ink,radius:R(u*(rd?5:3.5)),action:'pick_network'}]);
+      A.push(['button',{x:rd?R(b.x+b.w*.2):b.x,y:R(b.y+b.h-bh),w:rd?R(b.w*.6):b.w,h:bh,text:'Join',font:F(Math.min(u*5,bh*.45)),bg:C.acc,fg:'#FFFFFF',radius:R(bh/2),action:'join_wifi'}]);
+      return[{name:'WiFi',bg:C.bg,w:A}];
+    }
+    // The keyboard runs edge to edge along the bottom, like the one on a phone.
+    const kh=R(H*(land?.46:.42)),ky=H-kh,top=header(A,b,'Wi-Fi','Pick a network',{land}),room=ky-R(u*3)-top,fh=R(Math.min(Math.max(u*12,36),room*.4));
+    if(land){
+      const lw=R(b.w*.44),rx=R(b.x+lw+u*4),rw=R(b.x+b.w-rx);
+      A.push(['roller',{x:b.x,y:top,w:lw,h:room,options:nets,value:0,font:F(Math.min(u*5,room/3.4)),...ink,radius:R(u*3.5),action:'pick_network'}]);
+      A.push(['textarea',{x:rx,y:top,w:rw,h:fh,text:'Password',oneLine:true,password:true,font:F(Math.min(u*4.5,fh*.5)),...ink,radius:R(u*3),action:'join_wifi'}]);
+      A.push(['button',{x:rx,y:R(top+room-fh),w:rw,h:fh,text:'Join',font:F(Math.min(u*4.5,fh*.5)),bg:C.acc,fg:'#FFFFFF',radius:R(fh/2),action:'join_wifi'}]);
+    } else {
+      const rh=R(room-fh-u*3);
+      A.push(['roller',{x:b.x,y:top,w:b.w,h:rh,options:nets,value:0,font:F(Math.min(u*5,rh/3.4)),...ink,radius:R(u*3.5),action:'pick_network'}]);
+      A.push(['textarea',{x:b.x,y:R(top+rh+u*3),w:b.w,h:fh,text:'Password',oneLine:true,password:true,font:F(Math.min(u*4.5,fh*.5)),...ink,radius:R(u*3),action:'join_wifi'}]);
+    }
+    A.push(['keyboard',{x:0,y:ky,w:W,h:kh,font:F(clamp(kh/11,12,24)),bg:'#D1D5DB',accent:'#FFFFFF',fg:C.ink,radius:R(Math.max(4,u*1.6))}]);
+    return[{name:'WiFi',bg:C.bg,w:A}]}},
   lock:{n:'Door Keypad',d:'PIN pad with status LED',build(W,H,rd){const b=box(W,H,rd),u=b.u,A=[];const land=W>H*1.25;
     const kw=land?R(b.w*.5):R(b.w),kx=land?R(b.x+b.w-kw):b.x;
     const lx=land?b.x:b.x,lw=land?R(b.w*.44):R(b.w);
@@ -631,8 +655,12 @@ function pictureOf(w) {
 const hx = c => '0x' + hexv(c);
 const cstr = s => JSON.stringify(String(s == null ? '' : s));
 function iconFont(w) { const m = Math.min(w.w, w.h); let f = 12; for (const s of FONTS) if (LH[s] <= m) f = s; return f; }
+// A one-line text field centres its text. The bottom padding takes the odd pixel so the padding, the line and the
+// 2 px border add up to the field's height, which is also the height LVGL's XML loader gives a one-line field.
+const padBottom = w => Math.max(0, w.h - LH[w.font] - 4 - padOf(w));
 function padOf(w) {
   if (w.type === 'icon') return Math.max(0, Math.floor((w.h - LH[iconFont(w)]) / 2));
+  if (w.type === 'textarea' && w.oneLine) return Math.max(0, Math.floor((w.h - LH[w.font]) / 2) - 2);
   if (w.type === 'label' && w.valign === 'center') return Math.max(0, Math.floor((w.h - LH[w.font]) / 2));
   if (w.type === 'label' && w.valign === 'bottom') return Math.max(0, w.h - LH[w.font]);
   return 0;
@@ -666,6 +694,7 @@ function scriptWidget(P, w) {
   if (w.borderColor) p('borderColor', hexv(w.borderColor));
   if (t == 'label') p('align', alignIdx(w.align));
   const pad = padOf(w); if (pad) p('pad', pad);
+  if (pad && t == 'textarea') p('padb', padBottom(w));
   for (const k of ['radius', 'thick', 'border', 'value', 'min', 'max']) if (w[k] != null) p(k, k == 'value' && t == 'roller' ? rollerSel(w) : R(+w[k]));
   for (const k of ['checked', 'showValue', 'shadow']) if (w[k] != null) p(k, w[k] ? 1 : 0);
   p('opacity', R(w.opacity == null ? 100 : w.opacity));
@@ -782,7 +811,7 @@ function genC(P, opt) {
           break;
         case 'textarea':
           A(v + ' = lv_textarea_create(' + sv + ');'); A('lv_textarea_set_placeholder_text(' + v + ', ' + cstr(w.text) + ');'); if (w.oneLine) A('lv_textarea_set_one_line(' + v + ', true);'); if (w.password) A('lv_textarea_set_password_mode(' + v + ', true);');
-          A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), 0);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', 0);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', 0);'); A('lv_obj_set_style_border_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_STATE_FOCUSED);');
+          A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), 0);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', 0);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', 0);'); A('lv_obj_set_style_border_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_STATE_FOCUSED);'); A('lv_obj_set_scrollbar_mode(' + v + ', LV_SCROLLBAR_MODE_OFF);'); if (padOf(w)) { A('lv_obj_set_style_pad_top(' + v + ', ' + padOf(w) + ', 0);'); A('lv_obj_set_style_pad_bottom(' + v + ', ' + padBottom(w) + ', 0);'); }
           break;
         case 'keyboard':
           A(v + ' = lv_keyboard_create(' + sv + ');'); A('lv_obj_set_align(' + v + ', LV_ALIGN_TOP_LEFT);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.bg) + '), 0);'); A('lv_obj_set_style_bg_color(' + v + ', lv_color_hex(' + hx(w.accent) + '), LV_PART_ITEMS);'); A('lv_obj_set_style_text_color(' + v + ', lv_color_hex(' + hx(w.fg) + '), LV_PART_ITEMS);'); A('lv_obj_set_style_text_font(' + v + ', ' + font(w.font) + ', LV_PART_ITEMS);'); A('lv_obj_set_style_radius(' + v + ', ' + w.radius + ', LV_PART_ITEMS);');
@@ -890,7 +919,7 @@ function genPy(P, opt) {
         case 'spinner': A('# lv.spinner is not exposed by the MicroPython binding, so this is a matching arc'); A(v + ' = lv.arc(' + sv + ')'); A(v + '.set_bg_angles(0, 360)'); A(v + '.set_angles(270, 10)'); A(v + '.remove_style(None, lv.PART.KNOB)'); A(v + '.remove_flag(lv.obj.FLAG.CLICKABLE)'); A(v + '.set_style_arc_width(' + w.thick + ', lv.PART.MAIN)'); A(v + '.set_style_arc_width(' + w.thick + ', lv.PART.INDICATOR)'); A(v + '.set_style_arc_color(' + c(w.bg) + ', lv.PART.MAIN)'); A(v + '.set_style_arc_color(' + c(w.accent) + ', lv.PART.INDICATOR)'); break;
         case 'led': A(v + ' = lv.led(' + sv + ')'); A(v + '.set_color(' + c(w.accent) + ')'); A(w.checked ? v + '.on()' : v + '.off()'); break;
         case 'roller': A(v + ' = lv.roller(' + sv + ')'); A(v + '.set_options(' + cstr(w.options) + ', lv.roller.MODE.NORMAL)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_text_color(' + c(w.fg) + ', 0)'); A(v + '.set_style_text_font(' + f(w.font) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_width(0, 0)'); A(v + '.set_style_bg_color(' + c(w.accent) + ', lv.PART.SELECTED)'); A(v + '.set_style_text_color(lv.color_hex(0xFFFFFF), lv.PART.SELECTED)'); A(v + '.set_style_text_font(' + f(w.font) + ', lv.PART.SELECTED)'); A(v + '.set_selected(' + rollerSel(w) + ', False)'); break;
-        case 'textarea': A(v + ' = lv.textarea(' + sv + ')'); A(v + '.set_placeholder_text(' + cstr(w.text) + ')'); if (w.oneLine) A(v + '.set_one_line(True)'); if (w.password) A(v + '.set_password_mode(True)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_text_color(' + c(w.fg) + ', 0)'); A(v + '.set_style_text_font(' + f(w.font) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_color(' + c(w.accent) + ', lv.STATE.FOCUSED)'); break;
+        case 'textarea': A(v + ' = lv.textarea(' + sv + ')'); A(v + '.set_placeholder_text(' + cstr(w.text) + ')'); if (w.oneLine) A(v + '.set_one_line(True)'); if (w.password) A(v + '.set_password_mode(True)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_text_color(' + c(w.fg) + ', 0)'); A(v + '.set_style_text_font(' + f(w.font) + ', 0)'); A(v + '.set_style_radius(' + w.radius + ', 0)'); A(v + '.set_style_border_color(' + c(w.accent) + ', lv.STATE.FOCUSED)'); A(v + '.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)'); if (padOf(w)) { A(v + '.set_style_pad_top(' + padOf(w) + ', 0)'); A(v + '.set_style_pad_bottom(' + padBottom(w) + ', 0)'); } break;
         case 'keyboard': A(v + ' = lv.keyboard(' + sv + ')'); A(v + '.set_align(lv.ALIGN.TOP_LEFT)'); A(v + '.set_style_bg_color(' + c(w.bg) + ', 0)'); A(v + '.set_style_bg_color(' + c(w.accent) + ', lv.PART.ITEMS)'); A(v + '.set_style_text_color(' + c(w.fg) + ', lv.PART.ITEMS)'); A(v + '.set_style_text_font(' + f(w.font) + ', lv.PART.ITEMS)'); A(v + '.set_style_radius(' + w.radius + ', lv.PART.ITEMS)'); break;
         case 'image': {
           const pic = pictureOf(w);
@@ -944,7 +973,7 @@ function genXML(P) {
         case 'icon': open = '<lv_label ' + pos + ' text="&#x' + SYMBOL_HEX[(ICONS[w.icon] || ICONS.home)[1]] + ';" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(iconFont(w)) + '" style_text_align="center"' + pad + extra; break;
         case 'dropdown': open = '<lv_dropdown ' + pos + ' options="' + xa(w.options) + '" style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '"' + extra; break;
         case 'roller': open = '<lv_roller ' + pos + ' options="' + xa(w.options) + '" selected="' + rollerSel(w) + '" style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '" style_border_width="0" style_bg_color:selected="' + col(w.accent) + '" style_text_color:selected="0xFFFFFF" style_text_font:selected="' + fnt(w.font) + '"' + extra; break;
-        case 'textarea': open = '<lv_textarea ' + pos + ' placeholder_text="' + xa(w.text) + '"' + (w.oneLine ? ' one_line="true"' : '') + (w.password ? ' password_mode="true"' : '') + ' style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '" style_border_color:focused="' + col(w.accent) + '"' + extra; break;
+        case 'textarea': open = '<lv_textarea ' + (w.oneLine ? 'one_line="true" ' : '') + pos + ' placeholder_text="' + xa(w.text) + '"' + (w.password ? ' password_mode="true"' : '') + ' style_bg_color="' + col(w.bg) + '" style_text_color="' + col(w.fg) + '" style_text_font="' + fnt(w.font) + '" style_radius="' + w.radius + '" style_border_color:focused="' + col(w.accent) + '" scrollbar_mode="off"' + (padOf(w) ? ' style_pad_top="' + padOf(w) + '" style_pad_bottom="' + padBottom(w) + '"' : '') + extra; break;
         case 'keyboard': open = '<lv_keyboard ' + pos + ' align="top_left" style_bg_color="' + col(w.bg) + '" style_bg_color:items="' + col(w.accent) + '" style_text_color:items="' + col(w.fg) + '" style_text_font:items="' + fnt(w.font) + '" style_radius:items="' + w.radius + '"' + extra; break;
         case 'chart': { const vs = nums(w.data); open = '<lv_chart ' + pos + ' type="line" point_count="' + vs.length + '" hor_div_line_count="3" ver_div_line_count="0" style_bg_color="' + col(w.bg) + '" style_radius="' + w.radius + '" style_border_width="0"' + extra; kids.unshift('\t\t\t<lv_chart-axis axis="primary_y" min_value="' + Math.min(0, ...vs) + '" max_value="' + Math.max(1, ...vs) + '"/>', '\t\t\t<lv_chart-series color="0x' + hexv(w.accent) + '" axis="primary_y" values="' + vs.join(' ') + '"/>'); break; }
       }
@@ -993,7 +1022,7 @@ function genYAML(P) {
         case 'spinner': A('spin_time: 1000ms'); A('arc_length: 100deg'); A('arc_width: ' + w.thick); A('arc_color: ' + hx(w.bg)); A('indicator:'); A('  arc_width: ' + w.thick); A('  arc_color: ' + hx(w.accent)); break;
         case 'led': A('color: ' + hx(w.accent)); A('brightness: ' + (w.checked ? '100%' : '0%')); break;
         case 'roller': A('options:'); optionList(w).forEach(o => A('  - ' + q(o))); A('selected_index: ' + rollerSel(w)); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); A('border_width: 0'); A('selected:'); A('  bg_color: ' + hx(w.accent)); A('  text_color: 0xFFFFFF'); A('  text_font: montserrat_' + w.font); break;
-        case 'textarea': A('placeholder_text: ' + q(w.text)); A('one_line: ' + (w.oneLine ? 'true' : 'false')); if (w.password) A('password_mode: true'); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); break;
+        case 'textarea': A('placeholder_text: ' + q(w.text)); A('one_line: ' + (w.oneLine ? 'true' : 'false')); if (w.password) A('password_mode: true'); A('bg_color: ' + hx(w.bg)); A('text_color: ' + hx(w.fg)); A('text_font: montserrat_' + w.font); A('radius: ' + w.radius); A('scrollbar_mode: "OFF"'); if (padOf(w)) { A('pad_top: ' + padOf(w)); A('pad_bottom: ' + padBottom(w)); } break;
         case 'keyboard': { const kp = keyboardPairs(s); A('align: TOP_LEFT'); if (kp) A('textarea: ' + pid(s) + '_' + ident(kp.tas[0].name).toLowerCase()); A('bg_color: ' + hx(w.bg)); A('items:'); A('  bg_color: ' + hx(w.accent)); A('  text_color: ' + hx(w.fg)); A('  text_font: montserrat_' + w.font); A('  radius: ' + w.radius); break; }
         case 'image': { const pic = pictureOf(w); if (blank) { A('bg_color: 0xE4E6EB'); A('border_width: 0'); A('radius: 12'); A('scrollable: false'); A('widgets:'); A('  - label:'); A('      align: CENTER'); A('      text: "\\U0000' + SYMBOL_HEX.IMAGE + '"'); A('      text_color: 0x8D93A1'); A('      text_font: montserrat_14'); } else { const id = 'img_' + pid(s) + '_' + ident(w.name).toLowerCase(); A('src: ' + id); pics.push({id, file: 'epixo_images/' + id + '.png', w: pic.w, h: pic.h, alpha: !!pic.alpha}); files.push({name: 'epixo_images/' + id + '.png', bytes: b64bytes(PNG_URL.exec(w.image.src)[1])}); } break; }
       }

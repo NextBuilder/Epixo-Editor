@@ -50,13 +50,17 @@ The code updates live as you design. It is plain, idiomatic LVGL with sensible n
 
 <img src=".github/assets/export.png" alt="The export dialog listing C, MicroPython, LVGL XML, ESPHome and screen images" width="100%">
 
-One click gives you a zip with everything you chose: C for LVGL 8.4 or 9.x, MicroPython, LVGL XML, ESPHome YAML, a ready-to-build PlatformIO project for supported boards, and screen images for your README.
+Tell Epixo what you build with (Arduino IDE, PlatformIO, ESP-IDF, ESPHome or MicroPython) and one click gives you a zip with what that needs: C for LVGL 8.4 or 9.x, MicroPython, LVGL XML, ESPHome YAML, a ready-to-build PlatformIO project for supported boards, and screen images for your README.
+
+### Ready for real products
+
+Give any button, switch, slider or text field a name under **Run code**, and the export calls your own function, like `ui_action_fan()`, when it is tapped or changed. Epixo writes an empty version so the project always builds, and a new export never overwrites yours. Pictures, rollers, text fields and an on-screen keyboard are real LVGL widgets, drawn on the canvas and exported to every format. See [Connecting your firmware](https://epixo.app/docs/firmware).
 
 ### One design, every screen
 
 <img src=".github/assets/templates.png" alt="Templates rebuilt for different boards, from a wide panel to a round dial" width="100%">
 
-Start from eight finished templates, from a smart home panel to a door keypad. Each one rebuilds itself for the board you pick, so a dial stays round on a watch and a dashboard spreads out on a 7-inch panel.
+Start from nine finished templates, from a smart home panel to a Wi-Fi setup screen with a keyboard. Each one rebuilds itself for the board you pick, so a dial stays round on a watch and a dashboard spreads out on a 7-inch panel.
 
 ### A community of makers
 
@@ -98,16 +102,16 @@ Every board shows how its details were checked: **Driver-verified** (taken from 
 
 ## Exports
 
-Every change to the code generators is tested against real toolchains. The suite builds 57 projects, covering every template on seven different boards plus one project that uses every widget and option, and compares each result with the editor.
+Every change to the code generators is tested against real toolchains. The suite builds 65 projects, covering every template on seven different boards plus projects that use every widget, option, picture and action, and compares each result with the editor.
 
 | Export | How it is checked | Result |
 |---|---|:-:|
-| C for LVGL 8.4, 9.2, 9.4 and 9.6 | Compiled with `-Wall -Wextra -Werror`, rendered, compared byte for byte | 57 / 57 identical |
-| LVGL XML | Loaded by LVGL 9.4's XML engine, rendered and compared | 57 / 57 identical |
-| ESPHome YAML | Validated with `esphome config` | 57 / 57 valid |
+| C for LVGL 8.4, 9.2, 9.4 and 9.6 | Compiled with `-Wall -Wextra -Werror`, rendered, compared byte for byte | 65 / 65 identical |
+| LVGL XML | Loaded by LVGL 9.4's XML engine, rendered and compared | 65 / 65 identical† |
+| ESPHome YAML | Validated with `esphome config` | 65 / 65 valid |
 | MicroPython | Run on lv_micropython, rendered and compared | 56 / 57 identical* |
 
-<sub>* The MicroPython binding does not expose LVGL's spinner, so it is drawn as an animated arc instead.</sub>
+<sub>* Checked before pictures, rollers, text fields and keyboards were added. The MicroPython binding does not expose LVGL's spinner, so it is drawn as an animated arc instead.<br>† Pictures stay in the C export; the XML export leaves them out.</sub>
 
 <br>
 
@@ -143,8 +147,10 @@ Found a problem? Please report it privately, as described in the [security polic
 - [x] Community, remixing and maker profiles
 - [x] Guided first run and a friendlier editor for beginners
 - [x] Design from Claude, ChatGPT and other AI apps over MCP
-- [ ] "Which export do I need?" chooser
-- [ ] Images, tabs, rollers and keyboards
+- [x] "Which export do I need?" chooser
+- [x] Pictures, rollers, text fields and keyboards
+- [x] Actions that call your firmware code
+- [ ] Tabs, tables and custom fonts
 - [ ] Live data bindings from sensors
 - [ ] Team projects and shared libraries
 

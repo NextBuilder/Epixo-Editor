@@ -466,7 +466,9 @@ function renderLeft() {
       r.addEventListener('click', e => { const a = e.target.closest('[data-a]'); if (a) { e.stopPropagation(); const arr = cur().widgets, i = arr.indexOf(w);
         if (a.dataset.a == 'eye') mutate(() => w.hidden = !w.hidden); else if (a.dataset.a == 'lock') mutate(() => w.locked = !w.locked);
         else if (a.dataset.a == 'up' && i < arr.length - 1) mutate(() => { arr.splice(i, 1); arr.splice(i + 1, 0, w); }); else if (a.dataset.a == 'down' && i > 0) mutate(() => { arr.splice(i, 1); arr.splice(i - 1, 0, w); }); return; }
-        S.sel = w.id; renderSel(); });
+        if (S.sel != w.id) { S.sel = w.id; renderSel(); } });
+      // With a mouse, rows select on press, so a list refresh between press and release cannot swallow the click. Touch keeps tap to select, so scrolling the list does not select.
+      r.addEventListener('pointerdown', e => { if (e.pointerType != 'mouse' || e.button || e.target.closest('[data-a], input')) return; if (S.sel != w.id) { S.sel = w.id; renderSel(); } });
       r.addEventListener('mouseenter', () => { S.hover = w.id; renderOverlay(); });
       r.addEventListener('mouseleave', () => { S.hover = null; renderOverlay(); });
       r.addEventListener('dblclick', e => { if (e.target.closest('[data-a]')) return; const nm = r.querySelector('.nm'), inp = h(`<input class="renamer" value="${esc(w.name)}">`); nm.replaceWith(inp); inp.focus(); inp.select();
@@ -734,7 +736,12 @@ function renderHeader() {
   $('#boardChip').innerHTML = `<span class="dot">${ico(I.chip)}</span><span class="bc"><b>${esc(b.name)}</b><em>${esc(b.brand)} · ${b.w} × ${b.h}${b.round ? ' · round' : ''}</em></span>${ico(I.chev)}`;
   $('#undoBtn').disabled = !S.hist.length; $('#redoBtn').disabled = !S.fut.length;
 }
-function renderSel() { renderOverlay(); if (S.right == 'design') renderInspector(); if (S.left == 'layers') renderLeft(); }
+function renderSel() {
+  renderOverlay(); if (S.right == 'design') renderInspector();
+  if (S.left != 'layers') return;
+  const rows = document.querySelectorAll('#leftBody .row[data-id]');
+  if (rows.length == cur().widgets.length) rows.forEach(r => r.classList.toggle('sel', r.dataset.id == S.sel)); else renderLeft();
+}
 let docT;
 function renderAll() { renderHeader(); renderCanvas(); renderOverlay(); renderLeft(); clearTimeout(docT); DOC = E.doctor(S.p, measure); renderRight(); queueCode(); renderAskMode(); }
 
@@ -1072,14 +1079,25 @@ function openExport(preset) {
     ['json', '{}', 'Project file', 'Reopen this project in Epixo later', '', '#EEF0F4', '#566075', true]
   ];
   const sel = {c: 1, pack: !!pk, runtime: false, py: 1, xml: 1, yaml: 1, png: engineState == 'on', json: 1};
-  if (preset) { Object.keys(sel).forEach(k => sel[k] = 0); preset.forEach(k => sel[k] = 1); sel.json = 1; }
+  // "I build with" picks the parts each toolchain needs, and is remembered for next time.
+  const FOR = [['arduino', 'Arduino IDE', ['c', 'pack']], ['pio', 'PlatformIO', ['c', 'pack']], ['idf', 'ESP-IDF', ['c']], ['esphome', 'ESPHome', ['yaml', 'png']], ['mpy', 'MicroPython', ['py']], ['all', 'Everything', ['c', 'pack', 'py', 'xml', 'yaml', 'png']]];
+  let forKey = ''; try { forKey = localStorage.getItem('epixo.exportFor') || ''; } catch (e) {}
+  const usePreset = list => { Object.keys(sel).forEach(k => sel[k] = 0); list.forEach(k => sel[k] = k == 'pack' ? !!pk : k == 'png' ? engineState == 'on' : 1); sel.json = 1; };
+  if (preset) usePreset(preset); else if (FOR.some(f => f[0] == forKey)) usePreset(FOR.find(f => f[0] == forKey)[2]);
   const m = modal(`<div class="sheet md"><div class="sheet-h"><div style="flex:1;min-width:0"><h2>Export</h2><p>${esc(P.board.brand)} ${esc(P.board.name)} · ${P.board.w} × ${P.board.h} · LVGL target <b>${LVT.find(x => x[0] == S.lv)[1]}</b></p></div>${xBtn}</div>
     <div class="sheet-b"><div class="ex"><div class="exsum"><div><b>${P.screens.length}</b><span>Screens</span></div><div><b>${nW}</b><span>Widgets</span></div><div><b>${E.usedFonts(P).length}</b><span>Font sizes</span></div><div><b style="color:${er ? 'var(--bad)' : 'var(--ok)'}">${er ? er : '✓'}</b><span>${er ? 'Doctor errors' : 'Doctor clean'}</span></div></div>
+    <div class="for"><span>I build with</span><div class="forbtns">${FOR.map(f => `<button data-for="${f[0]}"${!preset && f[0] == forKey ? ' class="on"' : ''}>${f[1]}</button>`).join('')}</div></div>
     <div class="opts">${opts.map(o => `<label class="opt${sel[o[0]] ? ' on' : ''}"${o[7] ? '' : ' style="opacity:.5;pointer-events:none"'}><input type="checkbox" data-o="${o[0]}"${sel[o[0]] ? ' checked' : ''}${o[7] ? '' : ' disabled'}><span class="fi" style="background:${o[5]};color:${o[6]}">${o[1]}</span><span class="grow"><b>${o[2]}</b><small>${o[3]}</small></span>${o[4] ? `<span class="vtag${o[4] == 'Official driver' || o[4] == 'Same code as the editor' || o[4] == 'From the engine' ? ' info' : o[4] == 'Unavailable' ? ' warn' : ''}">${o[4]}</span>` : ''}</label>`).join('')}</div>
     <div class="exbtns"><button class="primary" id="exZip">${ico(I.dl)}Download .zip</button><button class="btn2" id="exJson">Project file only</button><label class="btn2" style="width:auto;margin:0;padding:0 14px;cursor:pointer">Open project file<input type="file" id="exOpen" accept=".json,application/json" hidden></label><button class="btn2" id="verRep">What is verified?</button></div>
     <div class="status" id="exst"></div></div></div></div>`);
   const st = m.el.querySelector('#exst');
   m.el.querySelectorAll('[data-o]').forEach(c => c.onchange = () => { sel[c.dataset.o] = c.checked ? 1 : 0; c.closest('.opt').classList.toggle('on', c.checked); });
+  m.el.querySelectorAll('[data-for]').forEach(b => b.onclick = () => {
+    const f = FOR.find(x => x[0] == b.dataset.for); usePreset(f[2]);
+    try { localStorage.setItem('epixo.exportFor', f[0]); } catch (e) {}
+    m.el.querySelectorAll('[data-for]').forEach(x => x.classList.toggle('on', x == b));
+    m.el.querySelectorAll('[data-o]').forEach(c => { if (c.disabled) return; c.checked = !!sel[c.dataset.o]; c.closest('.opt').classList.toggle('on', c.checked); });
+  });
   m.el.querySelector('#exZip').onclick = async () => { st.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>Building files'; try { const blob = await buildZip(sel, st); await saveFile((E.ident(P.name).toLowerCase() || 'epixo') + '-epixo.zip', blob, st); } catch (e) { st.textContent = 'Could not build the zip here (' + (e && e.message || e) + '). Use the Code panel to copy files.'; } };
   m.el.querySelector('#exJson').onclick = () => saveFile((E.ident(P.name).toLowerCase() || 'epixo') + '.epixo.json', JSON.stringify(P, null, 2), st);
   m.el.querySelector('#verRep').onclick = () => { m.close(); openVerify(); };
@@ -1092,7 +1110,7 @@ function openProjectFile(f, st, m) {
 }
 
 function openVerify() {
-  const rows = [['C (LVGL 8.4)', '57 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.2)', '57 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.4)', '57 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.6)', '57 projects', 'Compiled -Werror, pixel-identical'], ['LVGL XML (9.4)', '57 projects', 'Loaded by LVGL, pixel-identical'], ['ESPHome YAML', '57 configs', 'esphome config 2026.9.1 passes'], ['MicroPython', '57 projects', 'Ran on lv_micropython 9.3 · 56 pixel-identical, spinner shown as an arc'], ['Text measuring', '133 strings', 'Within 3.4% of LVGL, exact with engine']];
+  const rows = [['C (LVGL 8.4)', '65 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.2)', '65 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.4)', '65 projects', 'Compiled -Werror, pixel-identical'], ['C (LVGL 9.6)', '65 projects', 'Compiled -Werror, pixel-identical'], ['LVGL XML (9.4)', '65 projects', 'Loaded by LVGL, pixel-identical (pictures stay in C)'], ['ESPHome YAML', '65 configs', 'esphome config 2026.10.0 passes'], ['MicroPython', '57 projects', 'Ran on lv_micropython 9.3 before pictures, rollers, text fields and keyboards were added · 56 pixel-identical, spinner shown as an arc'], ['Text measuring', '133 strings', 'Within 3.4% of LVGL, exact with engine']];
   modal(`<div class="sheet md"><div class="sheet-h"><div style="flex:1"><h2>What Epixo verifies</h2><p>Every export format was tested against real LVGL, not just generated.</p></div>${xBtn}</div><div class="sheet-b"><div class="road">
     <div class="road-i"><div class="ti">${ico(I.bolt)}</div><div><b>The editor canvas is LVGL</b><small>LVGL 9.2 compiled to WebAssembly draws the canvas, the thumbnails, the screenshots and the preview. The same runtime C code powers Live Mirror on your board.</small></div></div>
     <div style="overflow-x:auto"><table class="vt"><thead><tr><th>Output</th><th>Tested on</th><th>Result</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="ok">${r[2]}</td></tr>`).join('')}</tbody></table></div>
@@ -1346,9 +1364,12 @@ DOC = E.doctor(S.p, measure);
 renderThemeBtn(); renderAll();
 requestAnimationFrame(() => { fit(); segThumb($('#leftTabs')); segThumb($('#rightTabs')); });
 startEngine();
-// First visit: a short welcome. Skipped when the page opens a project by link, or when an AI app drives the editor.
-addEventListener('load', () => setTimeout(() => {
-  if (seenWelcome() || /[?&](open|remix|template|board|new)=/.test(location.search) || document.querySelector('script[src="live.js"]') || $('#modalRoot').children.length) return;
-  openWelcome(false);
+// First visit: a short welcome. Skipped when the page opens a project by link, when an AI app drives the editor,
+// and for signed-in makers who already have projects, even on a new device.
+addEventListener('load', () => setTimeout(async () => {
+  if (seenWelcome() || /[?&](open|remix|template|board|new)=/.test(location.search) || document.querySelector('script[src="live.js"]')) return;
+  await capsReady;
+  if (CAP.db && CAP.uid && CAP.uid != 'local') { try { if ((await CAP.db.collection('data/users/' + CAP.uid).limit(1).get()).docs.length) { markWelcome(); return; } } catch (e) {} }
+  if (!$('#modalRoot').children.length) openWelcome(false);
 }, 400));
 })();

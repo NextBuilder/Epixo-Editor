@@ -16,6 +16,7 @@
   "scripts": {
     "test": "node --test tests/unit/*.test.mjs",
     "typecheck": "npm --prefix apps/web run typecheck",
-    "check": "npm run test && npm run typecheck"
+    "check": "npm run test && npm run typecheck",
+    "e2e": "node tests/e2e/run.mjs"
   }
 }

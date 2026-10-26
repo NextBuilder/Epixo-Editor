@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, X } from "./icons";
+import { Check, Plus, X } from "./icons";
 import { BrandTile } from "./brand";
 import { PLATFORMS, type SocialKey } from "@/lib/profile";
 
@@ -76,7 +76,7 @@ export function SocialEditor({ value, onChange }: { value: Links; onChange: (v: 
                         <button key={p.key} type="button" onClick={() => add(p.key)} className="press flex flex-col items-center gap-2 rounded-2xl px-1 py-2 text-center hover:bg-fill">
                           <span className="relative">
                             <BrandTile k={p.key} size={52} />
-                            {has && <span className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full bg-signal text-[11px] font-bold text-white ring-2 ring-paper">✓</span>}
+                            {has && <span className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full bg-signal text-white ring-2 ring-paper"><Check size={11} weight="bold" /></span>}
                           </span>
                           <span className="line-clamp-2 text-[12px] leading-tight text-graphite">{p.label}</span>
                         </button>

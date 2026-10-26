@@ -63,7 +63,7 @@ export function HomeBento() {
 
       <Tile href="/boards">
         <Say title={`${BOARDS.length} boards.`}>{`From ${BRANDS.length} makers, round and square, set up for you.`}</Say>
-        <p className="mt-6 bg-[linear-gradient(120deg,#0071E3,#5E5CE6_55%,#BF5AF2)] bg-clip-text font-display text-[88px] font-semibold leading-none tracking-[-0.05em] text-transparent">{BOARDS.length}</p>
+        <p className="mt-6 font-display text-[88px] font-semibold leading-none tracking-[-0.04em]">{BOARDS.length}</p>
         <p className="mt-auto pt-6 text-[13px] leading-relaxed text-mist">{makers.slice(0, 8).join(" · ")}</p>
       </Tile>
 

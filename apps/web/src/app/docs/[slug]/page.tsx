@@ -42,8 +42,7 @@ export default async function DocPage({ params }: Props) {
       </aside>
       <article className="min-w-0 max-w-[720px] pb-10">
         <Link href="/docs" className="text-[14px] text-signal hover:underline lg:hidden">All docs</Link>
-        <p className="mt-2 text-[14px] text-mist lg:mt-0">{d.group}</p>
-        <h1 className="t-display mt-1">{d.title}</h1>
+        <h1 className="t-display mt-3 lg:mt-0">{d.title}</h1>
         <p className="t-lead mt-3">{d.summary}</p>
         <div className="prose-epx mt-10">{d.body}</div>
         {next && (

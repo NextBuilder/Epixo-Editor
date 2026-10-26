@@ -5,12 +5,23 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 ## [Unreleased]
 
 ### Added
+- Pictures: an Image widget for logos and photos. Choose a picture in the inspector, or drop or paste one onto the screen. It is exported as LVGL image data for LVGL 9 (RGB565, with an alpha plane when needed) and for LVGL 8 at 16-bit, byte-swapped 16-bit and 32-bit colour, and as an image file for ESPHome.
+- Roller, Text field and Keyboard widgets. A keyboard types into the first text field on its screen and into any field that gets focus, and a text field runs its action when you press Enter. New keyboards sit full width along the bottom of the screen.
+- A Wi-Fi Setup template with a network roller, a password field and a keyboard. Round and very short screens get a compact version.
+- Design Doctor warns about pictures not chosen yet, rollers with one choice and keys too small to tap, and adds a keyboard in one tap for a text field that has none. The Device tab shows the flash your pictures use.
+- Export asks what you build with (Arduino IDE, PlatformIO, ESP-IDF, ESPHome or MicroPython), picks the parts that needs and remembers your choice.
+- An end-to-end test suite, `npm run e2e`, that drives the website and the editor in a real browser.
 - Actions: give any button, card, icon, label, switch, checkbox, slider or dropdown a name under **Run code**, and the export calls your own function when it is tapped or changed. C exports declare `ui_action_<name>()` in `ui.h` with empty weak defaults, so the project builds before you write yours and a new export never overwrites it. MicroPython gets `ui.actions`, ESPHome gets one script per action, and LVGL XML registers each callback. Try it shows which action a tap runs.
 - The export README now explains how to change widgets from firmware, with a starter function for every action.
 - A new guide, Connecting your firmware.
 - Social links for 31 platforms, added and removed from an iOS-style picker in Settings and shown with each platform's own mark.
 
 ### Changed
+- The AI knows the new widgets, pairs text fields with a keyboard and names actions for firmware hooks.
+- Signed-in makers who already have projects no longer see the first-run welcome on a new device.
+- Text fields centre their text and hide the scrollbar.
+- Secondary text is darker in light mode so it meets a 4.5:1 contrast ratio, and text selection, the caret, scrollbars and links take the site's colours.
+- The home page drops the label above the headline and the gradient number, and shows the verification results as a plain table.
 - One icon family across the website and the editor (Phosphor), with real brand marks for social links.
 - The home page shows real LVGL renders, a Design Doctor list and the firmware code you write, in place of coloured icon cards.
 - Scroll and entrance animations are shorter, and LVGL thumbnails you have already seen draw instantly.

@@ -7,8 +7,8 @@
   --color-card: #FFFFFF;
   --color-raised: #FFFFFF;
   --color-ink: #1D1D1F;
-  --color-graphite: #6E6E73;
-  --color-mist: #86868B;
+  --color-graphite: #636368;
+  --color-mist: #737378;
   --color-fill: rgb(118 118 128 / 0.1);
   --color-fill-strong: rgb(118 118 128 / 0.18);
   --color-line: rgb(0 0 0 / 0.08);
@@ -129,7 +129,10 @@ h1, h2, h3, h4 {
 
 p { text-wrap: pretty }
 
-::selection { background: var(--color-signal-soft) }
+::selection { background: color-mix(in srgb, var(--color-signal) 24%, transparent) }
+:root { caret-color: var(--color-signal); accent-color: var(--color-signal); scrollbar-color: var(--color-line-strong) transparent }
+a { text-underline-offset: 3px; text-decoration-thickness: 1px }
+dd, td, .tabular { font-variant-numeric: tabular-nums }
 
 :focus-visible {
   outline: 3px solid color-mix(in srgb, var(--color-signal) 55%, transparent);

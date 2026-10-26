@@ -252,12 +252,12 @@ K  <screen id>                 delete a screen`}</pre>
     summary: "What we test before every release, and what we have not tested yet.",
     body: (
       <>
-        <p>The test suite builds 57 projects, 9 templates on 7 boards plus one project that uses every widget and option. Each one is exported in every format and checked with the real tool.</p>
+        <p>The test suite builds 65 projects: 9 templates on 7 boards, one project that uses every widget and option, and one with pictures, rollers, text fields and a keyboard on a small screen. Each one is exported in every format and checked with the real tool.</p>
         <ul>
-          <li>C for LVGL 8.4, 9.2, 9.4 and 9.6: compiled with <code>gcc -Wall -Wextra -Werror</code>, rendered, compared byte for byte with the editor. 57 of 57 identical on each version.</li>
-          <li>LVGL XML: loaded by LVGL 9.4&apos;s XML module, rendered and compared. 57 of 57 identical.</li>
-          <li>ESPHome: <code>esphome config</code> with ESPHome 2026.9.1. 57 of 57 valid.</li>
-          <li>MicroPython: run on lv_micropython with LVGL 9.3, rendered and compared. 57 of 57 run, 56 identical; the spinner is drawn as an arc.</li>
+          <li>C for LVGL 8.4, 9.2, 9.4 and 9.6: compiled with <code>gcc -Wall -Wextra -Werror</code>, rendered, compared byte for byte with the editor. 65 of 65 identical on each version.</li>
+          <li>LVGL XML: loaded by LVGL 9.4&apos;s XML module, rendered and compared. 65 of 65 identical. Pictures are not part of the XML export yet, so they stay in the C files.</li>
+          <li>ESPHome: <code>esphome config</code> with ESPHome 2026.10.0. 65 of 65 valid, including actions and pictures.</li>
+          <li>MicroPython: run on lv_micropython with LVGL 9.3, rendered and compared, before pictures, rollers, text fields and keyboards were added: 57 of 57 ran, 56 identical; the spinner is drawn as an arc. The newest widgets have not been run on MicroPython yet.</li>
         </ul>
         <h2>Not yet tested</h2>
         <p>Board packs and Live Mirror firmware have not been compiled and flashed on every physical board. Try one board before you rely on them in a product.</p>

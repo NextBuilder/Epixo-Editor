@@ -43,7 +43,7 @@ typedef struct {
     char icon[24];
     uint32_t fg, bg, accent, border_color;
     int has_fg, has_bg, has_accent, has_border_color;
-    int font, align, pad, radius, thick, border, value, min, max;
+    int font, align, pad, pad_bottom, radius, thick, border, value, min, max;
     int checked, show_value, shadow, opacity, hidden, tap_to, tap_anim, one_line, password;
     uint8_t * img;
     uint32_t img_len, img_cap;
@@ -538,6 +538,11 @@ static void ep_build(void)
         lv_obj_set_style_text_font(v, ep_font(P.font), 0);
         lv_obj_set_style_radius(v, P.radius, 0);
         lv_obj_set_style_border_color(v, lv_color_hex(P.accent), LV_STATE_FOCUSED);
+        lv_obj_set_scrollbar_mode(v, LV_SCROLLBAR_MODE_OFF);
+        if(P.pad) {
+            lv_obj_set_style_pad_top(v, P.pad, 0);
+            lv_obj_set_style_pad_bottom(v, P.pad_bottom, 0);
+        }
         lv_obj_add_event_cb(v, ep_ta_focus_cb, LV_EVENT_FOCUSED, NULL);
         for(uint32_t i = 0; i < lv_obj_get_child_count(s); i++) {
             lv_obj_t * c = lv_obj_get_child(s, (int32_t)i);
@@ -610,6 +615,7 @@ static void ep_prop(const char * k, const char * val)
     else if(!strcmp(k, "font")) P.font = ep_atoi(val);
     else if(!strcmp(k, "align")) P.align = ep_atoi(val);
     else if(!strcmp(k, "pad")) P.pad = ep_atoi(val);
+    else if(!strcmp(k, "padb")) P.pad_bottom = ep_atoi(val);
     else if(!strcmp(k, "radius")) P.radius = ep_atoi(val);
     else if(!strcmp(k, "thick")) P.thick = ep_atoi(val);
     else if(!strcmp(k, "border")) P.border = ep_atoi(val);

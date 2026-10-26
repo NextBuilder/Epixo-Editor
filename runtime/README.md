@@ -32,7 +32,7 @@ Widget types are `label`, `button`, `panel`, `icon`, `image`, `switch`, `slider`
 |---|---|
 | `text`, `options`, `data`, `icon` | Text, with `\n` for a new line |
 | `fg`, `bg`, `accent`, `borderColor` | Colour as `RRGGBB` |
-| `font`, `align`, `pad`, `radius`, `thick`, `border`, `value`, `min`, `max`, `opacity` | Whole numbers |
+| `font`, `align`, `pad`, `padb`, `radius`, `thick`, `border`, `value`, `min`, `max`, `opacity` | Whole numbers |
 | `checked`, `showValue`, `shadow`, `hidden`, `oneLine`, `password` | `0` or `1` |
 | `tapTo`, `tapAnim` | Screen to open when tapped, and the animation |
 | `img` | Picture size and format: `<width>,<height>,<1 if it has an alpha plane>` |
