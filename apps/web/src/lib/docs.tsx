@@ -105,7 +105,7 @@ void setup() {
         <p>An exported screen is a normal LVGL program. Your firmware changes what it shows, and your code runs when someone taps a button or moves a slider.</p>
         <h2>Change what the screen shows</h2>
         <p>Every widget is a global in <code>ui.h</code>, named <code>ui_&lt;Screen&gt;_&lt;Widget&gt;</code>. Rename a widget in the editor to give it a clear name, like <code>Temperature</code>.</p>
-        <pre>{`lv_label_set_text_fmt(ui_Home_Temperature, "%d°", reading);
+        <pre>{`lv_label_set_text_fmt(ui_Home_Temperature, "%d C", reading);
 lv_arc_set_value(ui_Home_Dial, reading);
 lv_obj_add_state(ui_Home_Fan, LV_STATE_CHECKED);`}</pre>
         <p>Call LVGL only from the task that runs <code>lv_timer_handler()</code>, or take the LVGL lock first.</p>
@@ -126,7 +126,7 @@ void ui_action_fan(lv_event_t * e)
         <h2>Other formats</h2>
         <ul>
           <li><strong>MicroPython:</strong> <code>ui.actions[&quot;fan&quot;] = my_function</code> after <code>import ui</code>.</li>
-          <li><strong>ESPHome:</strong> each action is a script called <code>action_fan</code>. Replace its log line with your steps.</li>
+          <li><strong>ESPHome:</strong> each action is a script called <code>action_fan</code>. Put your steps in its lambda.</li>
           <li><strong>LVGL XML:</strong> <code>epixo_xml_init()</code> registers each action, so the same C function runs.</li>
         </ul>
       </>

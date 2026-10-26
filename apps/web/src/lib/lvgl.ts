@@ -51,19 +51,30 @@ export async function createEngine(w: number, h: number) {
 
 let shared: any = null;
 let queue: Promise<unknown> = Promise.resolve();
+// Finished renders, keyed by the exact screen script, so a screen seen once draws instantly after.
+const done = new Map<string, HTMLCanvasElement>();
 
 export function renderStill(canvas: HTMLCanvasElement, project: any, screenIndex = 0) {
   const job = queue.then(async () => {
     const { E } = await lvgl();
     const b = project.board;
-    shared ??= await createEngine(b.w, b.h);
-    if (shared.w !== b.w || shared.h !== b.h) shared.init(b.w, b.h);
     const s = project.screens[Math.min(screenIndex, project.screens.length - 1)];
-    shared.exec("X\n" + E.scriptScreen(project, s) + "\nL\t" + E.sid(s.id) + "\n");
+    const script = "X\n" + E.scriptScreen(project, s) + "\nL\t" + E.sid(s.id) + "\n", key = b.w + "x" + b.h + "|" + script;
     canvas.width = b.w;
     canvas.height = b.h;
+    const hit = done.get(key);
+    if (hit) return void canvas.getContext("2d")!.drawImage(hit, 0, 0);
+    shared ??= await createEngine(b.w, b.h);
+    if (shared.w !== b.w || shared.h !== b.h) shared.init(b.w, b.h);
+    shared.exec(script);
     shared.img = null;
     shared.renderTo(canvas.getContext("2d"), 450);
+    const copy = document.createElement("canvas");
+    copy.width = b.w;
+    copy.height = b.h;
+    copy.getContext("2d")!.drawImage(canvas, 0, 0);
+    if (done.size > 120) done.delete(done.keys().next().value!);
+    done.set(key, copy);
     await new Promise(r => setTimeout(r, 0));
   });
   queue = job.catch(() => undefined);

@@ -343,11 +343,14 @@ const TPL = {
     A.push(['icon',{x:R(cx+k*1.56),y:R(cy+k*.18),w:R(k*.64),h:R(k*.64),icon:'next',fg:C.ink}]);
     return[{name:'Player',w:A}]}},
   fitness:{n:'Activity Rings',d:'Three concentric rings with goals',build(W,H,rd){const b=box(W,H,rd),u=b.u,land=W>H*1.25,A=[];
-    const s=R(rd?b.w*.56:land?Math.min(b.h,b.w*.5):Math.min(b.w,b.h*.62)),ox=land?b.x:R(b.x+(b.w-s)/2),oy=land?R(b.y+(b.h-s)/2):b.y,t=R(s*.1);
+    const s=R(rd?b.w*.56:land?Math.min(b.h,b.w*.5):Math.min(b.w,b.h*.56,b.h-u*5-LH[12]*7.2)),ox=land?b.x:R(b.x+(b.w-s)/2),oy=land?R(b.y+(b.h-s)/2):b.y,t=R(s*.1);
     [['#FA114F',1,72,'#3D0A18'],['#92E82A',.74,54,'#22340B'],['#1EEAEF',.48,88,'#0A3637']].forEach(([c,f,v,tr])=>{const z=R(s*f);A.push(['arc',{x:R(ox+(s-z)/2),y:R(oy+(s-z)/2),w:z,h:z,value:v,accent:c,bg:tr,thick:t,showValue:false}])});
     const lx=land?R(ox+s+u*7):b.x,ly=land?R(b.y+b.h*.14):R(oy+s+u*5),lw=land?R(b.x+b.w-lx):R(b.w);
     if(rd){[['430 / 600 CAL','#FA114F'],['16 / 30 MIN','#5CC51C'],['7 / 8 HRS','#0FB5BA']].forEach((r,i)=>A.push(['label',{x:b.x,y:R(oy+s+u*4+i*u*7),w:R(b.w),h:R(u*6.5),text:r[0],font:F(u*5),fg:r[1],align:'center'}]));return[{name:'Activity',bg:'#000000',w:A}]}
-    [['Move','430 / 600 CAL','#FA114F'],['Exercise','16 / 30 MIN','#5CC51C'],['Stand','7 / 8 HRS','#0FB5BA']].forEach((r,i)=>{const yy=R(ly+i*u*(land?16:12));A.push(['label',{x:lx,y:yy,w:lw,h:R(u*5),text:r[0],font:F(u*4),fg:'#8D93A1',align:land?'left':'center'}]);A.push(['label',{x:lx,y:R(yy+u*5),w:lw,h:R(u*(land?8:6.5)),text:r[1],font:F(u*(land?6:5)),fg:r[2],align:land?'left':'center'}])});
+    // Upright screens share the space under the rings between the three goals, so tall narrow boards do not crowd them.
+    const room=b.y+b.h-ly,tf=land?F(u*4):F(Math.min(room*.09,u*4.5)),vf=land?F(u*6):F(Math.min(room*.13,u*6.5)),th=land?R(u*5):LH[tf],vh=land?R(u*8):LH[vf];
+    const step=land?u*16:Math.max(th+vh,Math.min(room/3,(th+vh)*1.5)),y0=land?ly:R(ly+(room-step*3+step-th-vh)/2);
+    [['Move','430 / 600 CAL','#FA114F'],['Exercise','16 / 30 MIN','#5CC51C'],['Stand','7 / 8 HRS','#0FB5BA']].forEach((r,i)=>{const yy=R(y0+i*step);A.push(['label',{x:lx,y:yy,w:lw,h:th,text:r[0],font:tf,fg:'#8D93A1',align:land?'left':'center'}]);A.push(['label',{x:lx,y:yy+th,w:lw,h:vh,text:r[1],font:vf,fg:r[2],align:land?'left':'center'}])});
     return[{name:'Activity',bg:'#000000',w:A}]}},
   energy:{n:'Energy Monitor',d:'Stat cards, live chart and battery',build(W,H,rd){const b=box(W,H,rd),u=b.u,land=W>H*1.25,A=[];const top=header(A,b,'Energy','Live from your inverter',{land});
     const p=R(u*3),cw=(b.w-2*R(u*2.5))/3,cf=F(Math.min(u*3.8,cw*.14)),vf=F(Math.min(u*6,cw*.2)),ch=Math.max(R(u*5),LH[cf]),vh=Math.max(R(u*8),LH[vf]);
@@ -623,7 +626,7 @@ function actionGuide(P) {
   const L = ['## Make it work with your code', '', 'Every widget is a global in `ui.h`, named `ui_<Screen>_<Widget>`. Change them from your firmware:', '', '```c', ...set, '```', '',
     'Call LVGL only from the task that runs `lv_timer_handler()`, or take the LVGL lock first.', ''];
   if (starters.length) L.push('### Actions', '', 'These widgets run your code when tapped or changed. Write the functions in a file of your own, like `src/actions.c`, so a new export never overwrites them. Until you do, empty versions in `ui.c` keep the project building.', '', '```c', '#include "ui.h"', '', starters.join('\n\n'), '```', '',
-    'In MicroPython, set `ui.actions["' + [...seen.keys()][0] + '"] = your_function`. In ESPHome, each action is a script called `action_<name>`; replace its log line with your steps.', '');
+    'In MicroPython, set `ui.actions["' + [...seen.keys()][0] + '"] = your_function`. In ESPHome, each action is a script called `action_<name>`; put your steps in its lambda.', '');
   else L.push('To run code when a widget is tapped or changed, select it in Epixo and give it a name under **Run code**. The export then includes a hook for it.', '');
   return L.join('\n');
 }
@@ -761,7 +764,7 @@ function genYAML(P) {
     });
   });
   const acts = actionsOf(P);
-  if (acts.length) L.push('', '# Actions. Replace each log line with what the widget should do.', 'script:', ...acts.flatMap(a => ['  - id: action_' + a, '    then:', '      - logger.log: "Action ' + a + '"']));
+  if (acts.length) L.push('', '# Actions. Put what each widget should do inside its lambda, or replace the lambda with other ESPHome actions.', 'script:', ...acts.flatMap(a => ['  - id: action_' + a, '    then:', '      - lambda: |-', '          // ' + a + ': your code here, like id(relay).toggle();']));
   return {yaml: L.join('\n') + '\n', skipped};
 }
 

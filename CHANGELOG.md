@@ -4,6 +4,22 @@ Notable changes to Epixo. The format follows [Keep a Changelog](https://keepacha
 
 ## [Unreleased]
 
+### Added
+- Actions: give any button, card, icon, label, switch, checkbox, slider or dropdown a name under **Run code**, and the export calls your own function when it is tapped or changed. C exports declare `ui_action_<name>()` in `ui.h` with empty weak defaults, so the project builds before you write yours and a new export never overwrites it. MicroPython gets `ui.actions`, ESPHome gets one script per action, and LVGL XML registers each callback. Try it shows which action a tap runs.
+- The export README now explains how to change widgets from firmware, with a starter function for every action.
+- A new guide, Connecting your firmware.
+- Social links for 31 platforms, added and removed from an iOS-style picker in Settings and shown with each platform's own mark.
+
+### Changed
+- One icon family across the website and the editor (Phosphor), with real brand marks for social links.
+- The home page shows real LVGL renders, a Design Doctor list and the firmware code you write, in place of coloured icon cards.
+- Scroll and entrance animations are shorter, and LVGL thumbnails you have already seen draw instantly.
+- Maker cards no longer show empty slots for makers with fewer than three projects.
+- The Activity rings template spaces its goals evenly on tall, narrow screens such as the T-Display-S3.
+
+### Fixed
+- The home and pricing pages no longer scroll sideways on phones.
+
 ## [0.7.0] - 2026-10-26
 
 ### Added

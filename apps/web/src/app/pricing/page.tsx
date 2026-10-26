@@ -14,7 +14,7 @@ export default function Pricing() {
         <h1 className="t-display">Pricing</h1>
         <p className="t-lead mx-auto mt-3 max-w-md">Designing and exporting is free, and will stay free.</p>
       </div>
-      <div className="mx-auto mt-12 grid max-w-[900px] gap-5 md:grid-cols-2">
+      <div className="mx-auto mt-12 grid max-w-[900px] grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
         <section className="card p-8">
           <h2 className="text-[22px]">Free</h2>
           <p className="mt-6 font-display text-[48px] font-semibold leading-none tracking-tight">$0</p>

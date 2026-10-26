@@ -58,13 +58,13 @@ export default async function Makers({ searchParams }: { searchParams: SP }) {
             const cv = covers[m.id] ?? [];
             return (
               <Link key={m.id} href={`/u/${m.handle}`} data-reveal style={{ "--i": mi % 3 } as React.CSSProperties} className="card card-hover group flex flex-col overflow-hidden">
-                <div className="grid h-[132px] grid-cols-3 gap-1 p-1">
-                  {[0, 1, 2].map(i => {
+                <div className={`grid h-[132px] gap-1 p-1 ${["grid-cols-1", "grid-cols-1", "grid-cols-2", "grid-cols-3"][Math.min(3, cv.length)]}`}>
+                  {Array.from({ length: Math.max(1, Math.min(3, cv.length)) }, (_, i) => i).map((i, _x, all) => {
                     const c = cv[i];
                     let img: string | null = null;
                     try { img = c ? `/api/media/${(JSON.parse(c.images) as string[])[0]}` : null; } catch {}
                     return (
-                      <div key={i} className={`flex items-center justify-center overflow-hidden bg-stage ${i === 0 ? "rounded-l-[18px]" : ""} ${i === 2 ? "rounded-r-[18px]" : ""}`}>
+                      <div key={i} className={`flex items-center justify-center overflow-hidden bg-stage ${i === 0 ? "rounded-l-[18px]" : ""} ${i === all.length - 1 ? "rounded-r-[18px]" : ""}`}>
                         {img && (c!.round
                           ? <img src={img} alt="" className="size-[84px] rounded-full object-cover ring-[4px] ring-bezel transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                           : <img src={img} alt="" className="max-h-[86%] max-w-[86%] rounded-[3px] object-contain ring-[3px] ring-bezel transition-transform duration-700 group-hover:scale-105" loading="lazy" />)}
