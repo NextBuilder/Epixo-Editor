@@ -21,7 +21,7 @@
     "next": "~16.4.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "simple-icons": "16.36.0",
+    "simple-icons": "16.37.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
